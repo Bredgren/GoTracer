@@ -11,9 +11,19 @@ type Scene struct {
 	Material map[string]Material
 }
 
-func (scene *Scene) Trace(x, y int) color.NRGBA {
+func (scene *Scene) TracePixel(x, y int) color.NRGBA {
+	nx := float64(x) / float64(scene.Camera.ImageWidth)
+	ny := float64(y) / float64(scene.Camera.ImageHeight)
+	ray := scene.Camera.RayThrough(nx, ny)
+	return scene.TraceRay(ray)
+}
 
-	return color.NRGBA{uint8(x), uint8(y), uint8(x + y), 255}
+func (scene *Scene) TraceRay(ray Ray) color.NRGBA {
+	r := uint8((ray.Direction.X() + 1) / 2 * 255)
+	g := uint8((ray.Direction.Y() + 1) / 2 * 255)
+	b := uint8((ray.Direction.Z() + 1) / 2 * 255)
+	return color.NRGBA{r, g, b, 255}
+
 }
 
 type Material struct {

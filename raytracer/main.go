@@ -63,7 +63,7 @@ func main() {
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			img.SetNRGBA(x, y, scene.Trace(x, y))
+			img.SetNRGBA(x, y, scene.TracePixel(x, y))
 		}
 	}
 

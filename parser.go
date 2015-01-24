@@ -9,10 +9,19 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
+type cameraSettings struct {
+	ImageWidth int
+	ImageHeight int
+	Position mgl64.Vec3
+	LookAt mgl64.Vec3
+	Rotation float64
+	FOV float64
+}
+
 type renderSettings struct {
 	ImageWidth int
 	ImageHeight int
-	Camera Camera
+	Camera cameraSettings
 	AmbientLight Color64
 }
 
@@ -30,7 +39,6 @@ type properties struct {
 	PointA mgl64.Vec3
 	PointB mgl64.Vec3
 	PointC mgl64.Vec3
-	Radius float64
 	Material string
 }
 
@@ -55,8 +63,6 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene) {
 		}
 	case "Sphere":
 		sphere := SphereObject{}
-		sphere.Center = object.Properties.PointA
-		sphere.Radius = object.Properties.Radius
 		sphere.MaterialName = object.Properties.Material
 		// pass in current transform
 		scene.Objects = append(scene.Objects, sphere)
@@ -86,8 +92,11 @@ func Parse(fileName string) *Scene {
 	}
 	log.Printf(spew.Sdump(settings))
 
+	camSet := settings.Render.Camera
+
 	scene := Scene{
-		Camera: settings.Render.Camera,
+		Camera: NewCamera(camSet.ImageWidth, camSet.ImageHeight, camSet.Position,
+			camSet.LookAt, camSet.FOV),
 		Material: make(map[string]Material),
 	}
 	scene.Camera.Update()

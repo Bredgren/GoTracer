@@ -3,9 +3,9 @@
     "Camera": {
       "ImageWidth": 500,
       "ImageHeight": 300,
-      "Position": [0, 0, 0],
-      "ViewDir": [0, 0, -1],
-      "UpDir": [0, 1, 0],
+      "Position": [0, 0, 5],
+      "LookAt": [0, 0, 0],
+      "Rotation": 0,
       "FOV": 50
     },
     "AmbientLight": [1, 1, 1]
@@ -35,8 +35,6 @@
         {
           "Type": "Sphere",
           "Properties": {
-            "PointA": [1, 0, -5],
-            "Radius": 2.0,
             "Material": "mat1"
           }
         },

@@ -10,8 +10,6 @@ type SceneObject interface {
 }
 
 type SphereObject struct {
-	Center mgl64.Vec3
-	Radius float64
 	MaterialName string
 }
 
