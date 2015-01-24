@@ -5,7 +5,7 @@
       "ImageHeight": 300,
       "Position": [0, 0, 3],
       "LookAt": [0, 0, 0],
-      "Rotation": 0,
+      "UpDir": [0, 1, 0],
       "FOV": 53,
       "Background": [0.2, 0.2, 0.2]
     },

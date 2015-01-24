@@ -14,7 +14,7 @@ type cameraSettings struct {
 	ImageHeight int
 	Position mgl64.Vec3
 	LookAt mgl64.Vec3
-	Rotation float64
+	UpDir mgl64.Vec3
 	FOV float64
 	Background Color64
 }
@@ -92,11 +92,10 @@ func Parse(fileName string) *Scene {
 	if err != nil {
 		log.Fatalln("Decoding JSON:", err)
 	}
-	log.Printf(spew.Sdump(settings))
 
 	camSet := settings.Render.Camera
 	cam := NewCamera(camSet.ImageWidth, camSet.ImageHeight, camSet.Position,
-		camSet.LookAt, camSet.FOV, camSet.Background)
+		camSet.LookAt, camSet.UpDir, camSet.FOV, camSet.Background)
 
 	lights := make([]Light, 0)
 	for _, light := range settings.Render.PointLights {

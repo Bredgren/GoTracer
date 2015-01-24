@@ -10,10 +10,10 @@
       "Position": Vector,
       // What point the camera is looking at
       "LookAt": Vector,
-      // Angle to rotate the camera around the direction it's looking
-      "Rotation": float,
+      // The upward direction of the camera
+      "UpDir": Vector, // Default: [0, 1, 0]
       // Field of view in degrees
-      "FOV": float,
+      "FOV": float, // Default: 53
       // Background color
       "Background": Color
 
