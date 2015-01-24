@@ -1,0 +1,55 @@
+{
+  "Render": {
+    "Camera": {
+      "ImageWidth": 500,
+      "ImageHeight": 300,
+      "Position": [0, 0, 0],
+      "ViewDir": [0, 0, -1],
+      "UpDir": [0, 1, 0],
+      "FOV": 50
+    },
+    "AmbientLight": [1, 1, 1]
+  },
+  "Materials": [
+    {
+      "Name": "mat1",
+      "Emissive": [1, 1, 1],
+      "Ambient": [1, 1, 1],
+      "Specualar": [1, 1, 1],
+      "Reflective": [1, 1, 1],
+      "Diffuse": [1, 1, 1],
+      "Transmissive": [1, 1, 1],
+      "Shininess": 100.0,
+      "Index": 1.33
+    }
+  ],
+  "Scene": [
+    {
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, 0, 0],
+        "Rotate": [0, 0, 0],
+        "Scale": [1, 1, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Sphere",
+          "Properties": {
+            "PointA": [1, 0, -5],
+            "Radius": 2.0,
+            "Material": "mat1"
+          }
+        },
+        {
+          "Type": "Triangle",
+          "Properties": {
+            "PointA": [1, 0, -5],
+            "PointB": [0, 1, -5],
+            "PointC": [0, 0, -5],
+            "Material": "mat1"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "Render": {
+    "Camera": {
+      "ImageWidth": 500,
+      "ImageHeight": 300,
+      "Position": [0, 0, 0],
+      "ViewDir": [0, 0, -1],
+      "UpDir": [0, 1, 0],
+      "FOV": 50
+    },
+    "AmbientLight": [1, 1, 1]
+  },
+  "Materials": [
+    {
+      "Name": "mat1",
+      "Emissive": [1, 1, 1],
+      "Ambient": [1, 1, 1],
+      "Specualar": [1, 1, 1],
+      "Reflective": [1, 1, 1],
+      "Diffuse": [1, 1, 1],
+      "Transmissive": [1, 1, 1],
+      "Shininess": 100.0,
+      "Index": 1.33
+    }
+  ],
+  "Scene": [
+    {
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, 0, 0],
+        "Rotate": [0, 0, 0],
+        "Scale": [1, 1, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Sphere",
+          "Properties": {
+            "PointA": [1, 0, -5],
+            "Radius": 2.0,
+            "Material": "mat1"
+          }
+        },
+        {
+          "Type": "Triangle",
+          "Properties": {
+            "PointA": [1, 0, -5],
+            "PointB": [0, 1, -5],
+            "PointC": [0, 0, -5],
+            "Material": "mat1"
+          }
+        }
+      ]
+    }
+  ]
+}
+// {
+//   "Render": {
+//     "ImageWidth": 500,
+//     "ImageHeight": 300,
+//     "Camera": {
+//       "Position": { "X": 0, "Y": 0, "Z": 0 },
+//       "ViewDir": { "X": 0, "Y": 0, "Z": -1 },
+//       /* "LookAt": { "X": 0, "Y": 1, "Z": 0 },*/
+//       "UpDir": { "X": 0, "Y": 1, "Z": 0 },
+//       "FOV": 50
+//     },
+//     "AmbientLight": { "R": 1.0, "G": 1.0, "B": 1.0 }
+//     // "Antialiasing": {
+//     //     "Type": "Adaptive" | "Supersample" | "None",
+//     //     "Threshold": Float  // For Adaptive
+//     //     "Amount": 4 | 8 // For Supersample
+//   },
+//   "Materials": [
+//     {
+//       "Name": "mat1",
+//       "Emissive": { "R": 1.0, "G": 1.0, "B": 1.0 },
+//       "Ambient": { "R": 1.0, "G": 1.0, "B": 1.0 },
+//       "Specualar": { "R": 1.0, "G": 1.0, "B": 1.0 },
+//       "Reflective": { "R": 1.0, "G": 1.0, "B": 1.0 }, // defaults to Specular
+//       "Diffuse": { "R": 1.0, "G": 1.0, "B": 1.0 },
+//       "Transmissive": { "R": 1.0, "G": 1.0, "B": 1.0 },
+//       "Shininess": 100.0,
+//       "Index": 1.33
+//     }
+//   ],
+//   "Scene": [
+//     {
+//       "Type": "Transform",
+//       "Properties": {
+//         "Translate": { "X": 0, "Y": 0, "Z": 0 },
+//         "Rotate": { "X": 0, "Y": 0, "Z": 0 },
+//         "Scale": { "X": 1, "Y": 1, "Z": 1 }
+//         "SubObjects": [
+//           {
+//             "Type": "Triangle",
+//             "Properties": {
+//               "PointA": { "X": 1, "Y": 0, "Z": -5 },
+//               "PointB": { "X": 0, "Y": 1, "Z": -5 },
+//               "PointC": { "X": 0, "Y": 0, "Z": -5 },
+//               "Material": "mat1"
+//             }
+//           }
+//         ]
+//       }
+//     }
+//   ]
+// }
