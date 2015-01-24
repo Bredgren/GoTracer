@@ -21,7 +21,7 @@ func (scene *Scene) TracePixel(x, y int) color.NRGBA {
 func (scene *Scene) TraceRay(ray Ray) color.NRGBA {
 	isect, found := scene.Intersect(ray)
 	if found {
-		return scene.Material[isect.Object.Material()].Emissive.NRGBA()
+		return scene.Material[isect.Object.Material()].ShadeBlinnPhong(scene, ray, isect).NRGBA()
 	}
 
 	// For fun color wheel:

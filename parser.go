@@ -24,6 +24,7 @@ type renderSettings struct {
 	ImageHeight int
 	Camera cameraSettings
 	AmbientLight Color64
+	PointLights []PointLight
 }
 
 type transformProperties struct {
@@ -94,11 +95,18 @@ func Parse(fileName string) *Scene {
 	log.Printf(spew.Sdump(settings))
 
 	camSet := settings.Render.Camera
+	cam := NewCamera(camSet.ImageWidth, camSet.ImageHeight, camSet.Position,
+		camSet.LookAt, camSet.FOV, camSet.Background)
+
+	lights := make([]Light, 0)
+	for _, light := range settings.Render.PointLights {
+		lights = append(lights, light)
+	}
 
 	scene := Scene{
-		Camera: NewCamera(camSet.ImageWidth, camSet.ImageHeight, camSet.Position,
-			camSet.LookAt, camSet.FOV, camSet.Background),
+		Camera: cam,
 		Material: make(map[string]Material),
+		Lights: lights,
 	}
 	scene.Camera.Update()
 
