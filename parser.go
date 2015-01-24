@@ -27,21 +27,17 @@ type renderSettings struct {
 	PointLights []PointLight
 }
 
-type transformProperties struct {
-	Translate mgl64.Vec3
-	Rotate mgl64.Vec3
-	Scale mgl64.Vec3
-	SubObjects []sceneObjectSettings
-}
-
 type properties struct {
 	Translate mgl64.Vec3
-	Rotate mgl64.Vec3
+	RotateAxis mgl64.Vec3
+	RotateAngle float64
 	Scale mgl64.Vec3
+
+	Material string
+
 	PointA mgl64.Vec3
 	PointB mgl64.Vec3
 	PointC mgl64.Vec3
-	Material string
 }
 
 type sceneObjectSettings struct {
@@ -56,25 +52,32 @@ type parsedSettings struct {
 	Scene []sceneObjectSettings
 }
 
-func parseSceneObject(object sceneObjectSettings, scene *Scene) {
+func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.Mat4) {
 	switch object.Type {
 	case "Transform":
 		for _, subObject := range object.SubObjects {
-			// pass in current transform modified by this one
-			parseSceneObject(subObject, scene)
+			prop := object.Properties
+			translate := mgl64.Translate3D(prop.Translate[0], prop.Translate[1], prop.Translate[2])
+			rotate := mgl64.HomogRotate3D(mgl64.DegToRad(prop.RotateAngle), prop.RotateAxis)
+			if prop.Scale.Len() == 0.0 {
+				prop.Scale = mgl64.Vec3{1, 1, 1}
+			}
+			scale := mgl64.Scale3D(prop.Scale[0], prop.Scale[1], prop.Scale[2])
+			newTransform := transform.Mul4(translate.Mul4(rotate).Mul4(scale))
+			parseSceneObject(subObject, scene, newTransform)
 		}
 	case "Sphere":
-		sphere := SphereObject{}
-		sphere.MaterialName = object.Properties.Material
-		// pass in current transform
+		sphere := SphereObject{transform, transform.Inv(), object.Properties.Material}
 		scene.Objects = append(scene.Objects, sphere)
 	case "Triangle":
-		tri := TriangleObject{}
-		tri.PointA = object.Properties.PointA
-		tri.PointB = object.Properties.PointB
-		tri.PointC = object.Properties.PointC
-		tri.MaterialName = object.Properties.Material
-		// pass in current transform
+		tri := TriangleObject{
+			transform,
+			transform.Inv(),
+			object.Properties.Material,
+			object.Properties.PointA,
+			object.Properties.PointB,
+			object.Properties.PointC,
+		}
 		scene.Objects = append(scene.Objects, tri)
 	}
 }
@@ -115,7 +118,8 @@ func Parse(fileName string) *Scene {
 
 	for _, object := range settings.Scene {
 		// init identity transform and pass in
-		parseSceneObject(object, &scene)
+		transform := mgl64.Ident4()
+		parseSceneObject(object, &scene, transform)
 	}
 
 	log.Printf(spew.Sdump(scene))

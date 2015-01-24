@@ -51,8 +51,11 @@
       "Type": "Transform",
       "Properties": {
         "Translate": Vector,
-        "Rotate": Vector,
-        "Scale": Vector
+        // Axis to rotate round
+        "RotateAxis": Vector,
+        // Degrees to rotate
+        "RotateAngle": float,
+        "Scale": Vector // Default: [1, 1, 1]
       },
       "SubObjects": [
         {
@@ -67,10 +70,10 @@
           // 3-sided polygon. The clockwise direction of the points is A -> B -> C
           "Type": "Triangle",
           "Properties": {
+            "Material": string,
             "PointA": Vector,
             "PointB": Vector,
-            "PointC": Vector,
-            "Material": string
+            "PointC": Vector
           }
         },
         ... // Other objects (possibly including nested trasforms)

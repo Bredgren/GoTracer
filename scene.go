@@ -21,7 +21,8 @@ func (scene *Scene) TracePixel(x, y int) color.NRGBA {
 func (scene *Scene) TraceRay(ray Ray) color.NRGBA {
 	isect, found := scene.Intersect(ray)
 	if found {
-		return scene.Material[isect.Object.Material()].ShadeBlinnPhong(scene, ray, isect).NRGBA()
+		materialName := isect.Object.GetMaterialName()
+		return scene.Material[materialName].ShadeBlinnPhong(scene, ray, isect).NRGBA()
 	}
 
 	// For fun color wheel:
@@ -37,8 +38,12 @@ func (scene *Scene) TraceRay(ray Ray) color.NRGBA {
 // false if no intersection was found.
 func (scene *Scene) Intersect(ray Ray) (isect Intersection, found bool) {
 	for _, object := range scene.Objects {
-		if i, hit := object.Intersect(ray); hit && (!found || i.T < isect.T) {
+		inv := object.GetInvTransform()
+		localRay, length := ray.Transform(inv)
+		if i, hit := object.Intersect(localRay); hit && (!found || i.T < isect.T) {
 			found = true
+			i.Normal = TransformVec3(object.GetTransform(), i.Normal)
+			i.T /= length
 			isect = i
 		}
 	}

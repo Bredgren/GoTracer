@@ -12,7 +12,7 @@
     "AmbientLight": [1, 1, 1],
     "PointLights": [
       {
-        "Position": [5, 5, 5],
+        "Position": [5, 5, 8],
         "Color": [1, 1, 1]
       }
     ]
@@ -35,8 +35,9 @@
       "Type": "Transform",
       "Properties": {
         "Translate": [0, 0, 0],
-        "Rotate": [0, 0, 0],
-        "Scale": [1, 1, 1]
+        "RotateAxis": [0, 0, 1],
+        "RotateAngle": -45,
+        "Scale": [0.8, 0.8, 0.8]
       },
       "SubObjects": [
         {
@@ -46,12 +47,29 @@
           }
         },
         {
+          "Type": "Transform",
+          "Properties": {
+            "Translate": [0, 1, 0],
+            "RotateAxis": [0, 0, 1],
+            "RotateAngle": 0,
+            "Scale": [0.5, 0.5, 0.5]
+          },
+          "SubObjects": [
+            {
+              "Type": "Sphere",
+              "Properties": {
+                "Material": "mat1"
+              }
+            }
+          ]
+        },
+        {
           "Type": "Triangle",
           "Properties": {
+            "Material": "mat1",
             "PointA": [1, 0, -5],
             "PointB": [0, 1, -5],
-            "PointC": [0, 0, -5],
-            "Material": "mat1"
+            "PointC": [0, 0, -5]
           }
         }
       ]

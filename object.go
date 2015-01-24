@@ -7,17 +7,29 @@ import (
 )
 
 type SceneObject interface {
-	Material() string
+	GetTransform() mgl64.Mat4
+	GetInvTransform() mgl64.Mat4
+	GetMaterialName() string
 	// Intersect takes a ray in local coordinates and returns an intersection and true
 	// if the intersects the object, false otherwise.
 	Intersect(r Ray) (isect Intersection, hit bool)
 }
 
 type SphereObject struct {
+	Transform mgl64.Mat4
+	InvTransform mgl64.Mat4
 	MaterialName string
 }
 
-func (s SphereObject) Material() string {
+func (s SphereObject) GetTransform() mgl64.Mat4 {
+	return s.Transform
+}
+
+func (s SphereObject) GetInvTransform() mgl64.Mat4 {
+	return s.InvTransform
+}
+
+func (s SphereObject) GetMaterialName() string {
 	return s.MaterialName
 }
 
@@ -65,13 +77,23 @@ func (s SphereObject) Intersect(r Ray) (isect Intersection, hit bool) {
 }
 
 type TriangleObject struct {
+	Transform mgl64.Mat4
+	InvTransform mgl64.Mat4
+	MaterialName string
 	PointA mgl64.Vec3
 	PointB mgl64.Vec3
 	PointC mgl64.Vec3
-	MaterialName string
 }
 
-func (t TriangleObject) Material() string {
+func (t TriangleObject) GetTransform() mgl64.Mat4 {
+	return t.Transform
+}
+
+func (t TriangleObject) GetInvTransform() mgl64.Mat4 {
+	return t.InvTransform
+}
+
+func (t TriangleObject) GetMaterialName() string {
 	return t.MaterialName
 }
 
