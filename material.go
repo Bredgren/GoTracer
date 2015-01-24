@@ -18,6 +18,7 @@ type Material struct {
 
 func (m Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (color Color64) {
 	point := ray.At(isect.T)
+	colorVec := mgl64.Vec3{}
 	for _, light := range scene.Lights {
 		lightDir := light.Direction(point)
 		if isect.Normal.Dot(lightDir) <= 0.0 {
@@ -27,7 +28,7 @@ func (m Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (co
 		atten := light.DistanceAttenuation(point)
 		l := mgl64.Vec3(m.Diffuse).Mul(lightDir.Dot(isect.Normal))
 		lambert := Color64(l.Mul(atten))
-		color = Color64(mgl64.Vec3(color).Add(mgl64.Vec3(light.GetColor().Product(lambert))))
+		colorVec = colorVec.Add(mgl64.Vec3(light.GetColor().Product(lambert)))
 	}
-	return color
+	return Color64(colorVec)
 }

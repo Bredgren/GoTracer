@@ -12,7 +12,7 @@
     "AmbientLight": [1, 1, 1],
     "PointLights": [
       {
-        "Position": [5, 5, -5],
+        "Position": [5, 5, 5],
         "Color": [1, 1, 1]
       }
     ]
@@ -24,7 +24,7 @@
       "Ambient": [1, 1, 1],
       "Specualar": [1, 1, 1],
       "Reflective": [1, 1, 1],
-      "Diffuse": [0.2, 0.2, 1],
+      "Diffuse": [0.5, 0.5, 1],
       "Transmissive": [1, 1, 1],
       "Shininess": 100.0,
       "Index": 1.33

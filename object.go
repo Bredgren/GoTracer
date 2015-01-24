@@ -41,7 +41,7 @@ func (s SphereObject) Intersect(r Ray) (isect Intersection, hit bool) {
 		return isect, false
 	}
 
-	t1 := (-dp + discriminant) / dd
+	t1 := (-dp - discriminant) / dd
 	if t1 > Rayε {
 		p := r.At(t1)
 		// Normalize because sphere is at origin
