@@ -55,20 +55,17 @@ func (s SphereObject) Intersect(r Ray) (isect Intersection, hit bool) {
 
 	t1 := (-dp - discriminant) / dd
 	if t1 > Rayε {
-		p := r.At(t1)
-		// Normalize because sphere is at origin
-		p = p.Normalize()
 		isect.T = t1
-		isect.Normal = p
+		// Normalize because sphere is at origin
+		isect.Normal = r.At(t1).Normalize()
 		// TODO: set UV coordinates
 		return isect, true
 	}
 
 	if t2 > Rayε {
-		p := r.At(t2)
-		p = p.Normalize()
 		isect.T = t2
-		isect.Normal = p
+		// Normalize because sphere is at origin
+		isect.Normal = r.At(t2).Normalize()
 		// TODO: set UV coordinates
 		return isect, true
 	}

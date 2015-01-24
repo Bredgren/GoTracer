@@ -109,6 +109,7 @@ func Parse(fileName string) *Scene {
 		Camera: cam,
 		Material: make(map[string]Material),
 		Lights: lights,
+		AmbientLight: settings.Render.AmbientLight,
 	}
 	scene.Camera.Update()
 

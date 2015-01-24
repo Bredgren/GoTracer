@@ -1,6 +1,8 @@
 package raytracer
 
 import (
+	"math"
+
 	"github.com/go-gl/mathgl/mgl64"
 )
 
@@ -8,7 +10,7 @@ type Light interface {
 	GetColor() Color64
 	Direction(point mgl64.Vec3) mgl64.Vec3
 	DistanceAttenuation(point mgl64.Vec3) float64
-	// TODO: ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3
+	ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3
 }
 
 type PointLight struct {
@@ -28,6 +30,11 @@ func (p PointLight) Direction(point mgl64.Vec3) mgl64.Vec3 {
 }
 
 func (p PointLight) DistanceAttenuation(point mgl64.Vec3) float64 {
+	r := p.Position.Sub(point).Len()
+	return math.Min(1.0, 1.0 / (p.ConstCoeff + p.LinearCoeff * r + p.QuadCoeff * r * r))
+}
+
+func (p PointLight) ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3 {
 	// TODO: add attuation
-	return 1.0
+	return mgl64.Vec3{1.0, 1.0, 1.0}
 }

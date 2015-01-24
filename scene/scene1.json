@@ -9,22 +9,24 @@
       "FOV": 53,
       "Background": [0.2, 0.2, 0.2]
     },
-    "AmbientLight": [1, 1, 1],
+    "AmbientLight": [0.1, 0.1, 0.1],
     "PointLights": [
       {
         "Position": [5, 5, 8],
-        "Color": [1, 1, 1]
+        "Color": [1, 1, 1],
+        "ConstCoeff": 0.1,
+        "LinearCoeff": 0.2
       }
     ]
   },
   "Materials": [
     {
       "Name": "mat1",
-      "Emissive": [1, 1, 1],
-      "Ambient": [1, 1, 1],
-      "Specualar": [1, 1, 1],
+      "Emissive": [0, 0, 0],
+      "Ambient": [0.3, 0.3, 0.9],
+      "Specular": [1, 1, 1],
       "Reflective": [1, 1, 1],
-      "Diffuse": [0.5, 0.5, 1],
+      "Diffuse": [0.3, 0.3, 0.9],
       "Transmissive": [1, 1, 1],
       "Shininess": 100.0,
       "Index": 1.33
@@ -34,10 +36,10 @@
     {
       "Type": "Transform",
       "Properties": {
-        "Translate": [0, 0, 0],
+        "Translate": [-1, 0, 0],
         "RotateAxis": [0, 0, 1],
-        "RotateAngle": -45,
-        "Scale": [0.8, 0.8, 0.8]
+        "RotateAngle": 0,
+        "Scale": [1.0, 1.0, 1.0]
       },
       "SubObjects": [
         {
@@ -49,10 +51,10 @@
         {
           "Type": "Transform",
           "Properties": {
-            "Translate": [0, 1, 0],
+            "Translate": [2, 0, 0],
             "RotateAxis": [0, 0, 1],
             "RotateAngle": 0,
-            "Scale": [0.5, 0.5, 0.5]
+            "Scale": [1, 1, 1]
           },
           "SubObjects": [
             {

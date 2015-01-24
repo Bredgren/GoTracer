@@ -6,6 +6,7 @@ import (
 
 type Scene struct {
 	Camera Camera
+	AmbientLight Color64
 	Lights []Light
 	Objects []SceneObject
 	Material map[string]Material
