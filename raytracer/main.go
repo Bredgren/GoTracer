@@ -1,12 +1,8 @@
 /*
 TODO:
- - Camera
- - Triangles
- - Spheres
- - Point lights
+ - Phong lighting
  - Reflection
  - Refraction
- - Phong lighting
  - Texture mapping
  - Bump mapping
  - Antialiasing
@@ -25,6 +21,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Bredgren/raytracer"
 )
@@ -61,11 +58,15 @@ func main() {
 	bounds := image.Rect(0, 0, scene.Camera.ImageWidth, scene.Camera.ImageHeight)
 	img := image.NewNRGBA(bounds)
 
+	log.Println("Begin tracing")
+	begin := time.Now()
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			img.SetNRGBA(x, y, scene.TracePixel(x, y))
 		}
 	}
+	end := time.Now()
+	log.Printf("Done tracing, took %v", end.Sub(begin))
 
 	if noImg {
 		return
