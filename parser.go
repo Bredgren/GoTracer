@@ -16,6 +16,7 @@ type cameraSettings struct {
 	LookAt mgl64.Vec3
 	Rotation float64
 	FOV float64
+	Background Color64
 }
 
 type renderSettings struct {
@@ -96,7 +97,7 @@ func Parse(fileName string) *Scene {
 
 	scene := Scene{
 		Camera: NewCamera(camSet.ImageWidth, camSet.ImageHeight, camSet.Position,
-			camSet.LookAt, camSet.FOV),
+			camSet.LookAt, camSet.FOV, camSet.Background),
 		Material: make(map[string]Material),
 	}
 	scene.Camera.Update()

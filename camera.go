@@ -13,12 +13,14 @@ type Camera struct {
 	ViewDir mgl64.Vec3
 	// UpDir mgl64.Vec3
 	FOV float64
+	Background Color64
 
 	u mgl64.Vec3
 	v mgl64.Vec3
 }
 
-func NewCamera(imgW, imgH int, pos, lookAt mgl64.Vec3, fov float64) (c Camera) {
+func NewCamera(imgW, imgH int, pos, lookAt mgl64.Vec3, fov float64,
+	bg Color64) (c Camera) {
 	viewDir := lookAt.Sub(pos)
 	c = Camera{
 		ImageWidth: imgW,
@@ -26,6 +28,7 @@ func NewCamera(imgW, imgH int, pos, lookAt mgl64.Vec3, fov float64) (c Camera) {
 		Position: pos,
 		ViewDir: viewDir,
 		FOV: fov,
+		Background: bg,
 	}
 	c.Update()
 	return

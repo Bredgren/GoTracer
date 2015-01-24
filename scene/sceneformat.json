@@ -9,14 +9,27 @@
       // Camera position
       "Position": Vector,
       // What point the camera is looking at
-      "LookAt": Vector
+      "LookAt": Vector,
       // Angle to rotate the camera around the direction it's looking
-      "Rotation": float
+      "Rotation": float,
       // Field of view in degrees
-      "FOV": float
+      "FOV": float,
+      // Background color
+      "Background": Color
+
     },
     // Color of the scene's ambient light
-    "AmbientLight": Color
+    "AmbientLight": Color,
+    "PointLights": [
+      {
+        "Position": Vetor,
+        "Color": Color,
+        "ConstCoeff": float,
+        "LinearCoeff": float,
+        "QuadraticCoeff": float
+      },
+      ...
+    ]
   },
   "Materials": [
     {

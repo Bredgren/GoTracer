@@ -3,12 +3,19 @@
     "Camera": {
       "ImageWidth": 500,
       "ImageHeight": 300,
-      "Position": [0, 0, 5],
+      "Position": [0, 0, 3],
       "LookAt": [0, 0, 0],
       "Rotation": 0,
-      "FOV": 50
+      "FOV": 53,
+      "Background": [0.2, 0.2, 0.2]
     },
-    "AmbientLight": [1, 1, 1]
+    "AmbientLight": [1, 1, 1],
+    "PointLights": [
+      {
+        "Position": [5, 5, 5],
+        "Color": [1, 1, 1]
+      }
+    ]
   },
   "Materials": [
     {

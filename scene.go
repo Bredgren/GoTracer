@@ -19,21 +19,28 @@ func (scene *Scene) TracePixel(x, y int) color.NRGBA {
 }
 
 func (scene *Scene) TraceRay(ray Ray) color.NRGBA {
-	r := uint8((ray.Direction.X() + 1) / 2 * 255)
-	g := uint8((ray.Direction.Y() + 1) / 2 * 255)
-	b := uint8((ray.Direction.Z() + 1) / 2 * 255)
-	return color.NRGBA{r, g, b, 255}
+	isect, found := scene.Intersect(ray)
+	if found {
+		return scene.Material[isect.Object.Material()].Emissive.NRGBA()
+	}
 
+	// For fun color wheel:
+	// r := uint8((ray.Direction.X() + 1) / 2 * 255)
+	// g := uint8((ray.Direction.Y() + 1) / 2 * 255)
+	// b := uint8((ray.Direction.Z() + 1) / 2 * 255)
+
+	// No intersection, use background color
+	return scene.Camera.Background.NRGBA()
 }
 
-type Material struct {
-	Name string
-	Emissive Color64
-	Ambient Color64
-	Specular Color64
-	Reflective Color64
-	Diffuse Color64
-	Transmissive Color64
-	Shininess float64
-	Index float64
+// Intersect finds the first object that the given Ray intersects. Found will be
+// false if no intersection was found.
+func (scene *Scene) Intersect(ray Ray) (isect Intersection, found bool) {
+	for _, object := range scene.Objects {
+		if i, hit := object.Intersect(ray); hit && (!found || i.T < isect.T) {
+			found = true
+			isect = i
+		}
+	}
+	return
 }
