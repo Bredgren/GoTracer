@@ -74,16 +74,19 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.
 	case "Box":
 		box := BoxObject{transform, transform.Inv(), object.Properties.Material}
 		scene.Objects = append(scene.Objects, box)
-	case "Triangle":
-		tri := TriangleObject{
-			transform,
-			transform.Inv(),
-			object.Properties.Material,
-			object.Properties.PointA,
-			object.Properties.PointB,
-			object.Properties.PointC,
-		}
-		scene.Objects = append(scene.Objects, tri)
+	case "Square":
+		square := SquareObject{transform, transform.Inv(), object.Properties.Material}
+		scene.Objects = append(scene.Objects, square)
+	// case "Triangle":
+	// 	tri := TriangleObject{
+	// 		transform,
+	// 		transform.Inv(),
+	// 		object.Properties.Material,
+	// 		object.Properties.PointA,
+	// 		object.Properties.PointB,
+	// 		object.Properties.PointC,
+	// 	}
+	// 	scene.Objects = append(scene.Objects, tri)
 	}
 }
 

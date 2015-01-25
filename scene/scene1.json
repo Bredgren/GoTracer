@@ -9,7 +9,7 @@
       "FOV": 53,
       "Background": [0.0, 0.0, 0.0]
     },
-    "MaxDepth": 10,
+    "MaxDepth": 5,
     "AmbientLight": [0.1, 0.1, 0.1],
     "PointLights": [
       {
@@ -25,36 +25,31 @@
       "Name": "mat1",
       "Ambient": [0.3, 0.3, 0.9],
       "Specular": [1, 1, 1],
-      "Reflective": [0.8, 0.8, 0.8],
-      "Diffuse": [0.3, 0.3, 0.9],
-      "Transmissive": [0, 0, 0],
       "Shininess": 100.0,
-      "Index": 1.33
+      "Reflective": [0.8, 0.8, 0.8],
+      "Diffuse": [0.3, 0.3, 0.9]
     },
     {
       "Name": "mat2",
       "Specular": [1, 1, 1],
+      "Shininess": 250.0,
       "Reflective": [0.5, 0.5, 0.5],
       "Diffuse": [0.1, 0.1, 0.1],
       "Transmissive": [0.8, 0.8, 0.8],
-      "Shininess": 250.0,
-      "Index": 1.1
+      "Index": 1.52
     },
     {
       "Name": "mat3",
       "Specular": [1, 1, 1],
       "Reflective": [0.2, 0.2, 0.2],
       "Diffuse": [0.1, 0.9, 0.1],
-      "Transmissive": [0, 0, 0],
-      "Shininess": 50.0,
-      "Index": 1.1
+      "Shininess": 50.0
     },
     {
       "Name": "mat4",
       "Specular": [1, 1, 1],
       "Reflective": [0.4, 0.4, 0.4],
       "Diffuse": [0.7, 0.7, 0.7],
-      "Transmissive": [0, 0, 0],
       "Shininess": 20.0
     }
   ],
@@ -139,13 +134,14 @@
     {
       "Type": "Transform",
       "Properties": {
-        "Translate": [0, -0.75, 0],
-        "RotateAngle": 0,
-        "Scale": [5, 0.25, 5]
+        "Translate": [0, -0.5, 0],
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90,
+        "Scale": [5, 5, 1]
       },
       "SubObjects": [
         {
-          "Type": "Box",
+          "Type": "Square",
           "Properties": {
             "Material": "mat4"
           }

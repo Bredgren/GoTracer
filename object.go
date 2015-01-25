@@ -156,6 +156,57 @@ func (b BoxObject) Intersect(r Ray) (isect Intersection, hit bool) {
 	return isect, true
 }
 
+type SquareObject struct {
+	Transform mgl64.Mat4
+	InvTransform mgl64.Mat4
+	MaterialName string
+}
+
+func (s SquareObject) GetTransform() mgl64.Mat4 {
+	return s.Transform
+}
+
+func (s SquareObject) GetInvTransform() mgl64.Mat4 {
+	return s.InvTransform
+}
+
+func (s SquareObject) GetMaterialName() string {
+	return s.MaterialName
+}
+
+func (s SquareObject) Intersect(r Ray) (isect Intersection, hit bool) {
+	isect = Intersection{Object: s}
+
+	halfSize := 0.5
+
+	if r.Direction.Z() == 0 {
+		return isect, false
+	}
+
+	t := -r.Origin.Z() / r.Direction.Z()
+
+	if t <= Rayε {
+		return isect, false
+	}
+
+	point := r.At(t)
+
+	if point.X() < -halfSize || point.X() > halfSize || point.Y() < -halfSize || point.Y() > halfSize {
+		return isect, false
+	}
+
+	isect.T = t
+	if r.Direction.Z() > 0 {
+		isect.Normal = mgl64.Vec3{0, 0, -1}
+	} else {
+		isect.Normal = mgl64.Vec3{0, 0, 1}
+	}
+
+	// TODO: UV coords
+
+	return isect, true
+}
+
 type TriangleObject struct {
 	Transform mgl64.Mat4
 	InvTransform mgl64.Mat4

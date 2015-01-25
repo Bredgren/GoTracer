@@ -1,6 +1,5 @@
 /*
 TODO:
- - Square
  - Shadows (soft, beers law)
  - Directional light
  - Spot light
