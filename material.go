@@ -6,6 +6,10 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
+const (
+	AirIndex = 1.0003
+)
+
 type Material struct {
 	Name string
 	Emissive Color64

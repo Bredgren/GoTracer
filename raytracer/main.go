@@ -1,10 +1,19 @@
 /*
 TODO:
- - Refraction
+ - Box
+ - Square
+ - Shadows (soft, beers law)
+ - Directional light
+ - Spot light
  - Texture mapping
  - Bump mapping
  - Antialiasing
+ - Cylinder
+ - Cone
+ - Torus
  - Skybox
+ - Trimesh
+ - CSG
  - Caustics
 */
 package main

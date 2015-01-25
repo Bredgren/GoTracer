@@ -9,7 +9,7 @@ import (
 
 type Scene struct {
 	Camera Camera
-	MaxReflection int
+	MaxDepth int
 	AdaptiveThreshold float64
 	AmbientLight Color64
 	Lights []Light
@@ -25,12 +25,24 @@ func (scene *Scene) TracePixel(x, y int) color.NRGBA {
 }
 
 func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
-	if depth <= scene.MaxReflection && contribution >= scene.AdaptiveThreshold {
+	if depth <= scene.MaxDepth && contribution >= scene.AdaptiveThreshold {
 		if isect, found := scene.Intersect(ray); found {
 			material := scene.Material[isect.Object.GetMaterialName()]
 
 			// Direct illumination
 			illum := material.ShadeBlinnPhong(scene, ray, isect)
+
+			entering := true
+			insideIndex := material.Index
+			outsideIndex := AirIndex
+			if (isect.Normal.Dot(ray.Direction.Mul(-1)) < 0) {
+				// Exiting object
+				insideIndex, outsideIndex = outsideIndex, insideIndex
+				isect.Normal = isect.Normal.Mul(-1)
+				entering = false
+				illum = Color64{}
+			}
+			_ = entering
 
 			// Reflection
 			reflect := Color64{}
@@ -41,7 +53,19 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 				reflect = material.Reflective.Product(reflColor)
 			}
 
-			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)))
+			// Refraction
+			refract := Color64{}
+			if mgl64.Vec3(material.Transmissive).Len() > Rayε {
+				if !TotalInternalReflection(outsideIndex, insideIndex, isect.Normal, ray.Direction.Mul(-1)) {
+					refrRay := ray.Refract(isect, outsideIndex, insideIndex)
+					contrib := math.Max(material.Transmissive[0], math.Max(material.Transmissive[1], material.Transmissive[2]))
+					refrColor := scene.TraceRay(refrRay, depth + 1, contrib)
+					refract = material.Transmissive.Product(refrColor)
+					// TODO: Fresnel
+				}
+			}
+
+			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)).Add(mgl64.Vec3(refract)))
 		}
 		// For fun color wheel:
 		// r := uint8((ray.Direction.X() + 1) / 2 * 255)
@@ -71,4 +95,10 @@ func (scene *Scene) Intersect(ray Ray) (isect Intersection, found bool) {
 		}
 	}
 	return
+}
+
+func TotalInternalReflection(outsideIndex, insideIndex float64, normal, direction mgl64.Vec3) bool {
+	criticalAngle := math.Asin(insideIndex / outsideIndex)
+	angle := math.Acos(normal.Dot(direction))
+	return angle > criticalAngle
 }

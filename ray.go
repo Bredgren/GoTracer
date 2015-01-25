@@ -1,6 +1,8 @@
 package raytracer
 
 import (
+	"math"
+
 	"github.com/go-gl/mathgl/mgl64"
 )
 
@@ -34,10 +36,19 @@ func (r Ray) Transform(transform mgl64.Mat4) (newR Ray, len float64) {
 }
 
 func (r Ray) Reflect(isect Intersection) (reflRay Ray) {
-	minusD := r.Direction.Mul(-1)
-	nMD2 := isect.Normal.Dot(minusD) * 2
+	mDir := r.Direction.Mul(-1)
+	nMD2 := isect.Normal.Dot(mDir) * 2
 	reflDir := isect.Normal.Mul(nMD2).Add(r.Direction)
 	return NewRay(r.At(isect.T), reflDir)
+}
+
+func (r Ray) Refract(isect Intersection, outsideIndex, insideIndex float64) (refrRay Ray) {
+	nn := outsideIndex / insideIndex
+	mDir := r.Direction.Mul(-1)
+	cosθOutside := isect.Normal.Dot(mDir)
+	cosθInside := math.Sqrt(1 - nn * nn * (1 - cosθOutside * cosθOutside))
+	refractDir := isect.Normal.Mul(nn * cosθOutside - cosθInside).Sub(mDir.Mul(nn))
+	return NewRay(r.At(isect.T), refractDir)
 }
 
 type Intersection struct {
