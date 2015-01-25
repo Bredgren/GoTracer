@@ -1,6 +1,5 @@
 /*
 TODO:
- - Phong lighting
  - Reflection
  - Refraction
  - Texture mapping

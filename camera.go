@@ -51,8 +51,8 @@ func NewCamera(imgW, imgH int, pos, lookAt, upDir mgl64.Vec3, fov float64,
 func (c Camera) RayThrough(nx, ny float64) Ray {
 	nx -= 0.5
 	ny -= 0.5
-	dir := c.ViewDir.Add(c.u.Mul(nx)).Add(c.v.Mul(ny)).Normalize()
-	return Ray{c.Position, dir}
+	dir := c.ViewDir.Add(c.u.Mul(nx)).Add(c.v.Mul(ny))
+	return NewRay(c.Position, dir)
 }
 
 // Update must be called after making changes to the camera.

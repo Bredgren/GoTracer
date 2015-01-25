@@ -24,6 +24,8 @@ type renderSettings struct {
 	ImageHeight int
 	Camera cameraSettings
 	AmbientLight Color64
+	MaxReflection int
+	AdaptiveThreshold float64
 	PointLights []PointLight
 }
 
@@ -110,6 +112,8 @@ func Parse(fileName string) *Scene {
 		Material: make(map[string]Material),
 		Lights: lights,
 		AmbientLight: settings.Render.AmbientLight,
+		MaxReflection: settings.Render.MaxReflection,
+		AdaptiveThreshold: settings.Render.AdaptiveThreshold,
 	}
 	scene.Camera.Update()
 

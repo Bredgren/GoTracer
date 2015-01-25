@@ -18,6 +18,10 @@
       "Background": Color
 
     },
+    // Max depth of reflection, if AdaptiveThreshold isn't hit
+    "MaxReflection": int,
+    // Stop reflection if contribution is below this value
+    "AdaptiveThreshold": float64,
     // Color of the scene's ambient light
     "AmbientLight": Color,
     "PointLights": [
@@ -36,7 +40,7 @@
       "Name": string,
       "Emissive": Color,
       "Ambient": Color,
-      "Specualar": Color,
+      "Specular": Color,
       "Reflective": Color,
       "Diffuse": Color,
       "Transmissive": Color,
