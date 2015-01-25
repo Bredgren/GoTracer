@@ -13,10 +13,12 @@ const (
 type Ray struct {
 	Origin mgl64.Vec3
 	Direction mgl64.Vec3
+	InvDir mgl64.Vec3
 }
 
 func NewRay(origin, direction mgl64.Vec3) Ray {
-	return Ray{origin, direction.Normalize()}
+	dir := direction.Normalize()
+	return Ray{origin, dir, mgl64.Vec3{1.0 / dir.X(), 1.0 / dir.Y(), 1.0 / dir.Z()}}
 }
 
 // At returns the point marked by the ray at t

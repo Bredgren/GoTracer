@@ -1,6 +1,5 @@
 /*
 TODO:
- - Box
  - Square
  - Shadows (soft, beers law)
  - Directional light
@@ -11,6 +10,7 @@ TODO:
  - Cylinder
  - Cone
  - Torus
+ - Disc
  - Skybox
  - Trimesh
  - CSG

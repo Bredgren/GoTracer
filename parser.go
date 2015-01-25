@@ -60,7 +60,7 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.
 		for _, subObject := range object.SubObjects {
 			prop := object.Properties
 			translate := mgl64.Translate3D(prop.Translate[0], prop.Translate[1], prop.Translate[2])
-			rotate := mgl64.HomogRotate3D(mgl64.DegToRad(prop.RotateAngle), prop.RotateAxis)
+			rotate := mgl64.HomogRotate3D(mgl64.DegToRad(prop.RotateAngle), prop.RotateAxis.Normalize())
 			if prop.Scale.Len() == 0.0 {
 				prop.Scale = mgl64.Vec3{1, 1, 1}
 			}
@@ -71,6 +71,9 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.
 	case "Sphere":
 		sphere := SphereObject{transform, transform.Inv(), object.Properties.Material}
 		scene.Objects = append(scene.Objects, sphere)
+	case "Box":
+		box := BoxObject{transform, transform.Inv(), object.Properties.Material}
+		scene.Objects = append(scene.Objects, box)
 	case "Triangle":
 		tri := TriangleObject{
 			transform,
