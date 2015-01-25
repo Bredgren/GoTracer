@@ -1,11 +1,15 @@
 /*
 TODO:
- - Shadows (soft, beers law)
+ - Basic shadows
  - Directional light
  - Spot light
+ - Soft shadows
+ - Beer's law
+ - Fresnel term
  - Texture mapping
  - Bump mapping
  - Antialiasing
+ - BSPTree
  - Cylinder
  - Cone
  - Torus

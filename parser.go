@@ -104,24 +104,22 @@ func Parse(fileName string) *Scene {
 		log.Fatalln("Decoding JSON:", err)
 	}
 
+	scene := &Scene{}
+
 	camSet := settings.Render.Camera
-	cam := NewCamera(camSet.ImageWidth, camSet.ImageHeight, camSet.Position,
+	scene.Camera = NewCamera(camSet.ImageWidth, camSet.ImageHeight, camSet.Position,
 		camSet.LookAt, camSet.UpDir, camSet.FOV, camSet.Background)
 
-	lights := make([]Light, 0)
+	scene.Lights = make([]Light, 0)
 	for _, light := range settings.Render.PointLights {
-		lights = append(lights, light)
+		light.Scene = scene
+		scene.Lights = append(scene.Lights, light)
 	}
 
-	scene := Scene{
-		Camera: cam,
-		Material: make(map[string]Material),
-		Lights: lights,
-		AmbientLight: settings.Render.AmbientLight,
-		MaxDepth: settings.Render.MaxDepth,
-		AdaptiveThreshold: settings.Render.AdaptiveThreshold,
-	}
-	scene.Camera.Update()
+	scene.Material = make(map[string]Material)
+	scene.AmbientLight = settings.Render.AmbientLight
+	scene.MaxDepth = settings.Render.MaxDepth
+	scene.AdaptiveThreshold = settings.Render.AdaptiveThreshold
 
 	for _, material := range settings.Materials {
 		scene.Material[material.Name] = material
@@ -130,9 +128,9 @@ func Parse(fileName string) *Scene {
 	for _, object := range settings.Scene {
 		// init identity transform and pass in
 		transform := mgl64.Ident4()
-		parseSceneObject(object, &scene, transform)
+		parseSceneObject(object, scene, transform)
 	}
 
 	log.Printf(spew.Sdump(scene))
-	return &scene
+	return scene
 }
