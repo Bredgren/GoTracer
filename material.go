@@ -18,14 +18,6 @@ type Material struct {
 	Index float64
 }
 
-func Clamp(low, high float64) func(float64) float64 {
-	return func(v float64) float64 {
-		return math.Min(high, math.Max(low, v))
-	}
-}
-
-var Clamp01 = Clamp(0.0, 1.0)
-
 func (m Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (color Color64) {
 	point := ray.At(isect.T)
 	colorVec := mgl64.Vec3(m.Emissive).Add(mgl64.Vec3(m.Ambient.Product(scene.AmbientLight)))
@@ -43,6 +35,5 @@ func (m Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (co
 		}
 	}
 
-	color = Color64{Clamp01(colorVec[0]), Clamp01(colorVec[1]), Clamp01(colorVec[2])}
-	return color
+	return Color64(colorVec).Clamp()
 }

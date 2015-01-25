@@ -2,6 +2,7 @@ package raytracer
 
 import (
 	"image/color"
+	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -31,4 +32,16 @@ func (c Color64) NRGBA() color.NRGBA {
 
 func (c Color64) Product(other Color64) Color64 {
 	return Color64{c[0] * other[0], c[1] * other[1], c[2] * other[2]}
+}
+
+func clamp(low, high float64) func(float64) float64 {
+	return func(v float64) float64 {
+		return math.Min(high, math.Max(low, v))
+	}
+}
+
+var Clamp01 = clamp(0.0, 1.0)
+
+func (c Color64) Clamp() Color64 {
+	return Color64{Clamp01(c[0]), Clamp01(c[1]), Clamp01(c[2])}
 }

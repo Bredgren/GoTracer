@@ -41,7 +41,7 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 				reflect = material.Reflective.Product(reflColor)
 			}
 
-			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)))
+			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect))).Clamp()
 		}
 		// For fun color wheel:
 		// r := uint8((ray.Direction.X() + 1) / 2 * 255)

@@ -1,6 +1,5 @@
 /*
 TODO:
- - Reflection
  - Refraction
  - Texture mapping
  - Bump mapping

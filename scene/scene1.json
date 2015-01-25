@@ -9,7 +9,7 @@
       "FOV": 53,
       "Background": [0.2, 0.2, 0.2]
     },
-    "MaxReflection": 1,
+    "MaxReflection": 5,
     "AmbientLight": [0.1, 0.1, 0.1],
     "PointLights": [
       {
