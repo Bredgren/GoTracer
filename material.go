@@ -35,5 +35,5 @@ func (m Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (co
 		}
 	}
 
-	return Color64(colorVec).Clamp()
+	return Color64(colorVec)
 }

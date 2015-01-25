@@ -23,9 +23,9 @@ func (c Color64) B() float64 {
 
 func (c Color64) NRGBA() color.NRGBA {
 	return color.NRGBA{
-		uint8(c.R() * 255),
-		uint8(c.G() * 255),
-		uint8(c.B() * 255),
+		uint8(Clamp01(c.R()) * 255),
+		uint8(Clamp01(c.G()) * 255),
+		uint8(Clamp01(c.B()) * 255),
 		255,
 	}
 }
