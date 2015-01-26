@@ -1,7 +1,5 @@
 /*
 TODO:
- - Basic shadows
- - Directional light
  - Spot light
  - Soft shadows
  - Beer's law

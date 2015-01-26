@@ -13,6 +13,29 @@ type Light interface {
 	ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3
 }
 
+// ShadowAttenuation takes the unnormalized direction to the light so we know when
+// we've "hit" it.
+func ShadowAttenuation(scene *Scene, dir mgl64.Vec3, point mgl64.Vec3) mgl64.Vec3 {
+	dist := dir.Len()
+	dir = dir.Normalize()
+
+	atten := Color64{1, 1, 1}
+	distTraveled := 0.0
+
+	shadowRay := NewRay(point, dir)
+	isect, found := scene.Intersect(shadowRay)
+	for found && distTraveled + isect.T < dist {
+		distTraveled += isect.T
+		material := scene.Material[isect.Object.GetMaterialName()]
+		atten = atten.Product(material.Transmissive)
+
+		shadowRay = NewRay(shadowRay.At(isect.T), dir)
+		isect, found = scene.Intersect(shadowRay)
+	}
+
+	return mgl64.Vec3(atten)
+}
+
 type PointLight struct {
 	Scene *Scene
 	Position mgl64.Vec3
@@ -36,23 +59,31 @@ func (p PointLight) DistanceAttenuation(point mgl64.Vec3) float64 {
 }
 
 func (p PointLight) ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3 {
-	dir := p.Position.Sub(point)
-	dist := dir.Len()
-	dir = dir.Normalize()
+	return ShadowAttenuation(p.Scene, p.Position.Sub(point), point)
+}
 
-	atten := Color64{1, 1, 1}
-	distTraveled := 0.0
+type DirectionalLight struct {
+	Scene *Scene
+	Orientation mgl64.Vec3
+	Color Color64
+}
 
-	shadowRay := NewRay(point, dir)
-	isect, found := p.Scene.Intersect(shadowRay)
-	for found && distTraveled + isect.T < dist {
-		distTraveled += isect.T
-		material := p.Scene.Material[isect.Object.GetMaterialName()]
-		atten = atten.Product(material.Transmissive)
+func NewDirectionalLight(scene *Scene, orient mgl64.Vec3, color Color64) DirectionalLight {
+	return DirectionalLight{scene, orient.Normalize(), color}
+}
 
-		shadowRay = NewRay(shadowRay.At(isect.T), dir)
-		isect, found = p.Scene.Intersect(shadowRay)
-	}
+func (d DirectionalLight) GetColor() Color64 {
+	return d.Color
+}
 
-	return mgl64.Vec3(atten)
+func (d DirectionalLight) Direction(point mgl64.Vec3) mgl64.Vec3 {
+	return d.Orientation.Mul(-1)
+}
+
+func (d DirectionalLight) DistanceAttenuation(point mgl64.Vec3) float64 {
+	return 1.0
+}
+
+func (d DirectionalLight) ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3 {
+	return ShadowAttenuation(d.Scene, d.Direction(point).Mul(100), point)
 }

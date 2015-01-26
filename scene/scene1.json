@@ -11,6 +11,12 @@
     },
     "MaxDepth": 5,
     "AmbientLight": [0.1, 0.1, 0.1],
+    "DirectionalLights": [
+      {
+        "Orientation": [1, -1, -1],
+        "Color": [0.4, 0.4, 0.4]
+      }
+    ],
     "PointLights": [
       {
         "Position": [5, 5, 8],
