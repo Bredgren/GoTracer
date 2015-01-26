@@ -29,6 +29,7 @@ type renderSettings struct {
  	DirectionalLights []DirectionalLight
 	PointLights []PointLight
  	SpotLights []SpotLight
+ 	AreaLights []AreaLight
 }
 
 type properties struct {
@@ -62,6 +63,9 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.
 		for _, subObject := range object.SubObjects {
 			prop := object.Properties
 			translate := mgl64.Translate3D(prop.Translate[0], prop.Translate[1], prop.Translate[2])
+			if prop.RotateAxis.Len() == 0.0 {
+				prop.RotateAxis = mgl64.Vec3{0, 1, 0}
+			}
 			rotate := mgl64.HomogRotate3D(mgl64.DegToRad(prop.RotateAngle), prop.RotateAxis.Normalize())
 			if prop.Scale.Len() == 0.0 {
 				prop.Scale = mgl64.Vec3{1, 1, 1}
@@ -124,6 +128,11 @@ func Parse(fileName string) *Scene {
 	for _, sLight := range settings.Render.SpotLights {
 		sLight = NewSpotLight(scene, sLight.Color, sLight.Position, sLight.Orientation, sLight.Angle, sLight.DropOff, sLight.FadeAngle)
 		scene.Lights = append(scene.Lights, sLight)
+	}
+	for _, aLight := range settings.Render.AreaLights {
+		aLight.Scene = scene
+		aLight = NewAreaLight(aLight)
+		scene.Lights = append(scene.Lights, aLight)
 	}
 
 	scene.Material = make(map[string]Material)

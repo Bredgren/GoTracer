@@ -13,38 +13,38 @@
     "AmbientLight": [0.1, 0.1, 0.1],
     "DirectionalLights": [
       {
-        "Orientation": [1, -1, -1],
-        "Color": [0.4, 0.4, 0.4]
+        "Color": [0.4, 0.4, 0.4],
+        "Orientation": [1, -1, -1]
       }
     ],
     "PointLights": [
       {
-        "Position": [5, 5, 8],
         "Color": [1, 1, 1],
+        "Position": [5, 5, 8],
         "ConstCoeff": 0.0,
         "LinearCoeff": 0.0
       }
     ],
     "_SpotLights": [
       {
-        "Position": [-0.5, 4, 1],
         "Color": [1, 0, 0],
+        "Position": [-0.5, 4, 1],
         "Orientation": [0, -1, 0],
         "Angle": 10,
         "DropOff": 1,
         "FadeAngle": 5
       },
       {
-        "Position": [0, 4, 0],
         "Color": [0, 1, 0],
+        "Position": [0, 4, 0],
         "Orientation": [0, -1, 0],
         "Angle": 10,
         "DropOff": 1,
         "FadeAngle": 10
       },
       {
-        "Position": [0.5, 4, 1],
         "Color": [0, 0, 1],
+        "Position": [0.5, 4, 1],
         "Orientation": [0, -1, 0],
         "Angle": 10,
         "DropOff": 1,

@@ -24,15 +24,42 @@
     "AdaptiveThreshold": float64,
     // Color of the scene's ambient light
     "AmbientLight": Color,
+    "DirectionalLights": [
+      {
+        "Color": Color
+        "Orientation": Vector,
+      },
+      ...
+    ],
     "PointLights": [
       {
-        "Position": Vetor,
         "Color": Color,
+        "Position": Vetor,
         "ConstCoeff": float,
         "LinearCoeff": float,
         "QuadCoeff": float
       },
       ...
+    ],
+    "SpotLights": [
+      {
+        "Color": Color
+        "Position": Vector
+        "Orientation": Vector,
+        "Angle": float, // Degrees
+        "DropOff": float,
+        "FadeAngle": float
+      },
+      // A square light source that casts soft shadows
+      "AreaLights": [
+      {
+        "Color": Color
+        "Position": Vector
+        "Orientation": Vector,
+        "UpDir": Vector,
+        "Size": float, // The width and height
+        "Samples": int // Sqrt(#samples you want)
+      },
     ]
   },
   "Materials": [
@@ -67,6 +94,20 @@
           "Type": "Sphere",
           "Properties": {
             // The "Name" of one of the Materials above
+            "Material": string
+          }
+        },
+        {
+          // Cube of side length 1
+          "Type": "Box",
+          "Properties": {
+            "Material": string
+          }
+        },
+        {
+          // Unit square in the XY plane
+          "Type": "Square",
+          "Properties": {
             "Material": string
           }
         },

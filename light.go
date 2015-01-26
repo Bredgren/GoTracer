@@ -2,6 +2,7 @@ package raytracer
 
 import (
 	"math"
+	"math/rand"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -53,9 +54,13 @@ func (p PointLight) Direction(point mgl64.Vec3) mgl64.Vec3 {
 	return p.Position.Sub(point).Normalize()
 }
 
+func PointDistAtten(r, constCoeff, linearCoeff, quadCoeff float64) float64 {
+	return math.Min(1.0, 1.0 / (constCoeff + linearCoeff * r + quadCoeff * r * r))
+}
+
 func (p PointLight) DistanceAttenuation(point mgl64.Vec3) float64 {
 	r := p.Position.Sub(point).Len()
-	return math.Min(1.0, 1.0 / (p.ConstCoeff + p.LinearCoeff * r + p.QuadCoeff * r * r))
+	return PointDistAtten(r, p.ConstCoeff, p.LinearCoeff, p.QuadCoeff)
 }
 
 func (p PointLight) ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3 {
@@ -151,4 +156,80 @@ func (s SpotLight) DistanceAttenuation(point mgl64.Vec3) float64 {
 
 func (s SpotLight) ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3 {
 	return ShadowAttenuation(s.Scene, s.Position.Sub(point), point)
+}
+
+
+type AreaLight struct {
+	Scene *Scene
+	Color Color64
+	Position mgl64.Vec3
+	Orientation mgl64.Vec3
+	UpDir mgl64.Vec3
+	Size float64
+	Samples int
+	ConstCoeff float64
+	LinearCoeff float64
+	QuadCoeff float64
+
+	u mgl64.Vec3
+	v mgl64.Vec3
+}
+
+// func NewAreaLight(scene *Scene, color Color64, pos, orient, upDir mgl64.Vec3, size float64, samples int) AreaLight {
+func NewAreaLight(a AreaLight) (light AreaLight) {
+	light = a
+	light.Orientation = light.Orientation.Normalize()
+	light.UpDir = light.UpDir.Normalize()
+
+	z := a.Orientation.Normalize()
+	y := light.UpDir
+	x := y.Cross(z).Normalize()
+	y = z.Cross(x).Normalize()
+	m := mgl64.Mat3FromCols(x, y, z)
+	light.u = m.Mul3x1(mgl64.Vec3{1, 0, 0}.Mul(light.Size))
+	light.v = m.Mul3x1(mgl64.Vec3{0, -1, 0}.Mul(light.Size))
+
+	return light
+}
+
+func (a AreaLight) GetColor() Color64 {
+	return a.Color
+}
+
+func (a AreaLight) Direction(point mgl64.Vec3) mgl64.Vec3 {
+	return a.Position.Sub(point).Normalize()
+}
+
+func (a AreaLight) DistanceAttenuation(point mgl64.Vec3) float64 {
+	r := a.Position.Sub(point).Len()
+	return PointDistAtten(r, a.ConstCoeff, a.LinearCoeff, a.QuadCoeff)
+}
+
+func (a AreaLight) GridAttenuation(point mgl64.Vec3, samples int) mgl64.Vec3 {
+	atten := mgl64.Vec3{}
+	sizePerSample := float64(a.Size) / float64(samples)
+	for y := 0.0; y < 1.0; y += sizePerSample {
+		for x := 0.0; x < 1.0; x += sizePerSample {
+			rx, ry := rand.Float64() / sizePerSample, rand.Float64() / sizePerSample
+			pos := a.GetPosition(x + rx, y + ry)
+			atten = atten.Add(ShadowAttenuation(a.Scene, pos.Sub(point), point))
+		}
+	}
+	return atten.Mul(1.0 / float64(a.Samples * a.Samples))
+}
+
+func (a AreaLight) ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3 {
+	// Check with a 2x2 grid to see there is a significant difference before going all out
+	// center := ShadowAttenuation(a.Scene, a.Position.Sub(point), point)
+	// atten4 := a.GridAttenuation(point, 2)
+	// if center.ApproxEqualThreshold(atten4, Rayε / 2) {
+	// 	return atten4
+	// }
+	return a.GridAttenuation(point, a.Samples)
+}
+
+// GetPosition takes normalized "light" coordinates and returns the point in space
+// that cooresponds to that point. This works the same way as the Camera.
+func (a AreaLight) GetPosition(nx, ny float64) mgl64.Vec3 {
+	return a.Position.Add(a.u.Mul(nx - 0.5)).Add(a.v.Mul(ny - 0.5))
 }

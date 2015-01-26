@@ -49,9 +49,7 @@ func NewCamera(imgW, imgH int, pos, lookAt, upDir mgl64.Vec3, fov float64,
 // RayThrough takes normalized window coordinates and returns the ray that goes
 // through that point starting from the camera.
 func (c Camera) RayThrough(nx, ny float64) Ray {
-	nx -= 0.5
-	ny -= 0.5
-	dir := c.ViewDir.Add(c.u.Mul(nx)).Add(c.v.Mul(ny))
+	dir := c.ViewDir.Add(c.u.Mul(nx - 0.5)).Add(c.v.Mul(ny - 0.5))
 	return NewRay(c.Position, dir)
 }
 
