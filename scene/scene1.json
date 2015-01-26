@@ -24,6 +24,32 @@
         "ConstCoeff": 0.0,
         "LinearCoeff": 0.0
       }
+    ],
+    "SpotLights": [
+      {
+        "Position": [-0.5, 4, 1],
+        "Color": [1, 0, 0],
+        "Orientation": [0, -1, 0],
+        "Angle": 10,
+        "DropOff": 1,
+        "FadeAngle": 5
+      },
+      {
+        "Position": [0, 4, 0],
+        "Color": [0, 1, 0],
+        "Orientation": [0, -1, 0],
+        "Angle": 10,
+        "DropOff": 1,
+        "FadeAngle": 10
+      },
+      {
+        "Position": [0.5, 4, 1],
+        "Color": [0, 0, 1],
+        "Orientation": [0, -1, 0],
+        "Angle": 10,
+        "DropOff": 1,
+        "FadeAngle": 20
+      }
     ]
   },
   "Materials": [
@@ -63,7 +89,7 @@
     {
       "Type": "Transform",
       "Properties": {
-        "Translate": [-0.5, 0, 0],
+        "Translate": [-0.5, 0, -1],
         "RotateAxis": [0, 0, 1],
         "RotateAngle": 0,
         "Scale": [0.5, 0.5, 0.5]
@@ -78,7 +104,7 @@
         {
           "Type": "Transform",
           "Properties": {
-            "Translate": [1.8, 0, -0.5],
+            "Translate": [2, 0, -0.5],
             "RotateAxis": [0, 0, 1],
             "RotateAngle": 0,
             "Scale": [1, 1, 1]
@@ -106,7 +132,7 @@
     {
       "Type": "Transform",
       "Properties": {
-        "Translate": [-0.7, 0, 1],
+        "Translate": [-0.9, 0, 0],
         "RotateAxis": [0, 0, 1],
         "RotateAngle": 0,
         "Scale": [0.5, 0.5, 0.5]
@@ -123,7 +149,7 @@
     {
       "Type": "Transform",
       "Properties": {
-        "Translate": [0.8, 0, 0.8],
+        "Translate": [1.2, 0, 0.8],
         "RotateAxis": [0, 1, 1],
         "RotateAngle": 30,
         "Scale": [0.5, 0.5, 0.5]
@@ -143,7 +169,7 @@
         "Translate": [0, -0.5, 0],
         "RotateAxis": [1, 0, 0],
         "RotateAngle": 90,
-        "Scale": [5, 5, 1]
+        "Scale": [10, 10, 1]
       },
       "SubObjects": [
         {

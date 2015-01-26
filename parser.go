@@ -26,8 +26,9 @@ type renderSettings struct {
 	AmbientLight Color64
 	MaxDepth int
 	AdaptiveThreshold float64
-	DirectionalLights []DirectionalLight
+ 	DirectionalLights []DirectionalLight
 	PointLights []PointLight
+ 	SpotLights []SpotLight
 }
 
 type properties struct {
@@ -117,8 +118,12 @@ func Parse(fileName string) *Scene {
 		scene.Lights = append(scene.Lights, pLight)
 	}
 	for _, dLight := range settings.Render.DirectionalLights {
-		dLight = NewDirectionalLight(scene, dLight.Orientation, dLight.Color)
+		dLight = NewDirectionalLight(scene, dLight.Color, dLight.Orientation)
 		scene.Lights = append(scene.Lights, dLight)
+	}
+	for _, sLight := range settings.Render.SpotLights {
+		sLight = NewSpotLight(scene, sLight.Color, sLight.Position, sLight.Orientation, sLight.Angle, sLight.DropOff, sLight.FadeAngle)
+		scene.Lights = append(scene.Lights, sLight)
 	}
 
 	scene.Material = make(map[string]Material)

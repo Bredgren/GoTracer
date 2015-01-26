@@ -1,6 +1,5 @@
 /*
 TODO:
- - Spot light
  - Soft shadows
  - Beer's law
  - Fresnel term
