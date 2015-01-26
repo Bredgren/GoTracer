@@ -68,7 +68,7 @@ type grid struct {
 	scene *raytracer.Scene
 	xMin, yMin, xMax, yMax int // Min inclusive, Max exclusive
 	img *image.NRGBA
-	ch chan int // signal done
+	ch chan float64 // signal done
 }
 
 func traceGrid(g grid) {
@@ -88,8 +88,8 @@ func main() {
 	bounds := image.Rect(0, 0, imgW, imgH)
 	img := image.NewNRGBA(bounds)
 
-	gridChan := make(chan int, 100)
-	gridCount := 0
+	gridChan := make(chan float64, 100)
+	gridCount := 0.0
 
 	log.Println("Begin tracing")
 	begin := time.Now()
@@ -107,7 +107,9 @@ func main() {
 			gridCount++
 		}
 	}
-	for g := 0; g < gridCount; g += <-gridChan {}
+	for g := 0.0; g < gridCount; g += <-gridChan {
+		log.Printf("%.2f%%", g / gridCount * 100)
+	}
 	end := time.Now()
 	log.Printf("Done tracing, took %v", end.Sub(begin))
 
