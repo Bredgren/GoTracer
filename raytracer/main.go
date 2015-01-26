@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -42,6 +43,7 @@ const (
 var (
 	sceneFile = ""
 	noImg = false
+	gridSize = 50
 )
 
 func init() {
@@ -50,6 +52,7 @@ func init() {
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(&noImg, "NoImg", false, "Don't create an image if present.")
+	flag.IntVar(&gridSize, "gridSize", gridSize, "Size of simultaneous trace grids.")
 	flag.Parse()
 
 	if flag.NArg() < 1 {
@@ -57,21 +60,54 @@ func init() {
 	}
 
 	sceneFile = flag.Arg(0)
+
+	runtime.GOMAXPROCS(runtime.NumCPU())
+}
+
+type grid struct {
+	scene *raytracer.Scene
+	xMin, yMin, xMax, yMax int // Min inclusive, Max exclusive
+	img *image.NRGBA
+	ch chan int // signal done
+}
+
+func traceGrid(g grid) {
+	for y := g.yMin; y < g.yMax; y++ {
+		for x := g.xMin; x < g.xMax; x++ {
+			g.img.SetNRGBA(x, y, g.scene.TracePixel(x, y))
+		}
+	}
+	g.ch <- 1
 }
 
 func main() {
 	scene := raytracer.Parse(sceneDir + "/" + sceneFile)
 
-	bounds := image.Rect(0, 0, scene.Camera.ImageWidth, scene.Camera.ImageHeight)
+	imgW := scene.Camera.ImageWidth
+	imgH := scene.Camera.ImageHeight
+	bounds := image.Rect(0, 0, imgW, imgH)
 	img := image.NewNRGBA(bounds)
+
+	gridChan := make(chan int, 100)
+	gridCount := 0
 
 	log.Println("Begin tracing")
 	begin := time.Now()
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			img.SetNRGBA(x, y, scene.TracePixel(x, y))
+	for y := bounds.Min.Y; y < bounds.Max.Y; y += gridSize {
+		for x := bounds.Min.X; x < bounds.Max.X; x += gridSize {
+			xMax := x + gridSize
+			if xMax > imgW {
+				xMax = imgW
+			}
+			yMax := y + gridSize
+			if yMax > imgH {
+				yMax = imgH
+			}
+			go traceGrid(grid{scene, x, y, xMax, yMax, img, gridChan})
+			gridCount++
 		}
 	}
+	for g := 0; g < gridCount; g += <-gridChan {}
 	end := time.Now()
 	log.Printf("Done tracing, took %v", end.Sub(begin))
 

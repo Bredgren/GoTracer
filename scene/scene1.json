@@ -25,7 +25,7 @@
         "LinearCoeff": 0.0
       }
     ],
-    "SpotLights": [
+    "_SpotLights": [
       {
         "Position": [-0.5, 4, 1],
         "Color": [1, 0, 0],
