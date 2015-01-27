@@ -59,6 +59,10 @@
         "UpDir": Vector,
         "Size": float, // The width and height
         "Samples": int // Sqrt(#samples you want)
+        "ConstCoeff": float,
+        "LinearCoeff": float,
+        "QuadCoeff": float,
+        "Accelerated": bool // Faster but slightly less accurate sometimes
       },
     ]
   },

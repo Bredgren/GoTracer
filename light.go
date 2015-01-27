@@ -3,6 +3,7 @@ package raytracer
 import (
 	"math"
 	"math/rand"
+	// "log"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -170,12 +171,13 @@ type AreaLight struct {
 	ConstCoeff float64
 	LinearCoeff float64
 	QuadCoeff float64
+	Accelerated bool
 
 	u mgl64.Vec3
 	v mgl64.Vec3
 }
 
-// func NewAreaLight(scene *Scene, color Color64, pos, orient, upDir mgl64.Vec3, size float64, samples int) AreaLight {
+// NewAreaLight takes an AreaLight and returns a new one that is ready to use.
 func NewAreaLight(a AreaLight) (light AreaLight) {
 	light = a
 	light.Orientation = light.Orientation.Normalize()
@@ -183,7 +185,7 @@ func NewAreaLight(a AreaLight) (light AreaLight) {
 
 	z := a.Orientation.Normalize()
 	y := light.UpDir
-	x := y.Cross(z).Normalize()
+	x := z.Cross(y).Normalize()
 	y = z.Cross(x).Normalize()
 	m := mgl64.Mat3FromCols(x, y, z)
 	light.u = m.Mul3x1(mgl64.Vec3{1, 0, 0}.Mul(light.Size))
@@ -207,24 +209,44 @@ func (a AreaLight) DistanceAttenuation(point mgl64.Vec3) float64 {
 
 func (a AreaLight) GridAttenuation(point mgl64.Vec3, samples int) mgl64.Vec3 {
 	atten := mgl64.Vec3{}
-	sizePerSample := float64(a.Size) / float64(samples)
-	for y := 0.0; y < 1.0; y += sizePerSample {
-		for x := 0.0; x < 1.0; x += sizePerSample {
-			rx, ry := rand.Float64() / sizePerSample, rand.Float64() / sizePerSample
-			pos := a.GetPosition(x + rx, y + ry)
-			atten = atten.Add(ShadowAttenuation(a.Scene, pos.Sub(point), point))
+	s := float64(samples)
+	// log.Println("s", s)
+	sizePerSample := 1.0 / s
+	// log.Println("sizePerSample", sizePerSample)
+	for y := 0.0; y < s; y++ {
+		for x := 0.0; x < s; x++ {
+			// log.Println("x, y", x, y)
+			xx := x * sizePerSample
+			yy := y * sizePerSample
+			// log.Println("xx, yy", xx, yy)
+			rx, ry := rand.Float64() * sizePerSample, rand.Float64() * sizePerSample
+			// log.Println("rx, ry", rx, ry)
+			pos := a.GetPosition(xx + rx, yy + ry)
+			// log.Println("pos", pos)
+			a := ShadowAttenuation(a.Scene, pos.Sub(point), point)
+			// log.Println("atten at pos", a)
+			atten = atten.Add(a)
+			// log.Println("atten", atten)
 		}
 	}
-	return atten.Mul(1.0 / float64(a.Samples * a.Samples))
+	// log.Println("final atten", atten.Mul(1.0 / (s * s)))
+	return atten.Mul(1.0 / (s * s))
 }
 
 func (a AreaLight) ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3 {
-	// Check with a 2x2 grid to see there is a significant difference before going all out
-	// center := ShadowAttenuation(a.Scene, a.Position.Sub(point), point)
-	// atten4 := a.GridAttenuation(point, 2)
-	// if center.ApproxEqualThreshold(atten4, Rayε / 2) {
-	// 	return atten4
-	// }
+	if a.Accelerated {
+		// Check the corners to see there is a significant difference before going all out
+		center := ShadowAttenuation(a.Scene, a.Position.Sub(point), point)
+		atten1 := ShadowAttenuation(a.Scene, a.GetPosition(0.0, 0.0).Sub(point), point)
+		atten2 := ShadowAttenuation(a.Scene, a.GetPosition(0.0, 1.0).Sub(point), point)
+		atten3 := ShadowAttenuation(a.Scene, a.GetPosition(1.0, 0.0).Sub(point), point)
+		atten4 := ShadowAttenuation(a.Scene, a.GetPosition(1.0, 1.0).Sub(point), point)
+		min := math.Min(center.Len(), math.Min(atten1.Len(), math.Min(atten2.Len(), math.Min(atten3.Len(), atten4.Len()))))
+		max := math.Max(center.Len(), math.Max(atten1.Len(), math.Max(atten2.Len(), math.Max(atten3.Len(), atten4.Len()))))
+		if max - min < Rayε {
+			return atten1.Add(atten2).Add(atten3).Add(atten4).Mul(0.25)
+		}
+	}
 	return a.GridAttenuation(point, a.Samples)
 }
 

@@ -2,47 +2,44 @@
   "Render": {
     "Camera": {
       "ImageWidth": 500,
-      "ImageHeight": 300,
-      "Position": [0, 3, 7],
-      "LookAt": [0, 0, 0],
+      "ImageHeight": 500,
+      "Position": [0, 4, 13],
+      "LookAt": [0, 4, 0],
       "UpDir": [0, 1, 0],
       "FOV": 53,
       "Background": [0.0, 0.0, 0.0]
     },
     "MaxDepth": 5,
-    "AmbientLight": [0.1, 0.1, 0.1],
-    "_PointLights": [
-      {
-        "Color": [1, 1, 1],
-        "Position": [0, 3, 0],
-        "ConstCoeff": 0.0,
-        "LinearCoeff": 0.0
-      }
-    ],
+    "AmbientLight": [1.0, 1.0, 1.0],
     "AreaLights": [
       {
         "Color": [1, 1, 1],
-        "Position": [0, 3, 0],
+        "Position": [0, 8, 0],
         "Orientation": [0, -1, 0],
         "UpDir": [0, 0, -1],
-        "Size": 0.5,
-        "Samples": 5,
-        "ConstCoeff": 1.0,
-        "LinearCoeff": 2.0,
-        "QuadCoeff": 0.0
+        "Size": 2.0,
+        "Samples": 10,
+        "ConstCoeff": 0.0,
+        "LinearCoeff": 0.0,
+        "QuadCoeff": 0.0,
+        "Accelerated": true
       }
     ]
   },
   "Materials": [
     {
+      "Name": "White",
+      "Ambient": [1.0, 1.0, 1.0],
+      "Diffuse": [1.0, 1.0, 1.0]
+    },
+    {
       "Name": "Soft White",
-      "_Ambient": [0.8, 0.8, 0.8],
-      "Specular": [0, 0, 0],
+      "Ambient": [0.1, 0.1, 0.1],
       "Diffuse": [1.0, 1.0, 1.0]
     },
     {
       "Name": "Green",
-      "_Ambient": [0.3, 0.8, 0.3],
+      "Ambient": [0.01, 0.06, 0.01],
       "Specular": [0.1, 0.1, 0.1],
       "Shininess": 10.0,
       "Diffuse": [0.3, 0.8, 0.3]
@@ -65,7 +62,23 @@
         "Translate": [0, -1, 0],
         "RotateAxis": [1, 0, 0],
         "RotateAngle": 90,
-        "Scale": [10, 10, 1]
+        "Scale": [11, 11, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "Soft White" }
+        }
+      ]
+    },
+    {
+      "_Note": "ceiling",
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, 9, 0],
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90,
+        "Scale": [11, 11, 1]
       },
       "SubObjects": [
         {
@@ -79,7 +92,7 @@
       "Type": "Transform",
       "Properties": {
         "Translate": [0, 4, -5],
-        "Scale": [10, 10, 1]
+        "Scale": [11, 11, 1]
       },
       "SubObjects": [
         {
@@ -95,7 +108,7 @@
         "Translate": [-5, 4, 0],
         "RotateAxis": [0, 1, 0],
         "RotateAngle": 90,
-        "Scale": [10, 10, 1]
+        "Scale": [11, 11, 1]
       },
       "SubObjects": [
         {
@@ -111,7 +124,7 @@
         "Translate": [5, 4, 0],
         "RotateAxis": [0, 1, 0],
         "RotateAngle": 90,
-        "Scale": [10, 10, 1]
+        "Scale": [11, 11, 1]
       },
       "SubObjects": [
         {
@@ -122,7 +135,7 @@
     },
     {
       "Type": "Transform",
-      "Properties": { "Translate": [2, 0, 0] },
+      "Properties": { "Translate": [2, 4, -0.5], "Scale": [0.8, 0.8, 0.8] },
       "SubObjects": [
         {
           "Type": "Sphere",
@@ -132,11 +145,26 @@
     },
     {
       "Type": "Transform",
-      "Properties": { "Translate": [-1.3, 0, 0.7] },
+      "Properties": { "Translate": [-1.3, 1, 0.7] },
       "SubObjects": [
         {
           "Type": "Sphere",
           "Properties": { "Material": "Glass" }
+        }
+      ]
+    },
+    {
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, 8.05, 0],
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90,
+        "Scale": [2, 2, 2]
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "White" }
         }
       ]
     }

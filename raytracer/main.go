@@ -1,6 +1,7 @@
 /*
 TODO:
  - Soft shadows
+ - Save scene file
  - Beer's law
  - Fresnel term
  - Texture mapping
@@ -15,6 +16,8 @@ TODO:
  - Trimesh
  - CSG
  - Caustics
+ - Distance estimators
+ - Fractals
 */
 package main
 
@@ -22,6 +25,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"io/ioutil"
 	"log"
@@ -44,6 +48,8 @@ var (
 	sceneFile = ""
 	noImg = false
 	gridSize = 50
+	format = "jpg"
+	jpegQuality = 95
 )
 
 func init() {
@@ -53,10 +59,16 @@ func init() {
 	}
 	flag.BoolVar(&noImg, "NoImg", false, "Don't create an image if present.")
 	flag.IntVar(&gridSize, "gridSize", gridSize, "Size of simultaneous trace grids.")
+	flag.StringVar(&format, "format", format, "Image format [jpg | png].")
+	flag.IntVar(&jpegQuality, "jpegQuality", jpegQuality, "JPEG quality.")
 	flag.Parse()
 
 	if flag.NArg() < 1 {
 		panic(usageStr)
+	}
+
+	if format != "jpg" && format != "png" {
+		panic("Unknown format " + format)
 	}
 
 	sceneFile = flag.Arg(0)
@@ -135,7 +147,7 @@ func main() {
 		}
 	}
 
-	outFile := fmt.Sprintf("%s/render%d.png", renderDir, count + 1)
+	outFile := fmt.Sprintf("%s/render%d.%s", renderDir, count + 1, format)
 
 	file, err := os.Create(outFile)
 	if err != nil {
@@ -143,5 +155,9 @@ func main() {
 	}
 	defer file.Close()
 
-	png.Encode(file, img)
+	if format == "jpg" {
+		jpeg.Encode(file, img, &jpeg.Options{jpegQuality})
+	} else if format == "png" {
+		png.Encode(file, img)
+	}
 }
