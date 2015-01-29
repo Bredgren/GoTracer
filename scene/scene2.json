@@ -50,7 +50,7 @@
       "Shininess": 250.0,
       "Reflective": [0.5, 0.5, 0.5],
       "Diffuse": [0.1, 0.1, 0.1],
-      "Transmissive": [0.8, 0.8, 0.8],
+      "Transmissive": [0.5, 0.5, 0.5],
       "Index": 1.52
     }
   ],

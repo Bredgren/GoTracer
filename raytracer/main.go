@@ -1,6 +1,5 @@
 /*
 TODO:
- - Soft shadows
  - Save scene file
  - Beer's law
  - Fresnel term

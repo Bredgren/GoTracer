@@ -3,7 +3,6 @@ package raytracer
 import (
 	"math"
 	"math/rand"
-	// "log"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -47,6 +46,10 @@ type PointLight struct {
 	QuadCoeff float64
 }
 
+func NewPointLight(p PointLight) (light PointLight) {
+	return p
+}
+
 func (p PointLight) GetColor() Color64 {
 	return p.Color
 }
@@ -77,8 +80,10 @@ type DirectionalLight struct {
 	Orientation mgl64.Vec3
 }
 
-func NewDirectionalLight(scene *Scene, color Color64, orient mgl64.Vec3) DirectionalLight {
-	return DirectionalLight{scene, color, orient.Normalize()}
+func NewDirectionalLight(d DirectionalLight) (light DirectionalLight) {
+	light = d
+	light.Orientation = light.Orientation.Normalize()
+	return light
 }
 
 func (d DirectionalLight) GetColor() Color64 {
@@ -112,14 +117,16 @@ type SpotLight struct {
 	edgeIntensity float64
 }
 
-func NewSpotLight(scene *Scene, color Color64, pos, orient mgl64.Vec3, angle, dropOff, fadeAngle float64) SpotLight {
-	angleDegrees := angle
-	angle = mgl64.DegToRad(angle)
-	fadeAngle = mgl64.DegToRad(fadeAngle)
-	minAngle := angle - fadeAngle
-	maxAngle := angle + fadeAngle
-	edgeIntensity := math.Pow(math.Cos(minAngle), dropOff)
-	return SpotLight{scene, color, pos, orient.Normalize(), angle, dropOff, fadeAngle, angleDegrees, minAngle, maxAngle, edgeIntensity}
+func NewSpotLight(s SpotLight) (light SpotLight) {
+	light = s
+	light.angleDegrees = s.Angle
+	light.Angle = mgl64.DegToRad(s.Angle)
+	light.FadeAngle = mgl64.DegToRad(s.FadeAngle)
+	light.minAngle = light.Angle - light.FadeAngle
+	light.maxAngle = light.Angle + light.FadeAngle
+	light.edgeIntensity = math.Pow(math.Cos(light.minAngle), light.DropOff)
+	light.Orientation = light.Orientation.Normalize()
+	return light
 }
 
 func (s SpotLight) GetColor() Color64 {
@@ -210,26 +217,17 @@ func (a AreaLight) DistanceAttenuation(point mgl64.Vec3) float64 {
 func (a AreaLight) GridAttenuation(point mgl64.Vec3, samples int) mgl64.Vec3 {
 	atten := mgl64.Vec3{}
 	s := float64(samples)
-	// log.Println("s", s)
 	sizePerSample := 1.0 / s
-	// log.Println("sizePerSample", sizePerSample)
 	for y := 0.0; y < s; y++ {
 		for x := 0.0; x < s; x++ {
-			// log.Println("x, y", x, y)
 			xx := x * sizePerSample
 			yy := y * sizePerSample
-			// log.Println("xx, yy", xx, yy)
 			rx, ry := rand.Float64() * sizePerSample, rand.Float64() * sizePerSample
-			// log.Println("rx, ry", rx, ry)
 			pos := a.GetPosition(xx + rx, yy + ry)
-			// log.Println("pos", pos)
 			a := ShadowAttenuation(a.Scene, pos.Sub(point), point)
-			// log.Println("atten at pos", a)
 			atten = atten.Add(a)
-			// log.Println("atten", atten)
 		}
 	}
-	// log.Println("final atten", atten.Mul(1.0 / (s * s)))
 	return atten.Mul(1.0 / (s * s))
 }
 

@@ -6,7 +6,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
-var sphere = SphereObject{}
+var sphere = NewSphereObject(SphereObject{})
 
 func checkIsect(t *testing.T, test string, isect Intersection, expNormal mgl64.Vec3, expT float64) {
 	if isect.Normal != expNormal {
@@ -92,7 +92,7 @@ func BenchmarkSphereIntersect(b *testing.B) {
 	}
 }
 
-var box = BoxObject{}
+var box = NewBoxObject(BoxObject{})
 
 func TestBoxIntersect(t *testing.T) {
 	// Origin ray
@@ -138,7 +138,7 @@ func BenchmarkBoxIntersect(b *testing.B) {
 	}
 }
 
-var square = SquareObject{}
+var square = NewSquareObject(SquareObject{})
 
 func TestSquareIntersect(t *testing.T) {
 	// Origin ray

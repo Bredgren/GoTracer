@@ -9,20 +9,10 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
-type cameraSettings struct {
-	ImageWidth int
-	ImageHeight int
-	Position mgl64.Vec3
-	LookAt mgl64.Vec3
-	UpDir mgl64.Vec3
-	FOV float64
-	Background Color64
-}
-
 type renderSettings struct {
 	ImageWidth int
 	ImageHeight int
-	Camera cameraSettings
+	Camera Camera
 	AmbientLight Color64
 	MaxDepth int
 	AdaptiveThreshold float64
@@ -75,13 +65,22 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.
 			parseSceneObject(subObject, scene, newTransform)
 		}
 	case "Sphere":
-		sphere := SphereObject{transform, transform.Inv(), object.Properties.Material}
+		sphere := SphereObject{}
+		sphere.Transform = transform
+		sphere.MaterialName = object.Properties.Material
+		sphere = NewSphereObject(sphere)
 		scene.Objects = append(scene.Objects, sphere)
 	case "Box":
-		box := BoxObject{transform, transform.Inv(), object.Properties.Material}
+		box := BoxObject{}
+		box.Transform = transform
+		box.MaterialName = object.Properties.Material
+		box = NewBoxObject(box)
 		scene.Objects = append(scene.Objects, box)
 	case "Square":
-		square := SquareObject{transform, transform.Inv(), object.Properties.Material}
+		square := SquareObject{}
+		square.Transform = transform
+		square.MaterialName = object.Properties.Material
+		square = NewSquareObject(square)
 		scene.Objects = append(scene.Objects, square)
 	// case "Triangle":
 	// 	tri := TriangleObject{
@@ -112,21 +111,22 @@ func Parse(fileName string) *Scene {
 
 	scene := &Scene{}
 
-	camSet := settings.Render.Camera
-	scene.Camera = NewCamera(camSet.ImageWidth, camSet.ImageHeight, camSet.Position,
-		camSet.LookAt, camSet.UpDir, camSet.FOV, camSet.Background)
+	scene.Camera = NewCamera(settings.Render.Camera)
 
 	scene.Lights = make([]Light, 0)
 	for _, pLight := range settings.Render.PointLights {
 		pLight.Scene = scene
+		pLight = NewPointLight(pLight)
 		scene.Lights = append(scene.Lights, pLight)
 	}
 	for _, dLight := range settings.Render.DirectionalLights {
-		dLight = NewDirectionalLight(scene, dLight.Color, dLight.Orientation)
+		dLight.Scene = scene
+		dLight = NewDirectionalLight(dLight)
 		scene.Lights = append(scene.Lights, dLight)
 	}
 	for _, sLight := range settings.Render.SpotLights {
-		sLight = NewSpotLight(scene, sLight.Color, sLight.Position, sLight.Orientation, sLight.Angle, sLight.DropOff, sLight.FadeAngle)
+		sLight.Scene = scene
+		sLight = NewSpotLight(sLight)
 		scene.Lights = append(scene.Lights, sLight)
 	}
 	for _, aLight := range settings.Render.AreaLights {

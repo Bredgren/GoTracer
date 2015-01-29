@@ -56,7 +56,7 @@ func TestAreaLight(t *testing.T) {
 	scale := mgl64.Scale3D(1, 1, 1)
 	transform := translate.Mul4(rotate).Mul4(scale)
 
-	square := SquareObject{transform, transform.Inv(), ""}
+	square := NewSquareObject(SquareObject{Transform: transform})
 	scene.Objects = append(scene.Objects, square)
 
 	samples := 2

@@ -27,7 +27,7 @@ func TestIntersectScaled(t *testing.T) {
 	scene := &Scene{}
 
 	transform := mgl64.Scale3D(0.5, 0.5, 0.5)
-	sphere1 := SphereObject{transform, transform.Inv(), "1"}
+	sphere1 := NewSphereObject(SphereObject{Transform: transform})
 	scene.Objects = append(scene.Objects, sphere1)
 
 	ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
@@ -54,7 +54,7 @@ func TestIntersectTranslated(t *testing.T) {
 	scene := &Scene{}
 
 	transform := mgl64.Translate3D(1, 0, 0)
-	sphere1 := SphereObject{transform, transform.Inv(), "1"}
+	sphere1 := NewSphereObject(SphereObject{Transform: transform})
 	scene.Objects = append(scene.Objects, sphere1)
 
 	ray := NewRay(mgl64.Vec3{1, 0, 5}, mgl64.Vec3{0, 0, -1})
@@ -91,7 +91,7 @@ func TestIntersectScaledTranslated(t *testing.T) {
 	scene := &Scene{}
 
 	transform := mgl64.Translate3D(1, 0, 0.5).Mul4(mgl64.Scale3D(0.5, 0.5, 0.5))
-	sphere1 := SphereObject{transform, transform.Inv(), "1"}
+	sphere1 := NewSphereObject(SphereObject{Transform: transform})
 	scene.Objects = append(scene.Objects, sphere1)
 
 	ray := NewRay(mgl64.Vec3{1, 0, 5}, mgl64.Vec3{0, 0, -1})
@@ -128,16 +128,16 @@ func TestIntersect(t *testing.T) {
 	scene := &Scene{}
 
 	transform := mgl64.Scale3D(0.5, 0.5, 0.5)
-	sphere1 := SphereObject{transform, transform.Inv(), "1"}
+	sphere1 := NewSphereObject(SphereObject{Transform: transform, MaterialName: "1"})
 	// scene.Objects = append(scene.Objects, sphere1)
 
 	transform = mgl64.Translate3D(1.8, 0, -0.5).Mul4(mgl64.Scale3D(0.5, 0.5, 0.5))
-	sphere2 := SphereObject{transform, transform.Inv(), "2"}
+	sphere2 := NewSphereObject(SphereObject{Transform: transform, MaterialName: "2"})
 	_ = sphere2
 	// scene.Objects = append(scene.Objects, sphere2)
 
 	transform = mgl64.Translate3D(-0.8, 0, 0.5).Mul4(mgl64.Scale3D(0.5, 0.5, 0.5))
-	sphere3 := SphereObject{transform, transform.Inv(), "3"}
+	sphere3 := NewSphereObject(SphereObject{Transform: transform, MaterialName: "3"})
 	scene.Objects = append(scene.Objects, sphere3)
 
 	ray := NewRay(mgl64.Vec3{-0.2 - Rayε, 0, 5}, mgl64.Vec3{0, 0, -1})

@@ -91,7 +91,7 @@ func checkReflectAngle(t *testing.T, angle float64) {
 	x := math.Sin(rad)
 	y := math.Cos(rad)
 	ray := NewRay(mgl64.Vec3{x, y, 0}, mgl64.Vec3{-x, -y, 0})
-	isect := Intersection{nil, mgl64.Vec3{0, 1, 0}, 1}
+	isect := NewIntersection(Intersection{nil, mgl64.Vec3{0, 1, 0}, 1})
 	reflRay := ray.Reflect(isect)
 	expOrigin := mgl64.Vec3{0, 0, 0}
 	expDirection := mgl64.Vec3{-x, y, 0}.Normalize()

@@ -17,8 +17,15 @@ type SceneObject interface {
 
 type SphereObject struct {
 	Transform mgl64.Mat4
-	InvTransform mgl64.Mat4
 	MaterialName string
+
+	invTransform mgl64.Mat4
+}
+
+func NewSphereObject(s SphereObject) (object SphereObject) {
+	object = s
+	object.invTransform = s.Transform.Inv()
+	return object
 }
 
 func (s SphereObject) GetTransform() mgl64.Mat4 {
@@ -26,7 +33,7 @@ func (s SphereObject) GetTransform() mgl64.Mat4 {
 }
 
 func (s SphereObject) GetInvTransform() mgl64.Mat4 {
-	return s.InvTransform
+	return s.invTransform
 }
 
 func (s SphereObject) GetMaterialName() string {
@@ -57,17 +64,17 @@ func (s SphereObject) Intersect(r Ray) (isect Intersection, hit bool) {
 	if t1 > Rayε {
 		isect.T = t1
 		// Normalize because sphere is at origin
-		isect.Normal = r.At(t1).Normalize()
+		isect.Normal = r.At(t1)
 		// TODO: set UV coordinates
-		return isect, true
+		return NewIntersection(isect), true
 	}
 
 	if t2 > Rayε {
 		isect.T = t2
 		// Normalize because sphere is at origin
-		isect.Normal = r.At(t2).Normalize()
+		isect.Normal = r.At(t2)
 		// TODO: set UV coordinates
-		return isect, true
+		return NewIntersection(isect), true
 	}
 
 	return isect, false
@@ -75,8 +82,15 @@ func (s SphereObject) Intersect(r Ray) (isect Intersection, hit bool) {
 
 type BoxObject struct {
 	Transform mgl64.Mat4
-	InvTransform mgl64.Mat4
 	MaterialName string
+
+	invTransform mgl64.Mat4
+}
+
+func NewBoxObject(b BoxObject) (object BoxObject) {
+	object = b
+	object.invTransform = b.Transform.Inv()
+	return object
 }
 
 func (b BoxObject) GetTransform() mgl64.Mat4 {
@@ -84,7 +98,7 @@ func (b BoxObject) GetTransform() mgl64.Mat4 {
 }
 
 func (b BoxObject) GetInvTransform() mgl64.Mat4 {
-	return b.InvTransform
+	return b.invTransform
 }
 
 func (b BoxObject) GetMaterialName() string {
@@ -153,13 +167,20 @@ func (b BoxObject) Intersect(r Ray) (isect Intersection, hit bool) {
 		// TODO: Set UV coods
 	}
 
-	return isect, true
+	return NewIntersection(isect), true
 }
 
 type SquareObject struct {
 	Transform mgl64.Mat4
-	InvTransform mgl64.Mat4
 	MaterialName string
+
+	invTransform mgl64.Mat4
+}
+
+func NewSquareObject(s SquareObject) (object SquareObject) {
+	object = s
+	object.invTransform = s.Transform.Inv()
+	return object
 }
 
 func (s SquareObject) GetTransform() mgl64.Mat4 {
@@ -167,7 +188,7 @@ func (s SquareObject) GetTransform() mgl64.Mat4 {
 }
 
 func (s SquareObject) GetInvTransform() mgl64.Mat4 {
-	return s.InvTransform
+	return s.invTransform
 }
 
 func (s SquareObject) GetMaterialName() string {
@@ -204,30 +225,30 @@ func (s SquareObject) Intersect(r Ray) (isect Intersection, hit bool) {
 
 	// TODO: UV coords
 
-	return isect, true
+	return NewIntersection(isect), true
 }
 
-type TriangleObject struct {
-	Transform mgl64.Mat4
-	InvTransform mgl64.Mat4
-	MaterialName string
-	PointA mgl64.Vec3
-	PointB mgl64.Vec3
-	PointC mgl64.Vec3
-}
+// type TriangleObject struct {
+// 	Transform mgl64.Mat4
+// 	InvTransform mgl64.Mat4
+// 	MaterialName string
+// 	PointA mgl64.Vec3
+// 	PointB mgl64.Vec3
+// 	PointC mgl64.Vec3
+// }
 
-func (t TriangleObject) GetTransform() mgl64.Mat4 {
-	return t.Transform
-}
+// func (t TriangleObject) GetTransform() mgl64.Mat4 {
+// 	return t.Transform
+// }
 
-func (t TriangleObject) GetInvTransform() mgl64.Mat4 {
-	return t.InvTransform
-}
+// func (t TriangleObject) GetInvTransform() mgl64.Mat4 {
+// 	return t.InvTransform
+// }
 
-func (t TriangleObject) GetMaterialName() string {
-	return t.MaterialName
-}
+// func (t TriangleObject) GetMaterialName() string {
+// 	return t.MaterialName
+// }
 
-func (t TriangleObject) Intersect(r Ray) (Intersection, bool) {
-	return Intersection{}, false
-}
+// func (t TriangleObject) Intersect(r Ray) (Intersection, bool) {
+// 	return Intersection{}, false
+// }

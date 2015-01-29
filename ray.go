@@ -58,3 +58,9 @@ type Intersection struct {
 	Normal mgl64.Vec3
 	T float64
 }
+
+func NewIntersection(i Intersection) (isect Intersection) {
+	isect = i
+	isect.Normal = isect.Normal.Normalize()
+	return isect
+}
