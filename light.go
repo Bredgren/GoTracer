@@ -46,8 +46,7 @@ type PointLight struct {
 	QuadCoeff float64
 }
 
-func NewPointLight(p PointLight) (light PointLight) {
-	return p
+func InitPointLight(p *PointLight) {
 }
 
 func (p PointLight) GetColor() Color64 {
@@ -80,10 +79,8 @@ type DirectionalLight struct {
 	Orientation mgl64.Vec3
 }
 
-func NewDirectionalLight(d DirectionalLight) (light DirectionalLight) {
-	light = d
-	light.Orientation = light.Orientation.Normalize()
-	return light
+func InitDirectionalLight(d *DirectionalLight) {
+	d.Orientation = d.Orientation.Normalize()
 }
 
 func (d DirectionalLight) GetColor() Color64 {
@@ -117,16 +114,14 @@ type SpotLight struct {
 	edgeIntensity float64
 }
 
-func NewSpotLight(s SpotLight) (light SpotLight) {
-	light = s
-	light.angleDegrees = s.Angle
-	light.Angle = mgl64.DegToRad(s.Angle)
-	light.FadeAngle = mgl64.DegToRad(s.FadeAngle)
-	light.minAngle = light.Angle - light.FadeAngle
-	light.maxAngle = light.Angle + light.FadeAngle
-	light.edgeIntensity = math.Pow(math.Cos(light.minAngle), light.DropOff)
-	light.Orientation = light.Orientation.Normalize()
-	return light
+func InitSpotLight(s *SpotLight) {
+	s.angleDegrees = s.Angle
+	s.Angle = mgl64.DegToRad(s.Angle)
+	s.FadeAngle = mgl64.DegToRad(s.FadeAngle)
+	s.minAngle = s.Angle - s.FadeAngle
+	s.maxAngle = s.Angle + s.FadeAngle
+	s.edgeIntensity = math.Pow(math.Cos(s.minAngle), s.DropOff)
+	s.Orientation = s.Orientation.Normalize()
 }
 
 func (s SpotLight) GetColor() Color64 {
@@ -184,21 +179,17 @@ type AreaLight struct {
 	v mgl64.Vec3
 }
 
-// NewAreaLight takes an AreaLight and returns a new one that is ready to use.
-func NewAreaLight(a AreaLight) (light AreaLight) {
-	light = a
-	light.Orientation = light.Orientation.Normalize()
-	light.UpDir = light.UpDir.Normalize()
+func InitAreaLight(a *AreaLight) {
+	a.Orientation = a.Orientation.Normalize()
+	a.UpDir = a.UpDir.Normalize()
 
 	z := a.Orientation.Normalize()
-	y := light.UpDir
+	y := a.UpDir
 	x := z.Cross(y).Normalize()
 	y = z.Cross(x).Normalize()
 	m := mgl64.Mat3FromCols(x, y, z)
-	light.u = m.Mul3x1(mgl64.Vec3{1, 0, 0}.Mul(light.Size))
-	light.v = m.Mul3x1(mgl64.Vec3{0, -1, 0}.Mul(light.Size))
-
-	return light
+	a.u = m.Mul3x1(mgl64.Vec3{1, 0, 0}.Mul(a.Size))
+	a.v = m.Mul3x1(mgl64.Vec3{0, -1, 0}.Mul(a.Size))
 }
 
 func (a AreaLight) GetColor() Color64 {

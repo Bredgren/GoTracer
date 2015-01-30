@@ -68,20 +68,20 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.
 		sphere := SphereObject{}
 		sphere.Transform = transform
 		sphere.MaterialName = object.Properties.Material
-		sphere = NewSphereObject(sphere)
-		scene.Objects = append(scene.Objects, sphere)
+		InitSphereObject(&sphere)
+		scene.Objects = append(scene.Objects, &sphere)
 	case "Box":
 		box := BoxObject{}
 		box.Transform = transform
 		box.MaterialName = object.Properties.Material
-		box = NewBoxObject(box)
-		scene.Objects = append(scene.Objects, box)
+		InitBoxObject(&box)
+		scene.Objects = append(scene.Objects, &box)
 	case "Square":
 		square := SquareObject{}
 		square.Transform = transform
 		square.MaterialName = object.Properties.Material
-		square = NewSquareObject(square)
-		scene.Objects = append(scene.Objects, square)
+		InitSquareObject(&square)
+		scene.Objects = append(scene.Objects, &square)
 	// case "Triangle":
 	// 	tri := TriangleObject{
 	// 		transform,
@@ -116,23 +116,23 @@ func Parse(fileName string) *Scene {
 	scene.Lights = make([]Light, 0)
 	for _, pLight := range settings.Render.PointLights {
 		pLight.Scene = scene
-		pLight = NewPointLight(pLight)
-		scene.Lights = append(scene.Lights, pLight)
+		InitPointLight(&pLight)
+		scene.Lights = append(scene.Lights, &pLight)
 	}
 	for _, dLight := range settings.Render.DirectionalLights {
 		dLight.Scene = scene
-		dLight = NewDirectionalLight(dLight)
-		scene.Lights = append(scene.Lights, dLight)
+		InitDirectionalLight(&dLight)
+		scene.Lights = append(scene.Lights, &dLight)
 	}
 	for _, sLight := range settings.Render.SpotLights {
 		sLight.Scene = scene
-		sLight = NewSpotLight(sLight)
-		scene.Lights = append(scene.Lights, sLight)
+		InitSpotLight(&sLight)
+		scene.Lights = append(scene.Lights, &sLight)
 	}
 	for _, aLight := range settings.Render.AreaLights {
 		aLight.Scene = scene
-		aLight = NewAreaLight(aLight)
-		scene.Lights = append(scene.Lights, aLight)
+		InitAreaLight(&aLight)
+		scene.Lights = append(scene.Lights, &aLight)
 	}
 
 	scene.Material = make(map[string]Material)

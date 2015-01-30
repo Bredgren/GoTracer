@@ -1,11 +1,11 @@
 /*
 TODO:
+ - Antialiasing
  - Save scene file
  - Beer's law
  - Fresnel term
  - Texture mapping
  - Bump mapping
- - Antialiasing
  - BSPTree
  - Cylinder
  - Cone

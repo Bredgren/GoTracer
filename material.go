@@ -22,7 +22,7 @@ type Material struct {
 	Index float64
 }
 
-func (m Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (color Color64) {
+func (m *Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (color Color64) {
 	point := ray.At(isect.T)
 	colorVec := mgl64.Vec3(m.Emissive).Add(mgl64.Vec3(m.Ambient.Product(scene.AmbientLight)))
 	for _, light := range scene.Lights {

@@ -22,10 +22,8 @@ type SphereObject struct {
 	invTransform mgl64.Mat4
 }
 
-func NewSphereObject(s SphereObject) (object SphereObject) {
-	object = s
-	object.invTransform = s.Transform.Inv()
-	return object
+func InitSphereObject(s *SphereObject) {
+	s.invTransform = s.Transform.Inv()
 }
 
 func (s SphereObject) GetTransform() mgl64.Mat4 {
@@ -87,10 +85,8 @@ type BoxObject struct {
 	invTransform mgl64.Mat4
 }
 
-func NewBoxObject(b BoxObject) (object BoxObject) {
-	object = b
-	object.invTransform = b.Transform.Inv()
-	return object
+func InitBoxObject(b *BoxObject) {
+	b.invTransform = b.Transform.Inv()
 }
 
 func (b BoxObject) GetTransform() mgl64.Mat4 {
@@ -177,10 +173,8 @@ type SquareObject struct {
 	invTransform mgl64.Mat4
 }
 
-func NewSquareObject(s SquareObject) (object SquareObject) {
-	object = s
-	object.invTransform = s.Transform.Inv()
-	return object
+func InitSquareObject(s *SquareObject) {
+	s.invTransform = s.Transform.Inv()
 }
 
 func (s SquareObject) GetTransform() mgl64.Mat4 {
