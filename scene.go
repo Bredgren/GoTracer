@@ -11,6 +11,8 @@ type Scene struct {
 	Camera Camera
 	MaxDepth int
 	AdaptiveThreshold float64
+  AAMaxDivisions int
+	AAThreshold float64
 	AmbientLight Color64
 	Lights []Light
 	Objects []SceneObject
@@ -18,10 +20,54 @@ type Scene struct {
 }
 
 func (scene *Scene) TracePixel(x, y int) color.NRGBA {
-	nx := float64(x) / float64(scene.Camera.ImageWidth)
-	ny := float64(y) / float64(scene.Camera.ImageHeight)
-	ray := scene.Camera.RayThrough(nx, ny)
-	return scene.TraceRay(ray, 0, 1.0).NRGBA()
+	pixelWidth := 1 / float64(scene.Camera.ImageWidth)
+	pixelHeight := 1 / float64(scene.Camera.ImageHeight)
+	centerX := float64(x) * pixelWidth
+	centerY := float64(y) * pixelHeight
+	if scene.AAThreshold == 0 {
+		ray := scene.Camera.RayThrough(centerX, centerY)
+		return scene.TraceRay(ray, 0, 1.0).NRGBA()
+	}
+	halfWidth := pixelWidth / 2
+	halfHeight := pixelHeight / 2
+	xMin := centerX - halfWidth
+	yMin := centerY - halfHeight
+	xMax := centerX + halfWidth
+	yMax := centerY + halfHeight
+	return scene.TraceSubPixel(xMin, yMin, xMax, yMax, 0).NRGBA()
+}
+
+func (scene *Scene) TraceSubPixel(xMin, yMin, xMax, yMax float64, depth int) Color64 {
+	width := xMax - xMin
+	height := yMax - yMin
+	if depth >= scene.AAMaxDivisions {
+		x := xMin + 0.5 * width
+		y := yMin + 0.5 * height
+		return scene.TraceRay(scene.Camera.RayThrough(x, y), 0, 1.0)
+	}
+	x1 := xMin + 0.25 * width
+	x2 := xMin + 0.75 * width
+	y1 := yMin + 0.25 * height
+	y2 := yMin + 0.75 * height
+	color1 := scene.TraceRay(scene.Camera.RayThrough(x1, y1), 0, 1.0)
+	color2 := scene.TraceRay(scene.Camera.RayThrough(x2, y1), 0, 1.0)
+	color3 := scene.TraceRay(scene.Camera.RayThrough(x1, y2), 0, 1.0)
+	color4 := scene.TraceRay(scene.Camera.RayThrough(x2, y2), 0, 1.0)
+	thresh := scene.AAThreshold
+	if ColorsDifferent(color1, color2, thresh) || ColorsDifferent(color1, color3, thresh) ||
+		ColorsDifferent(color1, color4, thresh) || ColorsDifferent(color2, color3, thresh) ||
+		ColorsDifferent(color2, color4, thresh) || ColorsDifferent(color3, color3, thresh) ||
+		ColorsDifferent(color3, color4, thresh) || ColorsDifferent(color4, color4, thresh) {
+		halfWidth := width / 2
+		halfHeight := height / 2
+		d := depth + 1
+		color1 = scene.TraceSubPixel(xMin, yMin, xMin + halfWidth, yMin + halfHeight, d)
+		color2 = scene.TraceSubPixel(xMin + halfWidth, yMin, xMax, yMin + halfHeight, d)
+		color3 = scene.TraceSubPixel(xMin, yMin + halfHeight, xMin + halfWidth, yMax, d)
+		color4 = scene.TraceSubPixel(xMin + halfWidth, yMin + halfHeight, xMax, yMax, d)
+	}
+	sum := mgl64.Vec3(color1).Add(mgl64.Vec3(color2)).Add(mgl64.Vec3(color3)).Add(mgl64.Vec3(color4))
+	return Color64(sum.Mul(0.25))
 }
 
 func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {

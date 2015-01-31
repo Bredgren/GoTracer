@@ -45,3 +45,7 @@ var Clamp01 = clamp(0.0, 1.0)
 func (c Color64) Clamp() Color64 {
 	return Color64{Clamp01(c[0]), Clamp01(c[1]), Clamp01(c[2])}
 }
+
+func ColorsDifferent(color1, color2 Color64, thresh float64) bool {
+	return mgl64.Vec3(color1).Sub(mgl64.Vec3(color2)).Len() > thresh
+}

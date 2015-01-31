@@ -1,6 +1,6 @@
 /*
 TODO:
- - Antialiasing
+ - Ray counts
  - Save scene file
  - Beer's law
  - Fresnel term

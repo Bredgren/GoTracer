@@ -10,6 +10,8 @@
       "Background": [0.0, 0.0, 0.0]
     },
     "MaxDepth": 5,
+    "AAThreshold": 0.05,
+    "AAMaxDivisions": 3,
     "AmbientLight": [1.0, 1.0, 1.0],
     "AreaLights": [
       {

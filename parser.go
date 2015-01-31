@@ -16,6 +16,8 @@ type renderSettings struct {
 	AmbientLight Color64
 	MaxDepth int
 	AdaptiveThreshold float64
+	AAMaxDivisions int
+	AAThreshold float64
  	DirectionalLights []DirectionalLight
 	PointLights []PointLight
  	SpotLights []SpotLight
@@ -139,6 +141,8 @@ func Parse(fileName string) *Scene {
 	scene.AmbientLight = settings.Render.AmbientLight
 	scene.MaxDepth = settings.Render.MaxDepth
 	scene.AdaptiveThreshold = settings.Render.AdaptiveThreshold
+	scene.AAMaxDivisions = settings.Render.AAMaxDivisions
+	scene.AAThreshold = settings.Render.AAThreshold
 
 	for _, material := range settings.Materials {
 		scene.Material[material.Name] = material

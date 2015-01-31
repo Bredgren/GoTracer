@@ -18,10 +18,16 @@
       "Background": Color
 
     },
-    // Max depth of reflection, if AdaptiveThreshold isn't hit
-    "MaxReflection": int,
-    // Stop reflection if contribution is below this value
-    "AdaptiveThreshold": float64,
+    // Max depth of reflection/refraction, if AdaptiveThreshold isn't hit
+    "MaxDepth": int,
+    // Stop reflection/refraction if contribution is below this value
+    "AdaptiveThreshold": float,
+    // Antialiasing is enabled if AAThreshold is > 0. If enabled, 4 primary rays are
+    // used per pixel and if the difference in color is above AAThreshold then each
+    // of the 4 subpixels is divided and repeated, until at most AAMAxDivisions
+    // subdivisions
+    "AAMaxDivisions": int,
+    "AAThreshold": float,
     // Color of the scene's ambient light
     "AmbientLight": Color,
     "DirectionalLights": [
