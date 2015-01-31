@@ -149,7 +149,7 @@ func Parse(fileName string) *Scene {
 	}
 
 	for _, object := range settings.Scene {
-		// init identity transform and pass in
+		// init identity transform and pass it in
 		transform := mgl64.Ident4()
 		parseSceneObject(object, scene, transform)
 	}

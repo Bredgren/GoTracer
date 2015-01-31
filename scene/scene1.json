@@ -10,7 +10,7 @@
       "Background": [0.0, 0.0, 0.0]
     },
     "MaxDepth": 5,
-    "AAThreshold": 0.05,
+    "AAThreshold": 0.1,
     "AAMaxDivisions": 4,
     "AmbientLight": [0.1, 0.1, 0.1],
     "DirectionalLights": [

@@ -23,14 +23,14 @@ func ShadowAttenuation(scene *Scene, dir mgl64.Vec3, point mgl64.Vec3) mgl64.Vec
 	atten := Color64{1, 1, 1}
 	distTraveled := 0.0
 
-	shadowRay := NewRay(point, dir)
+	shadowRay := NewRay(ShadowRay, point, dir)
 	isect, found := scene.Intersect(shadowRay)
 	for found && distTraveled + isect.T < dist {
 		distTraveled += isect.T
 		material := scene.Material[isect.Object.GetMaterialName()]
 		atten = atten.Product(material.Transmissive)
 
-		shadowRay = NewRay(shadowRay.At(isect.T), dir)
+		shadowRay = NewRay(ShadowRay, shadowRay.At(isect.T), dir)
 		isect, found = scene.Intersect(shadowRay)
 	}
 

@@ -10,15 +10,25 @@ const (
 	Rayε = 0.00001
 )
 
+const (
+	PrimaryRay = iota
+	CollisionRay
+	ReflectionRay
+	RefractionRay
+	ShadowRay
+	NumRayTypes
+)
+
 type Ray struct {
+	Type int
 	Origin mgl64.Vec3
 	Direction mgl64.Vec3
 	InvDir mgl64.Vec3
 }
 
-func NewRay(origin, direction mgl64.Vec3) Ray {
+func NewRay(t int, origin, direction mgl64.Vec3) Ray {
 	dir := direction.Normalize()
-	return Ray{origin, dir, mgl64.Vec3{1.0 / dir.X(), 1.0 / dir.Y(), 1.0 / dir.Z()}}
+	return Ray{t, origin, dir, mgl64.Vec3{1.0 / dir.X(), 1.0 / dir.Y(), 1.0 / dir.Z()}}
 }
 
 // At returns the point marked by the ray at t
@@ -30,18 +40,18 @@ func TransformVec3(m mgl64.Mat4, v mgl64.Vec3) mgl64.Vec3 {
 	return m.Mul4x1(v.Vec4(1)).Vec3()
 }
 
-func (r Ray) Transform(transform mgl64.Mat4) (newR Ray, len float64) {
+func (r Ray) Transform(transform mgl64.Mat4) (newRay Ray, len float64) {
 	newOrigin := TransformVec3(transform, r.Origin)
 	newDir := TransformVec3(transform, r.Origin.Add(r.Direction)).Sub(newOrigin)
 	len = newDir.Len()
-	return NewRay(newOrigin, newDir), len
+	return NewRay(CollisionRay, newOrigin, newDir), len
 }
 
 func (r Ray) Reflect(isect Intersection) (reflRay Ray) {
 	mDir := r.Direction.Mul(-1)
 	nMD2 := isect.Normal.Dot(mDir) * 2
 	reflDir := isect.Normal.Mul(nMD2).Add(r.Direction)
-	return NewRay(r.At(isect.T), reflDir)
+	return NewRay(ReflectionRay, r.At(isect.T), reflDir)
 }
 
 func (r Ray) Refract(isect Intersection, outsideIndex, insideIndex float64) (refrRay Ray) {
@@ -50,7 +60,7 @@ func (r Ray) Refract(isect Intersection, outsideIndex, insideIndex float64) (ref
 	cosθOutside := isect.Normal.Dot(mDir)
 	cosθInside := math.Sqrt(1 - nn * nn * (1 - cosθOutside * cosθOutside))
 	refractDir := isect.Normal.Mul(nn * cosθOutside - cosθInside).Sub(mDir.Mul(nn))
-	return NewRay(r.At(isect.T), refractDir)
+	return NewRay(RefractionRay, r.At(isect.T), refractDir)
 }
 
 type Intersection struct {

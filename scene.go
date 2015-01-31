@@ -56,8 +56,7 @@ func (scene *Scene) TraceSubPixel(xMin, yMin, xMax, yMax float64, depth int) Col
 	thresh := scene.AAThreshold
 	if ColorsDifferent(color1, color2, thresh) || ColorsDifferent(color1, color3, thresh) ||
 		ColorsDifferent(color1, color4, thresh) || ColorsDifferent(color2, color3, thresh) ||
-		ColorsDifferent(color2, color4, thresh) || ColorsDifferent(color3, color3, thresh) ||
-		ColorsDifferent(color3, color4, thresh) || ColorsDifferent(color4, color4, thresh) {
+		ColorsDifferent(color2, color4, thresh) || ColorsDifferent(color3, color4, thresh) {
 		halfWidth := width / 2
 		halfHeight := height / 2
 		d := depth + 1

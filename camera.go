@@ -52,5 +52,5 @@ func NewCamera(c Camera) (camera Camera) {
 // through that point starting from the camera.
 func (c Camera) RayThrough(nx, ny float64) Ray {
 	dir := c.ViewDir.Add(c.u.Mul(nx - 0.5)).Add(c.v.Mul(ny - 0.5))
-	return NewRay(c.Position, dir)
+	return NewRay(PrimaryRay, c.Position, dir)
 }

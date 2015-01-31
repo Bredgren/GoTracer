@@ -1,6 +1,5 @@
 /*
 TODO:
- - Ray counts
  - Save scene file
  - Beer's law
  - Fresnel term
@@ -24,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	// "image/color"
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
@@ -44,11 +44,18 @@ const (
 )
 
 var (
+	// rayCounts [][]map[int]int
+	imgW int
+	imgH int
+)
+
+var (
 	sceneFile = ""
 	noImg = false
 	gridSize = 50
 	format = "jpg"
 	jpegQuality = 95
+	countRays = false
 )
 
 func init() {
@@ -56,10 +63,11 @@ func init() {
 		fmt.Fprintf(os.Stderr, "%s\n", usageStr)
 		flag.PrintDefaults()
 	}
-	flag.BoolVar(&noImg, "NoImg", false, "Don't create an image if present.")
+	flag.BoolVar(&noImg, "NoImg", noImg, "Don't create an image if present.")
 	flag.IntVar(&gridSize, "gridSize", gridSize, "Size of simultaneous trace grids.")
 	flag.StringVar(&format, "format", format, "Image format [jpg | png].")
 	flag.IntVar(&jpegQuality, "jpegQuality", jpegQuality, "JPEG quality.")
+	flag.BoolVar(&countRays, "CountRays", countRays, "Make images showing ray counts.")
 	flag.Parse()
 
 	if flag.NArg() < 1 {
@@ -94,8 +102,15 @@ func traceGrid(g grid) {
 func main() {
 	scene := raytracer.Parse(sceneDir + "/" + sceneFile)
 
-	imgW := scene.Camera.ImageWidth
-	imgH := scene.Camera.ImageHeight
+	imgW = scene.Camera.ImageWidth
+	imgH = scene.Camera.ImageHeight
+	// rayCounts = make([][]map[int]int, imgW)
+	// for x := 0; x < imgW; x++ {
+	// 	rayCounts[x] = make([]map[int]int, imgH)
+	// 	for y := 0; y < imgH; y++ {
+	// 		rayCounts[x][y] = make(map[int]int)
+	// 	}
+	// }
 	bounds := image.Rect(0, 0, imgW, imgH)
 	img := image.NewNRGBA(bounds)
 
@@ -135,7 +150,7 @@ func main() {
 	count := 0
 	for _, file := range files {
 		name :=file.Name()
-		if strings.HasPrefix(name, "render") && len(name) > 10 {
+		if strings.HasPrefix(name, "render") && len(name) > 10 && !strings.Contains(name, "Rays") {
 			number, err := strconv.Atoi(name[6:len(name) - 4])
 			if err != nil {
 				log.Fatal(err)
@@ -146,9 +161,11 @@ func main() {
 		}
 	}
 
-	outFile := fmt.Sprintf("%s/render%d.%s", renderDir, count + 1, format)
+	baseFileName := fmt.Sprintf("%s/render%d", renderDir, count + 1)
 
-	file, err := os.Create(outFile)
+	outFile := fmt.Sprintf("%s.%s", baseFileName, format)
+
+ 	file, err := os.Create(outFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -159,4 +176,53 @@ func main() {
 	} else if format == "png" {
 		png.Encode(file, img)
 	}
+	log.Printf("Saved %s", outFile)
+
+	// saveRayCounts(baseFileName)
 }
+
+
+// func saveRayCounts(baseFileName string) {
+// 	imgs := new([raytracer.NumRayTypes]*image.NRGBA)
+// 	bounds := image.Rect(0, 0, imgW, imgH)
+// 	for i := 0; i < len(imgs); i++ {
+// 		imgs[i] = image.NewNRGBA(bounds)
+// 	}
+
+// 	maxCount := new([raytracer.NumRayTypes]int)
+// 	for x := 0; x < len(rayCounts); x++ {
+// 		for y := 0; y < len(rayCounts[x]); y++ {
+// 			for rayType := 0; rayType < raytracer.NumRayTypes; rayType++ {
+// 				if maxCount[rayType] < rayCounts[x][y][rayType] {
+// 					maxCount[rayType] = rayCounts[x][y][rayType]
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	for x := 0; x < len(rayCounts); x++ {
+// 		for y := 0; y < len(rayCounts[x]); y++ {
+// 			for rayType := 0; rayType < raytracer.NumRayTypes; rayType++ {
+// 				ratio := float64(rayCounts[x][y][rayType]) / float64(maxCount[rayType])
+// 				shade := uint8(ratio * 255)
+// 				color := color.NRGBA{shade, shade, shade, 255}
+// 				imgs[rayType].SetNRGBA(x, y, color)
+// 			}
+// 		}
+// 	}
+
+// 	fileName := fmt.Sprintf("%sPrimaryRays.png", baseFileName)
+// 	saveRayFile(fileName, imgs[raytracer.PrimaryRay])
+// 	fileName = fmt.Sprintf("%sShadowRays.png", baseFileName)
+// 	saveRayFile(fileName, imgs[raytracer.ShadowRay])
+// }
+
+// func saveRayFile(fileName string, img *image.NRGBA) {
+//  	file, err := os.Create(fileName)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	defer file.Close()
+// 	png.Encode(file, img)
+// 	log.Printf("Saved %s", fileName)
+// }
