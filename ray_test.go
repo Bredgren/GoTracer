@@ -17,7 +17,7 @@ func checkAt(test *testing.T, ray Ray, t float64, exp mgl64.Vec3) {
 func TestAt(t *testing.T) {
 	origin := mgl64.Vec3{0, 0, 1}
 	direction := mgl64.Vec3{0, 0, 1}
-	ray := NewRay(origin, direction)
+	ray := NewRay(PrimaryRay, origin, direction)
 	checkAt(t, ray, 0, origin)
 	checkAt(t, ray, 1, mgl64.Vec3{0, 0, 2})
 }
@@ -35,7 +35,7 @@ func checkRay(t *testing.T, ray Ray, expOrigin, expDirection mgl64.Vec3) {
 }
 
 func TestTransform(t *testing.T) {
-	ray := NewRay(mgl64.Vec3{0, 0, 0}, mgl64.Vec3{0, 0, 1})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 0}, mgl64.Vec3{0, 0, 1})
 
 	translate := mgl64.Translate3D(1, 2, 3)
 	newRay, _ := ray.Transform(translate)
@@ -56,7 +56,7 @@ func TestTransform(t *testing.T) {
 	expDirection = mgl64.Vec3{0, 0, 1}
 	checkRay(t, newRay, expOrigin, expDirection)
 
-	ray = NewRay(mgl64.Vec3{1, 0, 0}, mgl64.Vec3{1, 0, 1})
+	ray = NewRay(PrimaryRay, mgl64.Vec3{1, 0, 0}, mgl64.Vec3{1, 0, 1})
 
 	translate = mgl64.Translate3D(1, 2, 3)
 	newRay, _ = ray.Transform(translate)
@@ -78,7 +78,7 @@ func TestTransform(t *testing.T) {
 	checkRay(t, newRay, expOrigin, expDirection)
 
 	x := -(0.5 - Rayε)
-	ray = NewRay(mgl64.Vec3{x, 0, -5}, mgl64.Vec3{0, 0, -1})
+	ray = NewRay(PrimaryRay, mgl64.Vec3{x, 0, -5}, mgl64.Vec3{0, 0, -1})
 	scale = mgl64.Scale3D(0.5, 0.5, 0.5).Inv()
 	newRay, _ = ray.Transform(scale)
 	expOrigin = mgl64.Vec3{2 * x, 0, -10}
@@ -90,7 +90,7 @@ func checkReflectAngle(t *testing.T, angle float64) {
 	rad := mgl64.DegToRad(angle)
 	x := math.Sin(rad)
 	y := math.Cos(rad)
-	ray := NewRay(mgl64.Vec3{x, y, 0}, mgl64.Vec3{-x, -y, 0})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{x, y, 0}, mgl64.Vec3{-x, -y, 0})
 	isect := NewIntersection(Intersection{nil, mgl64.Vec3{0, 1, 0}, 1})
 	reflRay := ray.Reflect(isect)
 	expOrigin := mgl64.Vec3{0, 0, 0}

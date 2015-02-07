@@ -27,10 +27,11 @@ func TestIntersectScaled(t *testing.T) {
 	scene := &Scene{}
 
 	transform := mgl64.Scale3D(0.5, 0.5, 0.5)
-	sphere1 := NewSphereObject(SphereObject{Transform: transform})
+	sphere1 := SphereObject{Transform: transform}
+	InitSphereObject(&sphere1)
 	scene.Objects = append(scene.Objects, sphere1)
 
-	ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	if _, found := scene.Intersect(ray); !found {
 		t.Errorf("Ray %v didn't intersect", ray)
 	}
@@ -54,10 +55,11 @@ func TestIntersectTranslated(t *testing.T) {
 	scene := &Scene{}
 
 	transform := mgl64.Translate3D(1, 0, 0)
-	sphere1 := NewSphereObject(SphereObject{Transform: transform})
+	sphere1 := SphereObject{Transform: transform}
+	InitSphereObject(&sphere1)
 	scene.Objects = append(scene.Objects, sphere1)
 
-	ray := NewRay(mgl64.Vec3{1, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{1, 0, 5}, mgl64.Vec3{0, 0, -1})
 	if _, found := scene.Intersect(ray); !found {
 		t.Errorf("Ray %v didn't intersect", ray)
 	}
@@ -91,10 +93,11 @@ func TestIntersectScaledTranslated(t *testing.T) {
 	scene := &Scene{}
 
 	transform := mgl64.Translate3D(1, 0, 0.5).Mul4(mgl64.Scale3D(0.5, 0.5, 0.5))
-	sphere1 := NewSphereObject(SphereObject{Transform: transform})
+	sphere1 := SphereObject{Transform: transform}
+	InitSphereObject(&sphere1)
 	scene.Objects = append(scene.Objects, sphere1)
 
-	ray := NewRay(mgl64.Vec3{1, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{1, 0, 5}, mgl64.Vec3{0, 0, -1})
 	if _, found := scene.Intersect(ray); !found {
 		t.Errorf("Ray %v didn't intersect", ray)
 	}
@@ -128,19 +131,22 @@ func TestIntersect(t *testing.T) {
 	scene := &Scene{}
 
 	transform := mgl64.Scale3D(0.5, 0.5, 0.5)
-	sphere1 := NewSphereObject(SphereObject{Transform: transform, MaterialName: "1"})
+	sphere1 := SphereObject{Transform: transform, MaterialName: "1"}
+	InitSphereObject(&sphere1)
 	// scene.Objects = append(scene.Objects, sphere1)
 
 	transform = mgl64.Translate3D(1.8, 0, -0.5).Mul4(mgl64.Scale3D(0.5, 0.5, 0.5))
-	sphere2 := NewSphereObject(SphereObject{Transform: transform, MaterialName: "2"})
+	sphere2 := SphereObject{Transform: transform, MaterialName: "2"}
+	InitSphereObject(&sphere2)
 	_ = sphere2
 	// scene.Objects = append(scene.Objects, sphere2)
 
 	transform = mgl64.Translate3D(-0.8, 0, 0.5).Mul4(mgl64.Scale3D(0.5, 0.5, 0.5))
-	sphere3 := NewSphereObject(SphereObject{Transform: transform, MaterialName: "3"})
+	sphere3 := SphereObject{Transform: transform, MaterialName: "3"}
+	InitSphereObject(&sphere3)
 	scene.Objects = append(scene.Objects, sphere3)
 
-	ray := NewRay(mgl64.Vec3{-0.2 - Rayε, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{-0.2 - Rayε, 0, 5}, mgl64.Vec3{0, 0, -1})
 	if isect, found := scene.Intersect(ray); found {
 		if isect.Object != sphere3 {
 			t.Errorf("Incorrect object %v, expected %v", isect.Object.GetMaterialName(), sphere3.GetMaterialName())
@@ -149,7 +155,7 @@ func TestIntersect(t *testing.T) {
 		t.Errorf("Ray %v didn't intersect", ray)
 	}
 
-	ray = NewRay(mgl64.Vec3{-0.2, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray = NewRay(PrimaryRay, mgl64.Vec3{-0.2, 0, 5}, mgl64.Vec3{0, 0, -1})
 	if isect, found := scene.Intersect(ray); found {
 		if isect.Object != sphere1 {
 			t.Errorf("Incorrect object %v, expected %v", isect.Object.GetMaterialName(), sphere1.GetMaterialName())
@@ -158,7 +164,7 @@ func TestIntersect(t *testing.T) {
 		t.Errorf("Ray %v didn't intersect", ray)
 	}
 
-	ray = NewRay(mgl64.Vec3{-0.2 + Rayε, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray = NewRay(PrimaryRay, mgl64.Vec3{-0.2 + Rayε, 0, 5}, mgl64.Vec3{0, 0, -1})
 	if isect, found := scene.Intersect(ray); found {
 		if isect.Object != sphere1 {
 			t.Errorf("Incorrect object %v, expected %v", isect.Object.GetMaterialName(), sphere1.GetMaterialName())
@@ -167,7 +173,7 @@ func TestIntersect(t *testing.T) {
 		t.Errorf("Ray %v didn't intersect", ray)
 	}
 
-	// ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	// ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	// if isect, found := scene.Intersect(ray); found {
 	// 	expNormal := mgl64.Vec3{0, 0, 1}
 	// 	expT := 4.5
@@ -184,7 +190,7 @@ func TestIntersect(t *testing.T) {
 	// 	t.Errorf("Ray %v didn't intersect", ray)
 	// }
 
-	// ray = NewRay(mgl64.Vec3{0, 0, -10}, mgl64.Vec3{0, 0, 1})
+	// ray = NewRay(PrimaryRay, mgl64.Vec3{0, 0, -10}, mgl64.Vec3{0, 0, 1})
 	// if isect, found := scene.Intersect(ray); found {
 	// 	expNormal := mgl64.Vec3{0, 0, -1}
 	// 	expT := 4.0
@@ -196,7 +202,7 @@ func TestIntersect(t *testing.T) {
 	// transform = mgl64.Translate3D(0, 0, 5)
 	// sphere3 := SphereObject{transform, transform.Inv(), ""}
 	// scene.Objects = append(scene.Objects, sphere3)
-	// ray = NewRay(mgl64.Vec3{0, 0, 10}, mgl64.Vec3{0, 0, -1})
+	// ray = NewRay(PrimaryRay, mgl64.Vec3{0, 0, 10}, mgl64.Vec3{0, 0, -1})
 	// if isect, found := scene.Intersect(ray); found {
 	// 	expNormal := mgl64.Vec3{0, 0, 1}
 	// 	expT := 4.0

@@ -145,6 +145,7 @@ func Parse(fileName string) *Scene {
 	scene.AAThreshold = settings.Render.AAThreshold
 
 	for _, material := range settings.Materials {
+		InitMaterial(&material)
 		scene.Material[material.Name] = material
 	}
 

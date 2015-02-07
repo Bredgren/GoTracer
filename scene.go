@@ -74,24 +74,22 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 		if isect, found := scene.Intersect(ray); found {
 			material := scene.Material[isect.Object.GetMaterialName()]
 
-			// Direct illumination
-			illum := material.ShadeBlinnPhong(scene, ray, isect)
-
-			entering := true
+			exiting := false
 			insideIndex := material.Index
 			outsideIndex := AirIndex
-			if (isect.Normal.Dot(ray.Direction.Mul(-1)) < 0) {
+			if (isect.Normal.Dot(ray.Direction) > 0) {
 				// Exiting object
 				insideIndex, outsideIndex = outsideIndex, insideIndex
 				isect.Normal = isect.Normal.Mul(-1)
-				entering = false
-				illum = Color64{}
+				exiting = true
 			}
-			_ = entering
+
+			// Direct illumination
+			illum := material.ShadeBlinnPhong(scene, ray, isect)
 
 			// Reflection
 			reflect := Color64{}
-			if mgl64.Vec3(material.Reflective).Len() > Rayε {
+			if material.Reflective.Len2() > Rayε {
 				reflRay := ray.Reflect(isect)
 				contrib := math.Max(material.Reflective[0], math.Max(material.Reflective[1], material.Reflective[2]))
 				reflColor := scene.TraceRay(reflRay, depth + 1, contrib)
@@ -100,12 +98,16 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 
 			// Refraction
 			refract := Color64{}
-			if mgl64.Vec3(material.Transmissive).Len() > Rayε {
+			if material.Transmissive.Len2() > Rayε {
 				if !TotalInternalReflection(outsideIndex, insideIndex, isect.Normal, ray.Direction.Mul(-1)) {
 					refrRay := ray.Refract(isect, outsideIndex, insideIndex)
 					contrib := math.Max(material.Transmissive[0], math.Max(material.Transmissive[1], material.Transmissive[2]))
 					refrColor := scene.TraceRay(refrRay, depth + 1, contrib)
-					refract = material.Transmissive.Product(refrColor)
+					if exiting {
+						refract = refrColor.Product(material.BeersTrans(isect.T))
+					} else {
+						refract = refrColor.Product(material.Transmissive)
+					}
 					// TODO: Fresnel
 				}
 			}

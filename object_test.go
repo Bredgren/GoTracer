@@ -6,7 +6,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
-var sphere = NewSphereObject(SphereObject{})
+var sphere = SphereObject{}
 
 func checkIsect(t *testing.T, test string, isect Intersection, expNormal mgl64.Vec3, expT float64) {
 	if isect.Normal != expNormal {
@@ -49,8 +49,10 @@ func testIsectNoHit(t *testing.T, test string, object SceneObject, ray Ray) {
 }
 
 func TestSphereIntersect(t *testing.T) {
+	InitSphereObject(&sphere)
+
 	// Origin ray
-	ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	testIsect(t, "Origin", sphere, ray, mgl64.Vec3{0, 0, 1}, 4)
 
 	// Origin ray behind
@@ -85,18 +87,22 @@ func TestSphereIntersect(t *testing.T) {
 }
 
 func BenchmarkSphereIntersect(b *testing.B) {
-	ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	InitSphereObject(&sphere)
+
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		sphere.Intersect(ray)
 	}
 }
 
-var box = NewBoxObject(BoxObject{})
+var box = BoxObject{}
 
 func TestBoxIntersect(t *testing.T) {
+	InitBoxObject(&box)
+
 	// Origin ray
-	ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	testIsect(t, "Origin", box, ray, mgl64.Vec3{0, 0, 1}, 4.5)
 
 	// Origin ray behind
@@ -131,18 +137,22 @@ func TestBoxIntersect(t *testing.T) {
 }
 
 func BenchmarkBoxIntersect(b *testing.B) {
-	ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	InitBoxObject(&box)
+
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		box.Intersect(ray)
 	}
 }
 
-var square = NewSquareObject(SquareObject{})
+var square = SquareObject{}
 
 func TestSquareIntersect(t *testing.T) {
+	InitSquareObject(&square)
+
 	// Origin ray
-	ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	testIsect(t, "Origin", square, ray, mgl64.Vec3{0, 0, 1}, 5)
 
 	// Origin ray behind
@@ -174,7 +184,9 @@ func TestSquareIntersect(t *testing.T) {
 }
 
 func BenchmarkSquareIntersect(b *testing.B) {
-	ray := NewRay(mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	InitSquareObject(&square)
+
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		square.Intersect(ray)

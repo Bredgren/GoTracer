@@ -34,6 +34,10 @@ func (c Color64) Product(other Color64) Color64 {
 	return Color64{c[0] * other[0], c[1] * other[1], c[2] * other[2]}
 }
 
+func (c Color64) Len2() float64 {
+	return c[0] * c[0] + c[1] * c[1] + c[2] * c[2]
+}
+
 func clamp(low, high float64) func(float64) float64 {
 	return func(v float64) float64 {
 		return math.Min(high, math.Max(low, v))

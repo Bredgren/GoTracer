@@ -1,6 +1,5 @@
 /*
 TODO:
- - Save scene file
  - Beer's law
  - Fresnel term
  - Texture mapping
@@ -26,6 +25,7 @@ import (
 	// "image/color"
 	"image/jpeg"
 	"image/png"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -100,7 +100,8 @@ func traceGrid(g grid) {
 }
 
 func main() {
-	scene := raytracer.Parse(sceneDir + "/" + sceneFile)
+	sceneFilePath := sceneDir + "/" + sceneFile
+	scene := raytracer.Parse(sceneFilePath)
 
 	imgW = scene.Camera.ImageWidth
 	imgH = scene.Camera.ImageHeight
@@ -150,7 +151,8 @@ func main() {
 	count := 0
 	for _, file := range files {
 		name :=file.Name()
-		if strings.HasPrefix(name, "render") && len(name) > 10 && !strings.Contains(name, "Rays") {
+		if strings.HasPrefix(name, "render") && len(name) > 10 &&
+			!strings.Contains(name, "Rays") && !strings.Contains(name, "scene") {
 			number, err := strconv.Atoi(name[6:len(name) - 4])
 			if err != nil {
 				log.Fatal(err)
@@ -178,9 +180,34 @@ func main() {
 	}
 	log.Printf("Saved %s", outFile)
 
+	copyFileContents(sceneFilePath, baseFileName + "scene.json")
+
 	// saveRayCounts(baseFileName)
 }
 
+func copyFileContents(src, dst string) (err error) {
+	in, err := os.Open(src)
+	if err != nil {
+		return
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	if _, err = io.Copy(out, in); err != nil {
+		return
+	}
+	err = out.Sync()
+	log.Printf("Saved %s", dst)
+	return
+}
 
 // func saveRayCounts(baseFileName string) {
 // 	imgs := new([raytracer.NumRayTypes]*image.NRGBA)
