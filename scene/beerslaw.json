@@ -1,0 +1,171 @@
+{
+  "Render": {
+    "Camera": {
+      "ImageWidth": 500,
+      "ImageHeight": 500,
+      "Position": [0, 4, 13],
+      "LookAt": [0, 1, 0],
+      "UpDir": [0, 1, 0],
+      "FOV": 53,
+      "Background": [0.0, 0.0, 0.0]
+    },
+    "MaxDepth": 5,
+    "AAThreshold": 0.05,
+    "AAMaxDivisions": 5,
+    "AmbientLight": [1.0, 1.0, 1.0],
+    "PointLights": [
+      {
+        "Color": [1, 1, 1],
+        "Position": [0, 15, 0],
+        "ConstCoeff": 0.0,
+        "LinearCoeff": 0.0
+      }
+    ]
+  },
+  "Materials": [
+    {
+      "Name": "Soft White",
+      "Ambient": [0.1, 0.1, 0.1],
+      "Diffuse": [1.0, 1.0, 1.0]
+    },
+    {
+      "Name": "Transparent Red",
+      "Ambient": [0.1, 0, 0],
+      "Specular": [0.1, 0.1, 0.1],
+      "Shininess": 20.0,
+      "Reflective": [0, 0, 0],
+      "Diffuse": [1.0, 0, 0],
+      "Transmissive": [0.8, 0, 0],
+      "Index": 1.52
+    },
+    {
+      "Name": "Transparent",
+      "Ambient": [0, 0, 0],
+      "Specular": [0.1, 0.1, 0.1],
+      "Shininess": 20.0,
+      "Reflective": [0, 0, 0],
+      "Diffuse": [0, 0, 0],
+      "Transmissive": [0.8, 0.8, 0.8],
+      "Index": 1.52
+    }
+  ],
+  "Scene": [
+    {
+      "_Note": "floor",
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, -1, 0],
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90,
+        "Scale": [11, 11, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "Soft White" }
+        }
+      ]
+    },
+    {
+      "_Note": "back wall",
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, 4, -5],
+        "Scale": [11, 11, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "Soft White" }
+        }
+      ]
+    },
+    {
+      "_Note": "short",
+      "Type": "Transform",
+      "Properties": { "Translate": [-3, 4, 0], "Scale": [1.5, 5, 1.5] },
+      "SubObjects": [
+        {
+          "Type": "Box",
+          "Properties": { "Material": "Transparent Red" }
+        }
+      ]
+    },
+    {
+      "_Note": "medium",
+      "Type": "Transform",
+      "Properties": { "Translate": [0, 1.575, 0], "Scale": [1.5, 0.75, 1.5] },
+      "SubObjects": [
+        {
+          "Type": "Box",
+          "Properties": { "Material": "Transparent Red" }
+        }
+      ]
+    },
+    {
+      "_Note": "tall",
+      "Type": "Transform",
+      "Properties": { "Translate": [3, 2, 0], "Scale": [1.5, 1.5, 1.5] },
+      "SubObjects": [
+        {
+          "Type": "Box",
+          "Properties": { "Material": "Transparent Red" }
+        }
+      ]
+    },
+    {
+      "_Note": "tilted",
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, 2, 3],
+        "Scale": [2, 2, 2],
+        "RotateAxis": [0, 0, 1],
+        "RotateAngle": 45
+      },
+      "SubObjects": [
+        {
+          "Type": "Box",
+          "Properties": { "Material": "Transparent Red" }
+        }
+      ]
+    },
+    {
+      "_Note": "clear1",
+      "Type": "Transform",
+      "Properties": { "Translate": [-1, 4, -1], "Scale": [1, 4, 0.5] },
+      "SubObjects": [
+        {
+          "Type": "Box",
+          "Properties": { "Material": "Transparent" }
+        }
+      ]
+    },
+    {
+      "_Note": "clear2",
+      "Type": "Transform",
+      "Properties": { "Translate": [1, 4, -1], "Scale": [1, 1, 4] },
+      "SubObjects": [
+        {
+          "Type": "Box",
+          "Properties": { "Material": "Transparent" }
+        }
+      ]
+    },
+    {
+      "_Note": "square",
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [3, 1.25, 3],
+        "Scale": [1.5, 1.5, 1.5],
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "Transparent Red" }
+        }
+      ]
+    }
+  ]
+}
