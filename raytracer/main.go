@@ -1,7 +1,5 @@
 /*
 TODO:
- - Beer's law
- - Fresnel term
  - Texture mapping
  - Bump mapping
  - BSPTree

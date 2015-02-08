@@ -95,6 +95,7 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 				reflColor := scene.TraceRay(reflRay, depth + 1, contrib)
 				reflect = material.Reflective.Product(reflColor)
 			}
+			c := 0.0
 
 			// Refraction
 			refract := Color64{}
@@ -108,11 +109,21 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 					} else {
 						refract = refrColor.Product(material.Transmissive)
 					}
-					// TODO: Fresnel
+					c = isect.Normal.Mul(-1).Dot(refrRay.Direction)
+				} else {
+					// Total internal reflection
+					return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)))
 				}
 			}
 
-			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)).Add(mgl64.Vec3(refract)))
+
+			if !exiting {
+				c = isect.Normal.Dot(ray.Direction.Mul(-1))
+			}
+
+			R0 := math.Pow((insideIndex - 1) / (insideIndex + 1), 2)
+			R := R0 + (1 - R0) * math.Pow(1 - c, 5)
+			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect).Mul(R)).Add(mgl64.Vec3(refract).Mul(1 - R)))
 		}
 		// For fun color wheel:
 		// r := uint8((ray.Direction.X() + 1) / 2 * 255)

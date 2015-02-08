@@ -67,7 +67,7 @@
       "Name": "mat2",
       "Specular": [1, 1, 1],
       "Shininess": 250.0,
-      "Reflective": [0.5, 0.5, 0.5],
+      "Reflective": [0.2, 0.2, 0.2],
       "Diffuse": [0.1, 0.1, 0.1],
       "Transmissive": [0.8, 0.8, 0.8],
       "Index": 1.52
