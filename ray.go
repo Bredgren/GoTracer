@@ -67,6 +67,7 @@ type Intersection struct {
 	Object SceneObject
 	Normal mgl64.Vec3
 	T float64
+	UVCoords mgl64.Vec2
 }
 
 func NewIntersection(i Intersection) (isect Intersection) {

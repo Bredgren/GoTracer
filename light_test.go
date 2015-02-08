@@ -8,6 +8,8 @@ import (
 
 func TestAreaLight(t *testing.T) {
 	scene := Scene{}
+	scene.Material = make(map[string]*Material)
+	scene.Material["1"] = &Material{}
 	light := AreaLight{
 		Scene: &scene,
 		Color: Color64{1, 1, 1},
@@ -56,7 +58,7 @@ func TestAreaLight(t *testing.T) {
 	scale := mgl64.Scale3D(1, 1, 1)
 	transform := translate.Mul4(rotate).Mul4(scale)
 
-	square := SquareObject{Transform: transform}
+	square := SquareObject{Transform: transform, MaterialName: "1"}
 	InitSquareObject(&square)
 	scene.Objects = append(scene.Objects, square)
 

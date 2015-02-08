@@ -1,0 +1,76 @@
+{
+  "Render": {
+    "Camera": {
+      "ImageWidth": 500,
+      "ImageHeight": 300,
+      "Position": [0, 4, 5],
+      "LookAt": [0, 0, 0],
+      "UpDir": [0, 1, 0],
+      "FOV": 53,
+      "Background": [0.0, 0.0, 0.0]
+    },
+    "MaxDepth": 5,
+    "AAThreshold": 0.1,
+    "AAMaxDivisions": 4,
+    "AmbientLight": [0.1, 0.1, 0.1],
+    "DirectionalLights": [
+      {
+        "Color": [0.4, 0.4, 0.4],
+        "Orientation": [1, -1, -1]
+      }
+    ],
+    "PointLights": [
+      {
+        "Color": [1, 1, 1],
+        "Position": [5, 5, 8],
+        "ConstCoeff": 0.0,
+        "LinearCoeff": 0.0
+      }
+    ]
+  },
+  "Materials": [
+    {
+      "Name": "Floor",
+      "Ambient": [0.3, 0.3, 0.9],
+      "Diffuse": [0.3, 0.3, 0.9],
+      "DiffuseTextureFile": "hrt_clay_2.jpg"
+    },
+    {
+      "Name": "Sphere",
+      "Specular": [1, 1, 1],
+      "Shininess": 250.0,
+      "Reflective": [0.2, 0.2, 0.2],
+      "Diffuse": [0.1, 0.1, 0.1],
+      "Transmissive": [0.8, 0.8, 0.8],
+      "Index": 1.52
+    }
+  ],
+  "Scene": [
+    {
+      "_": "Floor",
+      "Type": "Transform",
+      "Properties": {
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90,
+        "Scale": [10, 10, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "Floor" }
+        }
+      ]
+    },
+    {
+      "_": "Sphere",
+      "Type": "Transform",
+      "Properties": { "Translate": [0, 1, 0] },
+      "SubObjects": [
+        {
+          "Type": "Sphere",
+          "Properties": { "Material": "Sphere" }
+        }
+      ]
+    }
+  ]
+}

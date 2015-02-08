@@ -1,7 +1,12 @@
 package raytracer
 
 import (
+	"image"
+	_ "image/png"
+	_ "image/jpeg"
+	"log"
 	"math"
+	"os"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -10,6 +15,75 @@ const (
 	AirIndex = 1.0003
 )
 
+var textures map[string]*image.Image = make(map[string]*image.Image)
+
+type Texture struct {
+	tex *image.Image
+	Width float64
+	Height float64
+}
+
+func NewTexture(fileName string) *Texture {
+	log.Printf("NewTexture(%s)", fileName)
+	if fileName == "" {
+		return nil
+	}
+	fileName = "texture/" + fileName
+
+	t := Texture{}
+	if textures[fileName] != nil {
+		t.tex = textures[fileName]
+	} else {
+		file, err := os.Open(fileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		img, _, err := image.Decode(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		t.tex = &img
+		textures[fileName] = &img
+	}
+	bounds := (*t.tex).Bounds()
+	t.Width = float64(bounds.Max.X - bounds.Min.X)
+	t.Height = float64(bounds.Max.Y - bounds.Min.Y)
+	return &t
+}
+
+func (t *Texture) ColorAt(coord mgl64.Vec2) (color Color64) {
+	x := coord.X() * t.Width
+	y := coord.Y() * t.Height
+	fx := math.Floor(x)
+	fy := math.Floor(y)
+	i := int(fx)
+	j := int(fy)
+	dx := x - fx
+	dy := y - fy
+
+	img := *(t.tex)
+
+	ulr, ulg, ulb, _ := img.At(i, j).RGBA()
+	urr, urg, urb, _ := img.At(i + 1, j).RGBA()
+	llr, llg, llb, _ := img.At(i, j + 1).RGBA()
+	lrr, lrg, lrb, _ := img.At(i + 1, j + 1).RGBA()
+
+	r := (1 - dx) * (1 - dy) * float64(ulr) +
+		dx * (1 - dy) * float64(urr) +
+		(1 - dx) * dy * float64(llr) +
+		dx * dy * float64(lrr)
+	g := (1 - dx) * (1 - dy) * float64(ulg) +
+		dx * (1 - dy) * float64(urg) +
+		(1 - dx) * dy * float64(llg) +
+		dx * dy * float64(lrg)
+	b := (1 - dx) * (1 - dy) * float64(ulb) +
+		dx * (1 - dy) * float64(urb) +
+		(1 - dx) * dy * float64(llb) +
+		dx * dy * float64(lrb)
+
+	return Color64{r / 65535, g / 65535, b / 65535}
+}
+
 type Material struct {
 	Name string
 	Emissive Color64
@@ -17,6 +91,8 @@ type Material struct {
 	Specular Color64
 	Reflective Color64
 	Diffuse Color64
+	DiffuseTextureFile string
+	DiffuseTexture *Texture
 	Transmissive Color64
 	Shininess float64
 	Index float64
@@ -26,17 +102,25 @@ type Material struct {
 
 func InitMaterial(m *Material) {
 	m.LogTransmissive = Color64{
-		math.Log(2 - m.Transmissive[0]),
-		math.Log(2 - m.Transmissive[1]),
-		math.Log(2 - m.Transmissive[2]),
+		math.Log(2 - m.Transmissive.R()),
+		math.Log(2 - m.Transmissive.G()),
+		math.Log(2 - m.Transmissive.B()),
 	}
+	m.DiffuseTexture = NewTexture(m.DiffuseTextureFile)
+}
+
+func (m *Material) GetDiffuseColor(isect Intersection) Color64 {
+	if m.DiffuseTexture != nil {
+		return m.DiffuseTexture.ColorAt(isect.UVCoords)
+	}
+	return m.Diffuse
 }
 
 func (m *Material) BeersTrans(dist float64) Color64 {
 	return Color64{
-		math.Exp(m.LogTransmissive[0] * -dist),
-		math.Exp(m.LogTransmissive[1] * -dist),
-		math.Exp(m.LogTransmissive[2] * -dist),
+		math.Exp(m.LogTransmissive.R() * -dist),
+		math.Exp(m.LogTransmissive.G() * -dist),
+		math.Exp(m.LogTransmissive.B() * -dist),
 	}
 }
 
@@ -50,7 +134,7 @@ func (m *Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (c
 		if shade > 0 {
 			h := lightDir.Sub(ray.Direction).Normalize()
 			s := mgl64.Vec3(m.Specular).Mul(math.Pow(isect.Normal.Dot(h), m.Shininess))
-			d := mgl64.Vec3(m.Diffuse).Mul(shade).Add(s)
+			d := mgl64.Vec3(m.GetDiffuseColor(isect)).Mul(shade).Add(s)
 			a := Color64(attenuation).Product(Color64(d))
 			contribution := mgl64.Vec3(light.GetColor().Product(a))
 			colorVec = colorVec.Add(contribution)

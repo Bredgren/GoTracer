@@ -45,7 +45,7 @@ type sceneObjectSettings struct {
 
 type parsedSettings struct {
 	Render renderSettings
-	Materials []Material
+	Materials []*Material
 	Scene []sceneObjectSettings
 }
 
@@ -137,7 +137,7 @@ func Parse(fileName string) *Scene {
 		scene.Lights = append(scene.Lights, &aLight)
 	}
 
-	scene.Material = make(map[string]Material)
+	scene.Material = make(map[string]*Material)
 	scene.AmbientLight = settings.Render.AmbientLight
 	scene.MaxDepth = settings.Render.MaxDepth
 	scene.AdaptiveThreshold = settings.Render.AdaptiveThreshold
@@ -145,7 +145,7 @@ func Parse(fileName string) *Scene {
 	scene.AAThreshold = settings.Render.AAThreshold
 
 	for _, material := range settings.Materials {
-		InitMaterial(&material)
+		InitMaterial(material)
 		scene.Material[material.Name] = material
 	}
 
@@ -155,6 +155,7 @@ func Parse(fileName string) *Scene {
 		parseSceneObject(object, scene, transform)
 	}
 
+	spew.Config.MaxDepth = 2
 	log.Printf(spew.Sdump(scene))
 	return scene
 }

@@ -16,7 +16,7 @@ type Scene struct {
 	AmbientLight Color64
 	Lights []Light
 	Objects []SceneObject
-	Material map[string]Material
+	Material map[string]*Material
 }
 
 func (scene *Scene) TracePixel(x, y int) color.NRGBA {
@@ -95,7 +95,7 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 				reflColor := scene.TraceRay(reflRay, depth + 1, contrib)
 				reflect = material.Reflective.Product(reflColor)
 			}
-			c := 0.0
+			// c := 0.0
 
 			// Refraction
 			refract := Color64{}
@@ -109,7 +109,7 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 					} else {
 						refract = refrColor.Product(material.Transmissive)
 					}
-					c = isect.Normal.Mul(-1).Dot(refrRay.Direction)
+					// c = isect.Normal.Mul(-1).Dot(refrRay.Direction)
 				} else {
 					// Total internal reflection
 					return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)))
@@ -117,13 +117,18 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 			}
 
 
-			if !exiting {
-				c = isect.Normal.Dot(ray.Direction.Mul(-1))
-			}
+			// return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)).Add(mgl64.Vec3(refract)))
 
-			R0 := math.Pow((insideIndex - 1) / (insideIndex + 1), 2)
-			R := R0 + (1 - R0) * math.Pow(1 - c, 5)
-			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect).Mul(R)).Add(mgl64.Vec3(refract).Mul(1 - R)))
+			// if !exiting {
+			// 	c = isect.Normal.Dot(ray.Direction.Mul(-1))
+			// }
+			// R0 := math.Pow((insideIndex - AirIndex) / (insideIndex + AirIndex), 2)
+			// R := R0 + (1 - R0) * math.Pow(1 - c, 5)
+			// return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect).Mul(R)).Add(mgl64.Vec3(refract).Mul(1 - R)))
+
+			R := math.Pow((insideIndex - outsideIndex) / (insideIndex + outsideIndex), 2)
+			T := (4 * insideIndex * outsideIndex) / math.Pow(insideIndex + outsideIndex, 2)
+			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect).Mul(R)).Add(mgl64.Vec3(refract).Mul(T)))
 		}
 		// For fun color wheel:
 		// r := uint8((ray.Direction.X() + 1) / 2 * 255)
