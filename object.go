@@ -63,16 +63,22 @@ func (s SphereObject) Intersect(r Ray) (isect Intersection, hit bool) {
 		isect.T = t1
 		// Normalize because sphere is at origin
 		isect.Normal = r.At(t1)
-		// TODO: set UV coordinates
-		return NewIntersection(isect), true
+		InitIntersection(&isect)
+		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
+		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
+		isect.UVCoords = mgl64.Vec2{u, v}
+		return isect, true
 	}
 
 	if t2 > Rayε {
 		isect.T = t2
 		// Normalize because sphere is at origin
 		isect.Normal = r.At(t2)
-		// TODO: set UV coordinates
-		return NewIntersection(isect), true
+		InitIntersection(&isect)
+		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
+		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
+		isect.UVCoords = mgl64.Vec2{u, v}
+		return isect, true
 	}
 
 	return isect, false
@@ -163,7 +169,8 @@ func (b BoxObject) Intersect(r Ray) (isect Intersection, hit bool) {
 		// TODO: Set UV coods
 	}
 
-	return NewIntersection(isect), true
+	InitIntersection(&isect)
+	return isect, true
 }
 
 type SquareObject struct {
@@ -219,7 +226,8 @@ func (s SquareObject) Intersect(r Ray) (isect Intersection, hit bool) {
 
 	isect.UVCoords = mgl64.Vec2{point.X() + 0.5, point.Y() + 0.5}
 
-	return NewIntersection(isect), true
+	InitIntersection(&isect)
+	return isect, true
 }
 
 // type TriangleObject struct {

@@ -30,10 +30,10 @@ func ShadowAttenuation(scene *Scene, dir mgl64.Vec3, point mgl64.Vec3) mgl64.Vec
 		material := scene.Material[isect.Object.GetMaterialName()]
 		if isect.Normal.Dot(dir) > 0 {
 			// Exiting object
-			atten = atten.Product(material.BeersTrans(isect.T))
+			atten = atten.Product(material.BeersTrans(isect))
 		} else {
 			// Entering object
-			atten = atten.Product(material.Transmissive)
+			atten = atten.Product(material.GetTransmissiveColor(isect))
 		}
 
 		shadowRay = NewRay(ShadowRay, shadowRay.At(isect.T), dir)

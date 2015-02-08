@@ -99,15 +99,16 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 
 			// Refraction
 			refract := Color64{}
-			if material.Transmissive.Len2() > Rayε {
+			kt := material.GetTransmissiveColor(isect)
+			if kt.Len2() > Rayε {
 				if !TotalInternalReflection(outsideIndex, insideIndex, isect.Normal, ray.Direction.Mul(-1)) {
 					refrRay := ray.Refract(isect, outsideIndex, insideIndex)
-					contrib := math.Max(material.Transmissive[0], math.Max(material.Transmissive[1], material.Transmissive[2]))
+					contrib := math.Max(kt.R(), math.Max(kt.G(), kt.B()))
 					refrColor := scene.TraceRay(refrRay, depth + 1, contrib)
 					if exiting {
-						refract = refrColor.Product(material.BeersTrans(isect.T))
+						refract = refrColor.Product(material.BeersTrans(isect))
 					} else {
-						refract = refrColor.Product(material.Transmissive)
+						refract = refrColor.Product(kt)
 					}
 					// c = isect.Normal.Mul(-1).Dot(refrRay.Direction)
 				} else {

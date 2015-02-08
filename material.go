@@ -90,10 +90,15 @@ type Material struct {
 	Ambient Color64
 	Specular Color64
 	Reflective Color64
+
 	Diffuse Color64
 	DiffuseTextureFile string
 	DiffuseTexture *Texture
+
 	Transmissive Color64
+	TransmissiveTextureFile string
+	TransmissiveTexture *Texture
+
 	Shininess float64
 	Index float64
 
@@ -107,6 +112,10 @@ func InitMaterial(m *Material) {
 		math.Log(2 - m.Transmissive.B()),
 	}
 	m.DiffuseTexture = NewTexture(m.DiffuseTextureFile)
+	m.TransmissiveTexture = NewTexture(m.TransmissiveTextureFile)
+	if mgl64.FloatEqual(m.Index, 0) {
+		m.Index = AirIndex
+	}
 }
 
 func (m *Material) GetDiffuseColor(isect Intersection) Color64 {
@@ -116,11 +125,31 @@ func (m *Material) GetDiffuseColor(isect Intersection) Color64 {
 	return m.Diffuse
 }
 
-func (m *Material) BeersTrans(dist float64) Color64 {
+func (m *Material) GetTransmissiveColor(isect Intersection) Color64 {
+	if m.TransmissiveTexture != nil {
+		return m.TransmissiveTexture.ColorAt(isect.UVCoords)
+	}
+	return m.Transmissive
+}
+
+func (m *Material) GetLogTransmissiveColor(isect Intersection) Color64 {
+	if m.TransmissiveTexture != nil {
+		t := m.TransmissiveTexture.ColorAt(isect.UVCoords)
+		return Color64{
+			math.Log(2 - t.R()),
+			math.Log(2 - t.G()),
+			math.Log(2 - t.B()),
+		}
+	}
+	return m.LogTransmissive
+}
+
+func (m *Material) BeersTrans(isect Intersection) Color64 {
+	dist := isect.T
 	return Color64{
-		math.Exp(m.LogTransmissive.R() * -dist),
-		math.Exp(m.LogTransmissive.G() * -dist),
-		math.Exp(m.LogTransmissive.B() * -dist),
+		math.Exp(m.GetLogTransmissiveColor(isect).R() * -dist),
+		math.Exp(m.GetLogTransmissiveColor(isect).G() * -dist),
+		math.Exp(m.GetLogTransmissiveColor(isect).B() * -dist),
 	}
 }
 

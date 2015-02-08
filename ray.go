@@ -70,8 +70,6 @@ type Intersection struct {
 	UVCoords mgl64.Vec2
 }
 
-func NewIntersection(i Intersection) (isect Intersection) {
-	isect = i
-	isect.Normal = isect.Normal.Normalize()
-	return isect
+func InitIntersection(i *Intersection) {
+	i.Normal = i.Normal.Normalize()
 }

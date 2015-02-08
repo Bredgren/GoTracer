@@ -32,17 +32,25 @@
     {
       "Name": "Floor",
       "Ambient": [0.3, 0.3, 0.9],
-      "Diffuse": [0.3, 0.3, 0.9],
       "DiffuseTextureFile": "hrt_clay_2.jpg"
     },
     {
       "Name": "Sphere",
-      "Specular": [1, 1, 1],
-      "Shininess": 250.0,
-      "Reflective": [0.2, 0.2, 0.2],
-      "Diffuse": [0.1, 0.1, 0.1],
-      "Transmissive": [0.8, 0.8, 0.8],
+      "Specular": [0.2, 0.2, 0.2],
+      "Shininess": 50.0,
+      "Reflective": [0.1, 0.1, 0.1],
+      "Diffuse": [0, 0.4, 0.1],
+      "TransmissiveTextureFile": "checker.png",
       "Index": 1.52
+    },
+    {
+      "Name": "Square",
+      "Specular": [0.2, 0.2, 0.2],
+      "Shininess": 50.0,
+      "Reflective": [0.1, 0.1, 0.1],
+      "Diffuse": [0, 0.1, 0.3],
+      "TransmissiveTextureFile": "checker.png",
+      "_Index": 1.52
     }
   ],
   "Scene": [
@@ -64,11 +72,32 @@
     {
       "_": "Sphere",
       "Type": "Transform",
-      "Properties": { "Translate": [0, 1, 0] },
+      "Properties": {
+        "Translate": [-1.0, 1.0, 1.0],
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90,
+        "Scale": [1, 1, 1]
+      },
       "SubObjects": [
         {
           "Type": "Sphere",
           "Properties": { "Material": "Sphere" }
+        }
+      ]
+    },
+    {
+      "_": "Square",
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [3, 1, 1],
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90,
+        "Scale": [2, 2, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "Square" }
         }
       ]
     }
