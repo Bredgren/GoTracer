@@ -87,22 +87,37 @@ func (t *Texture) ColorAt(coord mgl64.Vec2) (color Color64) {
 type Material struct {
 	Name string
 	Emissive Color64
+	EmissiveTextureFile string
+	EmissiveTexture *Texture
+
 	Ambient Color64
+	AmbientTextureFile string
+	AmbientTexture *Texture
+
 	Specular Color64
+	SpecularTextureFile string
+	SpecularTexture *Texture
+
 	Reflective Color64
+	ReflectiveTextureFile string
+	ReflectiveTexture *Texture
 
 	Diffuse Color64
 	DiffuseTextureFile string
 	DiffuseTexture *Texture
 
 	Transmissive Color64
+	LogTransmissive Color64
 	TransmissiveTextureFile string
 	TransmissiveTexture *Texture
 
 	Shininess float64
-	Index float64
+	ShininessTextureFile string
+	ShininessTexture *Texture
 
-	LogTransmissive Color64
+	Index float64
+	IndexTextureFile string
+	IndexTexture *Texture
 }
 
 func InitMaterial(m *Material) {
@@ -113,6 +128,13 @@ func InitMaterial(m *Material) {
 	}
 	m.DiffuseTexture = NewTexture(m.DiffuseTextureFile)
 	m.TransmissiveTexture = NewTexture(m.TransmissiveTextureFile)
+	m.EmissiveTexture = NewTexture(m.EmissiveTextureFile)
+	m.AmbientTexture = NewTexture(m.AmbientTextureFile)
+	m.SpecularTexture = NewTexture(m.SpecularTextureFile)
+	m.ReflectiveTexture = NewTexture(m.ReflectiveTextureFile)
+	m.ShininessTexture = NewTexture(m.ShininessTextureFile)
+	m.IndexTexture = NewTexture(m.IndexTextureFile)
+
 	if mgl64.FloatEqual(m.Index, 0) {
 		m.Index = AirIndex
 	}
@@ -144,6 +166,48 @@ func (m *Material) GetLogTransmissiveColor(isect Intersection) Color64 {
 	return m.LogTransmissive
 }
 
+func (m *Material) GetEmissiveColor(isect Intersection) Color64 {
+	if m.EmissiveTexture != nil {
+		return m.EmissiveTexture.ColorAt(isect.UVCoords)
+	}
+	return m.Emissive
+}
+
+func (m *Material) GetAmbientColor(isect Intersection) Color64 {
+	if m.AmbientTexture != nil {
+		return m.AmbientTexture.ColorAt(isect.UVCoords)
+	}
+	return m.Ambient
+}
+
+func (m *Material) GetSpecularColor(isect Intersection) Color64 {
+	if m.SpecularTexture != nil {
+		return m.SpecularTexture.ColorAt(isect.UVCoords)
+	}
+	return m.Specular
+}
+
+func (m *Material) GetReflectiveColor(isect Intersection) Color64 {
+	if m.ReflectiveTexture != nil {
+		return m.ReflectiveTexture.ColorAt(isect.UVCoords)
+	}
+	return m.Reflective
+}
+
+func (m *Material) GetShininessValue(isect Intersection) float64 {
+	if m.ShininessTexture != nil {
+		return m.ShininessTexture.ColorAt(isect.UVCoords).R()
+	}
+	return m.Shininess
+}
+
+func (m *Material) GetIndexValue(isect Intersection) float64 {
+	if m.IndexTexture != nil {
+		return m.IndexTexture.ColorAt(isect.UVCoords).R()
+	}
+	return m.Index
+}
+
 func (m *Material) BeersTrans(isect Intersection) Color64 {
 	dist := isect.T
 	return Color64{
@@ -155,14 +219,14 @@ func (m *Material) BeersTrans(isect Intersection) Color64 {
 
 func (m *Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (color Color64) {
 	point := ray.At(isect.T)
-	colorVec := mgl64.Vec3(m.Emissive).Add(mgl64.Vec3(m.Ambient.Product(scene.AmbientLight)))
+	colorVec := mgl64.Vec3(m.GetEmissiveColor(isect)).Add(mgl64.Vec3(m.GetAmbientColor(isect).Product(scene.AmbientLight)))
 	for _, light := range scene.Lights {
 		attenuation := light.ShadowAttenuation(point).Mul(light.DistanceAttenuation(point))
 		lightDir := light.Direction(point)
 		shade := isect.Normal.Dot(lightDir)
 		if shade > 0 {
 			h := lightDir.Sub(ray.Direction).Normalize()
-			s := mgl64.Vec3(m.Specular).Mul(math.Pow(isect.Normal.Dot(h), m.Shininess))
+			s := mgl64.Vec3(m.GetSpecularColor(isect)).Mul(math.Pow(isect.Normal.Dot(h), m.GetShininessValue(isect)))
 			d := mgl64.Vec3(m.GetDiffuseColor(isect)).Mul(shade).Add(s)
 			a := Color64(attenuation).Product(Color64(d))
 			contribution := mgl64.Vec3(light.GetColor().Product(a))

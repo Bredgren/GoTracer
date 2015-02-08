@@ -76,13 +76,25 @@
     {
       "Name": string,
       "Emissive": Color,
+      // Textures are png or jpeg images. Specify the file name here relative to
+      // the texture directory. If both a texture and a constant value is specified
+      // then only the texture is used.
+      "EmissiveTextureFile": string,
       "Ambient": Color,
+      "AmbientTextureFile": string,
       "Specular": Color,
+      "SpecularTextureFile": string,
       "Reflective": Color,
+      "ReflectiveTextureFile": string,
       "Diffuse": Color,
+      "DiffuseTextureFile": string,
       "Transmissive": Color,
+      "TransmissiveTextureFile": string
       "Shininess": float,
-      "Index": float
+      // For the Shininess and Index textures only the R value of the colors is used.
+      "ShininessTextureFile": string,
+      "Index": float, // Default: refractive index of air
+      "IndexTextureFile": string
     },
     ... // Any number of materials, each with a unique "Name"
   ],

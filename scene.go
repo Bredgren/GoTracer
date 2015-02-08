@@ -75,7 +75,7 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 			material := scene.Material[isect.Object.GetMaterialName()]
 
 			exiting := false
-			insideIndex := material.Index
+			insideIndex := material.GetIndexValue(isect)
 			outsideIndex := AirIndex
 			if (isect.Normal.Dot(ray.Direction) > 0) {
 				// Exiting object
@@ -89,11 +89,12 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 
 			// Reflection
 			reflect := Color64{}
-			if material.Reflective.Len2() > Rayε {
+			kr := material.GetReflectiveColor(isect)
+			if kr.Len2() > Rayε {
 				reflRay := ray.Reflect(isect)
-				contrib := math.Max(material.Reflective[0], math.Max(material.Reflective[1], material.Reflective[2]))
+				contrib := math.Max(kr.R(), math.Max(kr.G(), kr.B()))
 				reflColor := scene.TraceRay(reflRay, depth + 1, contrib)
-				reflect = material.Reflective.Product(reflColor)
+				reflect = kr.Product(reflColor)
 			}
 			// c := 0.0
 

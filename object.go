@@ -145,9 +145,9 @@ func (b BoxObject) Intersect(r Ray) (isect Intersection, hit bool) {
 	isect.T = bestT
 
 	// // For UV coords
-	// intersectPoint := r.At(isect.T)
-	// side1 := (bestSide + 1) % 3
-	// side2 := (bestSide + 2) % 3
+	intersectPoint := r.At(isect.T)
+	side1 := float64((bestSide + 1) % 3)
+	side2 := float64((bestSide + 2) % 3)
 
 	if bestSide < 3 {
 		x := 0.0
@@ -157,7 +157,11 @@ func (b BoxObject) Intersect(r Ray) (isect Intersection, hit bool) {
 		z := 0.0
 		if bestSide == 2 { z = -1.0; }
 		isect.Normal = mgl64.Vec3{x, y, z}
-		// TODO: Set UV coods
+		InitIntersection(&isect)
+		isect.UVCoords = mgl64.Vec2{
+			0.5 - intersectPoint[int(math.Min(side1, side2))],
+			0.5 + intersectPoint[int(math.Max(side1, side2))],
+		}
 	} else {
 		x := 0.0
 		if bestSide == 3 { x = 1.0; }
@@ -166,10 +170,13 @@ func (b BoxObject) Intersect(r Ray) (isect Intersection, hit bool) {
 		z := 0.0
 		if bestSide == 5 { z = 1.0; }
 		isect.Normal = mgl64.Vec3{x, y, z}
-		// TODO: Set UV coods
+		InitIntersection(&isect)
+		isect.UVCoords = mgl64.Vec2{
+			0.5 + intersectPoint[int(math.Min(side1, side2))],
+			0.5 + intersectPoint[int(math.Max(side1, side2))],
+		}
 	}
 
-	InitIntersection(&isect)
 	return isect, true
 }
 

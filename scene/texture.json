@@ -3,7 +3,7 @@
     "Camera": {
       "ImageWidth": 500,
       "ImageHeight": 300,
-      "Position": [0, 4, 5],
+      "Position": [-2, 4, 7],
       "LookAt": [0, 0, 0],
       "UpDir": [0, 1, 0],
       "FOV": 53,
@@ -22,7 +22,7 @@
     "PointLights": [
       {
         "Color": [1, 1, 1],
-        "Position": [5, 5, 8],
+        "Position": [9, 4, -1],
         "ConstCoeff": 0.0,
         "LinearCoeff": 0.0
       }
@@ -45,11 +45,22 @@
     },
     {
       "Name": "Square",
+      "Ambient": [0.1, 0.1, 0.1],
+      "_Specular": [0.2, 0.2, 0.2],
+      "_Shininess": 50.0,
+      "_Reflective": [0.1, 0.1, 0.1],
+      "_Diffuse": [0, 0.1, 0.3],
+      "DiffuseTextureFile": "goku.jpg",
+      "TransmissiveTextureFile": "goku.jpg",
+      "_Index": 1.52
+    },
+    {
+      "Name": "Box",
       "Specular": [0.2, 0.2, 0.2],
       "Shininess": 50.0,
       "Reflective": [0.1, 0.1, 0.1],
       "Diffuse": [0, 0.1, 0.3],
-      "TransmissiveTextureFile": "checker.png",
+      "TransmissiveTextureFile": "red_checker.png",
       "_Index": 1.52
     }
   ],
@@ -73,7 +84,7 @@
       "_": "Sphere",
       "Type": "Transform",
       "Properties": {
-        "Translate": [-1.0, 1.0, 1.0],
+        "Translate": [-1.0, 1.0, -2.0],
         "RotateAxis": [1, 0, 0],
         "RotateAngle": 90,
         "Scale": [1, 1, 1]
@@ -89,15 +100,36 @@
       "_": "Square",
       "Type": "Transform",
       "Properties": {
-        "Translate": [3, 1, 1],
-        "RotateAxis": [1, 0, 0],
+        "Translate": [5, 1, 0],
+        "RotateAxis": [0, 1, 0],
         "RotateAngle": 90,
-        "Scale": [2, 2, 1]
+        "Scale": [2, 2.14, 1]
       },
       "SubObjects": [
         {
-          "Type": "Square",
-          "Properties": { "Material": "Square" }
+          "Type": "Transform",
+          "Properties": { "RotateAxis": [0, 0, 1], "RotateAngle": 180 },
+          "SubObjects": [
+            {
+              "Type": "Square",
+              "Properties": { "Material": "Square" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_": "Box",
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, 0.5, 1.5],
+        "RotateAxis": [0, 1, 0],
+        "RotateAngle": 30
+      },
+      "SubObjects": [
+        {
+          "Type": "Box",
+          "Properties": { "Material": "Box" }
         }
       ]
     }
