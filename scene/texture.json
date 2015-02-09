@@ -15,7 +15,7 @@
     "AmbientLight": [0.1, 0.1, 0.1],
     "DirectionalLights": [
       {
-        "Color": [0.4, 0.4, 0.4],
+        "Color": [1, 1, 1],
         "Orientation": [1, -1, -1]
       }
     ],
@@ -32,7 +32,8 @@
     {
       "Name": "Floor",
       "Ambient": [0.3, 0.3, 0.9],
-      "DiffuseTextureFile": "hrt_clay_2.jpg"
+      "DiffuseTextureFile": "hrt_clay_2.jpg",
+      "NormalTextureFile": "hrt_clay_2_normals.jpg"
     },
     {
       "Name": "Sphere",
@@ -107,14 +108,8 @@
       },
       "SubObjects": [
         {
-          "Type": "Transform",
-          "Properties": { "RotateAxis": [0, 0, 1], "RotateAngle": 180 },
-          "SubObjects": [
-            {
               "Type": "Square",
               "Properties": { "Material": "Square" }
-            }
-          ]
         }
       ]
     },

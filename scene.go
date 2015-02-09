@@ -84,6 +84,22 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 				exiting = true
 			}
 
+			// Bump mapping
+			bump := material.GetNormal(isect)
+			bump = bump.Mul(2).Sub(mgl64.Vec3{1, 1, 1})
+			cosθ := isect.Normal.Dot(mgl64.Vec3{0, 0, 1})
+			rotateVec := mgl64.Vec3{0, 0, 1}.Cross(isect.Normal)
+			len2 := rotateVec.X() * rotateVec.X() + rotateVec.Y() * rotateVec.Y() + rotateVec.Z() * rotateVec.Z()
+			if len2 > Rayε {
+				rotMat := mgl64.HomogRotate3D(math.Acos(cosθ), rotateVec).Mat3()
+				isect.Normal = isect.Normal.Add(rotMat.Mul3x1(bump))
+			} else if isect.Normal.Z() < 0 {
+				isect.Normal = isect.Normal.Sub(bump)
+			} else {
+				isect.Normal = isect.Normal.Add(bump)
+			}
+			isect.Normal = isect.Normal.Normalize()
+
 			// Direct illumination
 			illum := material.ShadeBlinnPhong(scene, ray, isect)
 

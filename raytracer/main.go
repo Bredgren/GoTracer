@@ -1,7 +1,5 @@
 /*
 TODO:
- - Texture mapping
- - Bump mapping
  - BSPTree
  - Cylinder
  - Cone

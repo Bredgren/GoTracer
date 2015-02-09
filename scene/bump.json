@@ -1,0 +1,79 @@
+{
+  "Render": {
+    "Camera": {
+      "ImageWidth": 500,
+      "ImageHeight": 300,
+      "Position": [0, 4, 6],
+      "LookAt": [0, 0, 0],
+      "UpDir": [0, 1, 0],
+      "FOV": 53,
+      "Background": [0.0, 0.0, 0.0]
+    },
+    "MaxDepth": 5,
+    "AAThreshold": 0.1,
+    "AAMaxDivisions": 4,
+    "AmbientLight": [0.1, 0.1, 0.1],
+    "DirectionalLights": [
+      {
+        "Color": [0.4, 0.4, 0.4],
+        "Orientation": [1, -1, -1]
+      }
+    ],
+    "PointLights": [
+      {
+        "Color": [1, 1, 1],
+        "Position": [-8, 4, 5],
+        "ConstCoeff": 0.0,
+        "LinearCoeff": 0.0
+      }
+    ]
+  },
+  "Materials": [
+    {
+      "Name": "Floor",
+      "Ambient": [0.3, 0.3, 0.3],
+      "Diffuse": [1.0, 1.0, 1.0],
+      "NormalTextureFile": "normal_4.png"
+    },
+    {
+      "Name": "Square",
+      "Ambient": [0.1, 0.1, 0.1],
+      "Specular": [1.0, 1.0, 1.0],
+      "Shininess": 100.0,
+      "Reflective": [0.4, 0.4, 0.4],
+      "Diffuse": [1.0, 1.0, 1.0],
+      "NormalTextureFile": "face.jpg"
+    }
+  ],
+  "Scene": [
+    {
+      "_": "Floor",
+      "Type": "Transform",
+      "Properties": {
+        "RotateAxis": [1, 0, 0],
+        "RotateAngle": 90,
+        "Scale": [10, 10, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "Floor" }
+        }
+      ]
+    },
+    {
+      "_": "Square",
+      "Type": "Transform",
+      "Properties": {
+        "Translate": [0, 1.5, 0],
+        "Scale": [3, 3, 1]
+      },
+      "SubObjects": [
+        {
+          "Type": "Square",
+          "Properties": { "Material": "Square" }
+        }
+      ]
+    }
+  ]
+}

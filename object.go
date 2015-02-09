@@ -231,7 +231,7 @@ func (s SquareObject) Intersect(r Ray) (isect Intersection, hit bool) {
 		isect.Normal = mgl64.Vec3{0, 0, 1}
 	}
 
-	isect.UVCoords = mgl64.Vec2{point.X() + 0.5, point.Y() + 0.5}
+	isect.UVCoords = mgl64.Vec2{point.X() + 0.5, 1 - (point.Y() + 0.5)}
 
 	InitIntersection(&isect)
 	return isect, true

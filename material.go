@@ -118,6 +118,9 @@ type Material struct {
 	Index float64
 	IndexTextureFile string
 	IndexTexture *Texture
+
+	NormalTextureFile string
+	NormalTexture *Texture
 }
 
 func InitMaterial(m *Material) {
@@ -138,6 +141,8 @@ func InitMaterial(m *Material) {
 	if mgl64.FloatEqual(m.Index, 0) {
 		m.Index = AirIndex
 	}
+
+	m.NormalTexture = NewTexture(m.NormalTextureFile)
 }
 
 func (m *Material) GetDiffuseColor(isect Intersection) Color64 {
@@ -206,6 +211,14 @@ func (m *Material) GetIndexValue(isect Intersection) float64 {
 		return m.IndexTexture.ColorAt(isect.UVCoords).R()
 	}
 	return m.Index
+}
+
+func (m *Material) GetNormal(isect Intersection) mgl64.Vec3 {
+	if m.NormalTexture != nil {
+		c := m.NormalTexture.ColorAt(isect.UVCoords)
+		return mgl64.Vec3{c.R(), c.G(), c.B()}.Normalize()
+	}
+	return mgl64.Vec3{0.5, 0.5, 0.5}
 }
 
 func (m *Material) BeersTrans(isect Intersection) Color64 {
