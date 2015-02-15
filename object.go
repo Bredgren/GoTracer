@@ -144,7 +144,7 @@ func (b BoxObject) Intersect(r Ray) (isect Intersection, hit bool) {
 
 	isect.T = bestT
 
-	// // For UV coords
+	// For UV coords
 	intersectPoint := r.At(isect.T)
 	side1 := float64((bestSide + 1) % 3)
 	side2 := float64((bestSide + 2) % 3)
@@ -235,6 +235,216 @@ func (s SquareObject) Intersect(r Ray) (isect Intersection, hit bool) {
 
 	InitIntersection(&isect)
 	return isect, true
+}
+
+type CylinderObject struct {
+	Transform mgl64.Mat4
+	MaterialName string
+	Capped bool
+
+	invTransform mgl64.Mat4
+}
+
+func InitCylinderObject(c *CylinderObject) {
+	c.invTransform = c.Transform.Inv()
+}
+
+func (c CylinderObject) GetTransform() mgl64.Mat4 {
+	return c.Transform
+}
+
+func (c CylinderObject) GetInvTransform() mgl64.Mat4 {
+	return c.invTransform
+}
+
+func (c CylinderObject) GetMaterialName() string {
+	return c.MaterialName
+}
+
+func (c CylinderObject) Intersect(r Ray) (isect Intersection, hit bool) {
+	isect = Intersection{Object: c}
+
+	if c.IntersectCaps(r, &isect) {
+		i := Intersection{Object: c}
+		if c.IntersectBody(r, &i) {
+			if i.T < isect.T {
+				isect = i
+			}
+		}
+		InitIntersection(&isect)
+		return isect, true
+	}
+
+	hit = c.IntersectBody(r, &isect)
+	InitIntersection(&isect)
+	return isect, hit
+}
+
+func (c CylinderObject) IntersectCaps(r Ray, isect *Intersection) (hit bool) {
+	if !c.Capped {
+		return false
+	}
+
+	pz := r.Origin.Z()
+	dz := r.Direction.Z()
+
+	if mgl64.FloatEqual(dz, 0) {
+		return false
+	}
+
+	t1 := (1 - pz) / dz
+	t2 := -pz / dz
+
+	if dz > 0 {
+		t1, t2 = t2, t1
+	}
+
+	if t2 < Rayε {
+		return false
+	}
+
+	if t1 >= Rayε {
+		p := r.At(t1)
+		if p.X() * p.X() + p.Y() * p.Y() <= 1 {
+			isect.T = t1
+			if dz > 0 {
+				isect.Normal = mgl64.Vec3{0, 0, -1}
+			} else {
+				isect.Normal = mgl64.Vec3{0, 0, 1}
+			}
+			isect.UVCoords = mgl64.Vec2{p.X() / 2 + 0.5, p.Y() / 2 + 0.5}
+			return true
+		}
+	}
+
+	p := r.At(t2)
+	if p.X() * p.X() + p.Y() * p.Y() <= 1 {
+		isect.T = t2
+		if dz > 0 {
+			isect.Normal = mgl64.Vec3{0, 0, 1}
+		} else {
+			isect.Normal = mgl64.Vec3{0, 0, -1}
+		}
+		isect.UVCoords = mgl64.Vec2{p.X() / 2 + 0.5, p.Y() / 2 + 0.5}
+		return true
+	}
+
+	return false
+}
+
+func (cyl CylinderObject) IntersectBody(r Ray, isect *Intersection) (hit bool) {
+	x0 := r.Origin.X()
+	y0 := r.Origin.Y()
+	x1 := r.Direction.X()
+	y1 := r.Direction.Y()
+
+	a := x1 * x1 + y1 * y1
+	b := 2 * (x0 * x1 + y0 * y1)
+	c := x0 * x0 + y0 * y0 - 1
+
+	if mgl64.FloatEqual(a, 0) {
+		// x1 = 0, y1 = 0 -> ray aligned with body
+		return false
+	}
+
+	discriminant := b * b - 4 * a * c
+	if discriminant < 0 {
+		return false
+	}
+
+	discriminant = math.Sqrt(discriminant)
+
+	t2 := (-b + discriminant) / (2 * a)
+	if t2 <= Rayε {
+		return false
+	}
+
+	t1 := (-b - discriminant) / (2 * a)
+	if t1 > Rayε {
+		p := r.At(t1)
+		z := p.Z()
+		if z >= 0 && z <= 1 {
+			isect.T = t1
+			isect.Normal = mgl64.Vec3{p.X(), p.Y(), 0}
+			isect.UVCoords = mgl64.Vec2{0.5 + (math.Atan2(p.Y(), p.X()) / (2 * math.Pi)), 1 - p.Z()}
+			return true
+		}
+	}
+
+	p := r.At(t2)
+	z := p.Z()
+	if z >= 0 && z <= 1 {
+		isect.T = t2
+		normal := mgl64.Vec3{p.X(), p.Y(), 0}
+		if !cyl.Capped && normal.Dot(r.Direction) > 0 {
+			normal.Mul(-1)
+		}
+		isect.Normal = normal
+		isect.UVCoords = mgl64.Vec2{0.5 + (math.Atan2(p.Y(), p.X()) / (2 * math.Pi)), 1 - p.Z()}
+		return true
+	}
+
+	return false
+}
+
+type ConeObject struct {
+	Transform mgl64.Mat4
+	MaterialName string
+
+	invTransform mgl64.Mat4
+}
+
+func InitConeObject(c *ConeObject) {
+	c.invTransform = c.Transform.Inv()
+}
+
+func (c ConeObject) GetTransform() mgl64.Mat4 {
+	return c.Transform
+}
+
+func (c ConeObject) GetInvTransform() mgl64.Mat4 {
+	return c.invTransform
+}
+
+func (c ConeObject) GetMaterialName() string {
+	return c.MaterialName
+}
+
+func (c ConeObject) Intersect(r Ray) (isect Intersection, hit bool) {
+	isect = Intersection{Object: c}
+
+	InitIntersection(&isect)
+	return isect, false
+}
+
+type TorusObject struct {
+	Transform mgl64.Mat4
+	MaterialName string
+
+	invTransform mgl64.Mat4
+}
+
+func InitTorusObject(t *TorusObject) {
+	t.invTransform = t.Transform.Inv()
+}
+
+func (t TorusObject) GetTransform() mgl64.Mat4 {
+	return t.Transform
+}
+
+func (t TorusObject) GetInvTransform() mgl64.Mat4 {
+	return t.invTransform
+}
+
+func (t TorusObject) GetMaterialName() string {
+	return t.MaterialName
+}
+
+func (t TorusObject) Intersect(r Ray) (isect Intersection, hit bool) {
+	isect = Intersection{Object: t}
+
+	InitIntersection(&isect)
+	return isect, false
 }
 
 // type TriangleObject struct {

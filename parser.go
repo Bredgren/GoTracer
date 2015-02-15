@@ -32,9 +32,7 @@ type properties struct {
 
 	Material string
 
-	PointA mgl64.Vec3
-	PointB mgl64.Vec3
-	PointC mgl64.Vec3
+	Capped bool
 }
 
 type sceneObjectSettings struct {
@@ -84,6 +82,13 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.
 		square.MaterialName = object.Properties.Material
 		InitSquareObject(&square)
 		scene.Objects = append(scene.Objects, &square)
+	case "Cylinder":
+		cylinder := CylinderObject{}
+		cylinder.Transform = transform
+		cylinder.MaterialName = object.Properties.Material
+		cylinder.Capped = object.Properties.Capped
+		InitCylinderObject(&cylinder)
+		scene.Objects = append(scene.Objects, &cylinder)
 	// case "Triangle":
 	// 	tri := TriangleObject{
 	// 		transform,
@@ -155,7 +160,7 @@ func Parse(fileName string) *Scene {
 		parseSceneObject(object, scene, transform)
 	}
 
-	spew.Config.MaxDepth = 2
+	spew.Config.MaxDepth = 3
 	log.Printf(spew.Sdump(scene))
 	return scene
 }

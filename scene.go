@@ -144,8 +144,10 @@ func (scene *Scene) TraceRay(ray Ray, depth int, contribution float64) Color64 {
 			// R := R0 + (1 - R0) * math.Pow(1 - c, 5)
 			// return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect).Mul(R)).Add(mgl64.Vec3(refract).Mul(1 - R)))
 
-			R := math.Pow((insideIndex - outsideIndex) / (insideIndex + outsideIndex), 2)
-			T := (4 * insideIndex * outsideIndex) / math.Pow(insideIndex + outsideIndex, 2)
+			// R := math.Pow((insideIndex - outsideIndex) / (insideIndex + outsideIndex), 2)
+			// T := (4 * insideIndex * outsideIndex) / math.Pow(insideIndex + outsideIndex, 2)
+			R := 1.0
+			T := 1.0
 			return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect).Mul(R)).Add(mgl64.Vec3(refract).Mul(T)))
 		}
 		// For fun color wheel:

@@ -1,11 +1,11 @@
 /*
 TODO:
- - BSPTree
  - Cylinder
  - Cone
  - Torus
  - Disc
  - Skybox
+ - BSPTree
  - Trimesh
  - CSG
  - Caustics
@@ -30,7 +30,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Bredgren/raytracer"
+	"github.com/Bredgren/gotracer"
 )
 
 const (

@@ -192,3 +192,51 @@ func BenchmarkSquareIntersect(b *testing.B) {
 		square.Intersect(ray)
 	}
 }
+
+
+var cylinder = CylinderObject{}
+
+func TestCylinderIntersect(t *testing.T) {
+	InitCylinderObject(&cylinder)
+
+	// Origin ray
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	testIsect(t, "Origin", cylinder, ray, mgl64.Vec3{0, 0, 1}, 5)
+
+// 	// Origin ray behind
+// 	ray.Origin = mgl64.Vec3{0, 0, -5}
+// 	testIsectNoHit(t, "Behind", square, ray)
+
+// 	// Left graze
+// 	ray.Origin = mgl64.Vec3{-0.5 + Rayε, 0, 5}
+// 	testIsect(t, "Left graze hit", square, ray, mgl64.Vec3{0, 0, 1}, 5)
+// 	ray.Origin = mgl64.Vec3{-0.5 - Rayε, 0, 5}
+// 	testIsectNoHit(t, "Left graze no hit", square, ray)
+
+// 	// Right graze
+// 	ray.Origin = mgl64.Vec3{0.5 - Rayε, 0, 5}
+// 	testIsect(t, "Right graze hit", square, ray, mgl64.Vec3{0, 0, 1}, 5)
+// 	ray.Origin = mgl64.Vec3{0.5 + Rayε, 0, 5}
+// 	testIsectNoHit(t, "Right graze no hit", square, ray)
+
+// 	// Really close
+// 	ray.Origin = mgl64.Vec3{0, 0, 0}
+// 	testIsectNoHit(t, "Touching", square, ray)
+// 	ray.Origin = mgl64.Vec3{0, 0, 2 * Rayε}
+// 	testIsect(t, "Close to front", square, ray, mgl64.Vec3{0, 0, 1}, 2 * Rayε)
+// 	ray.Origin = mgl64.Vec3{0, 0, -Rayε}
+// 	testIsectNoHit(t, "Insde front", square, ray)
+// 	ray.Origin = mgl64.Vec3{0, 0, -2 * Rayε}
+// 	ray.Direction = mgl64.Vec3{0, 0, 1}
+// 	testIsect(t, "Close to back", square, ray, mgl64.Vec3{0, 0, -1}, 2 * Rayε)
+}
+
+// func BenchmarkSquareIntersect(b *testing.B) {
+// 	InitSquareObject(&square)
+
+// 	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+// 	b.ResetTimer()
+// 	for i := 0; i < b.N; i++ {
+// 		square.Intersect(ray)
+// 	}
+// }
