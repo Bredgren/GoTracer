@@ -377,7 +377,7 @@ func (cyl CylinderObject) IntersectBody(r Ray, isect *Intersection) (hit bool) {
 		isect.T = t2
 		normal := mgl64.Vec3{p.X(), p.Y(), 0}
 		if !cyl.Capped && normal.Dot(r.Direction) > 0 {
-			normal.Mul(-1)
+			normal = normal.Mul(-1)
 		}
 		isect.Normal = normal
 		isect.UVCoords = mgl64.Vec2{0.5 + (math.Atan2(p.Y(), p.X()) / (2 * math.Pi)), 1 - p.Z()}
@@ -390,12 +390,33 @@ func (cyl CylinderObject) IntersectBody(r Ray, isect *Intersection) (hit bool) {
 type ConeObject struct {
 	Transform mgl64.Mat4
 	MaterialName string
+	Capped bool
+	BaseRadius float64
+	TopRadius float64
 
 	invTransform mgl64.Mat4
+	betaSquared float64
+	gamma float64
 }
 
 func InitConeObject(c *ConeObject) {
 	c.invTransform = c.Transform.Inv()
+	c.BaseRadius = math.Max(c.BaseRadius, 0.0001)
+	c.TopRadius = math.Max(c.TopRadius, 0.0001)
+	beta := c.TopRadius - c.BaseRadius
+	beta = math.Max(beta, 0.001)
+	if math.Abs(beta) < 0.001 {
+		beta = 0.001
+	}
+	if beta < 0 {
+		c.gamma = c.TopRadius / beta
+	} else {
+		c.gamma = c.BaseRadius / beta
+	}
+	c.betaSquared = beta * beta
+	if c.gamma < 0 {
+		c.gamma = c.gamma - 1
+	}
 }
 
 func (c ConeObject) GetTransform() mgl64.Mat4 {
@@ -410,11 +431,88 @@ func (c ConeObject) GetMaterialName() string {
 	return c.MaterialName
 }
 
-func (c ConeObject) Intersect(r Ray) (isect Intersection, hit bool) {
-	isect = Intersection{Object: c}
+func (co ConeObject) Intersect(r Ray) (isect Intersection, hit bool) {
+	isect = Intersection{Object: co}
+
+	ox := r.Origin.X()
+	oy := r.Origin.Y()
+	oz := r.Origin.Z()
+	dx := r.Direction.X()
+	dy := r.Direction.Y()
+	dz := r.Direction.Z()
+
+	a := dx * dx + dy * dy - co.betaSquared * dz * dz
+	if mgl64.FloatEqual(a, 0) {
+		InitIntersection(&isect)
+		return isect, false
+	}
+	b := 2 * (ox * dx + oy * dy - co.betaSquared * ((co.gamma + oz) * dz))
+	c := ox * ox + oy * oy - co.betaSquared * (co.gamma + oz) * (co.gamma + oz)
+
+	discriminant := b * b - 4 * a * c
+	if discriminant < 0 {
+		InitIntersection(&isect)
+		return isect, false
+	}
+	discriminant = math.Sqrt(discriminant)
+
+	isect.T = -1
+
+	nearRoot := (-b + discriminant) / (2 * a)
+	p := r.At(nearRoot)
+	if isGoodRoot(p) && nearRoot > Rayε {
+		isect.T = nearRoot
+		isect.Normal = mgl64.Vec3{2 * p.X(), 2 * p.Y(), -2 * co.betaSquared * (p.Z() + co.gamma)}
+	}
+
+	farRoot := (-b - discriminant) / (2 * a)
+	p = r.At(farRoot)
+	if isGoodRoot(p) && (farRoot < isect.T || isect.T < 0) && farRoot > Rayε {
+		isect.T = farRoot
+		isect.Normal = mgl64.Vec3{2 * p.X(), 2 * p.Y(), -2 * co.betaSquared * (p.Z() + co.gamma)}
+	}
+
+	if !co.Capped && isect.Normal.Dot(r.Direction) > 0 {
+		isect.Normal = isect.Normal.Mul(-1)
+	}
+
+	t1 := -oz / dz
+	t2 := (1 - oz) / dz
+
+	p = r.At(t1)
+	if co.Capped {
+		if p.X() * p.X() + p.Y() * p.Y() <= co.BaseRadius * co.BaseRadius {
+			if (t1 < isect.T || isect.T < 0) && t1 > Rayε {
+				isect.T = t1
+				isect.Normal = mgl64.Vec3{0, 0, -1}
+			}
+		}
+		q := r.At(t2)
+		if q.X() * q.X() + q.Y() * q.Y() <= co.TopRadius * co.TopRadius {
+			if (t2 < isect.T || isect.T < 0) && t2 > Rayε {
+				isect.T = t2
+				isect.Normal = mgl64.Vec3{0, 0, 1}
+			}
+		}
+	}
+
+	if isect.T <= Rayε {
+		InitIntersection(&isect)
+		return isect, false
+	}
+
+	p = r.At(isect.T)
+	rad := math.Max(co.BaseRadius, co.TopRadius)
+	u := p.X() / (2 * rad) + 0.5
+	v := p.Y() / (2 * rad) + 0.5
+	isect.UVCoords = mgl64.Vec2{u, v}
 
 	InitIntersection(&isect)
-	return isect, false
+	return isect, true
+}
+
+func isGoodRoot(root mgl64.Vec3) bool {
+	return root.Z() >= 0 && root.Z() <= 1
 }
 
 type TorusObject struct {

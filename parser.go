@@ -33,6 +33,8 @@ type properties struct {
 	Material string
 
 	Capped bool
+	TopRadius float64
+	BaseRadius float64
 }
 
 type sceneObjectSettings struct {
@@ -89,6 +91,15 @@ func parseSceneObject(object sceneObjectSettings, scene *Scene, transform mgl64.
 		cylinder.Capped = object.Properties.Capped
 		InitCylinderObject(&cylinder)
 		scene.Objects = append(scene.Objects, &cylinder)
+	case "Cone":
+		cone := ConeObject{}
+		cone.Transform = transform
+		cone.MaterialName = object.Properties.Material
+		cone.Capped = object.Properties.Capped
+		cone.TopRadius = object.Properties.TopRadius
+		cone.BaseRadius = object.Properties.BaseRadius
+		InitConeObject(&cone)
+		scene.Objects = append(scene.Objects, &cone)
 	// case "Triangle":
 	// 	tri := TriangleObject{
 	// 		transform,

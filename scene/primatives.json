@@ -77,6 +77,33 @@
       "SubObjects": [
         { "Type": "Cylinder", "Properties": { "Material": "Checker" } }
       ]
+    },
+    {
+      "Type": "Transform",
+      "Properties": { "Translate": [-2.5, 1, 0] },
+      "SubObjects": [
+        { "Type": "Cone",
+					"Properties": {
+						"Material": "Checker",
+						"TopRadius": 0.5,
+						"BaseRadius": 0.25,
+						"Capped": true
+					}
+				}
+      ]
+    },
+    {
+      "Type": "Transform",
+      "Properties": { "Translate": [-1, 1, 0] },
+      "SubObjects": [
+        { "Type": "Cone",
+					"Properties": {
+						"Material": "Checker",
+						"TopRadius": 0.75,
+						"BaseRadius": 0.1
+					}
+				}
+      ]
     }
   ]
 }
