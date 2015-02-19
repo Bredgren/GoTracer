@@ -403,15 +403,15 @@ func InitConeObject(c *ConeObject) {
 	c.invTransform = c.Transform.Inv()
 	c.BaseRadius = math.Max(c.BaseRadius, 0.0001)
 	c.TopRadius = math.Max(c.TopRadius, 0.0001)
-	beta := c.TopRadius - c.BaseRadius
+	beta := c.BaseRadius - c.TopRadius
 	beta = math.Max(beta, 0.001)
 	if math.Abs(beta) < 0.001 {
 		beta = 0.001
 	}
 	if beta < 0 {
-		c.gamma = c.TopRadius / beta
-	} else {
 		c.gamma = c.BaseRadius / beta
+	} else {
+		c.gamma = c.TopRadius / beta
 	}
 	c.betaSquared = beta * beta
 	if c.gamma < 0 {
@@ -481,14 +481,14 @@ func (co ConeObject) Intersect(r Ray) (isect Intersection, hit bool) {
 
 	p = r.At(t1)
 	if co.Capped {
-		if p.X() * p.X() + p.Y() * p.Y() <= co.BaseRadius * co.BaseRadius {
+		if p.X() * p.X() + p.Y() * p.Y() <= co.TopRadius * co.TopRadius {
 			if (t1 < isect.T || isect.T < 0) && t1 > Rayε {
 				isect.T = t1
 				isect.Normal = mgl64.Vec3{0, 0, -1}
 			}
 		}
 		q := r.At(t2)
-		if q.X() * q.X() + q.Y() * q.Y() <= co.TopRadius * co.TopRadius {
+		if q.X() * q.X() + q.Y() * q.Y() <= co.BaseRadius * co.BaseRadius {
 			if (t2 < isect.T || isect.T < 0) && t2 > Rayε {
 				isect.T = t2
 				isect.Normal = mgl64.Vec3{0, 0, 1}

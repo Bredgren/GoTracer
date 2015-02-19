@@ -85,8 +85,8 @@
         { "Type": "Cone",
 					"Properties": {
 						"Material": "Checker",
-						"TopRadius": 0.5,
-						"BaseRadius": 0.25,
+						"BaseRadius": 0.5,
+						"TopRadius": 0.25,
 						"Capped": true
 					}
 				}
@@ -99,8 +99,8 @@
         { "Type": "Cone",
 					"Properties": {
 						"Material": "Checker",
-						"TopRadius": 0.75,
-						"BaseRadius": 0.1
+						"BaseRadius": 0.75,
+						"TopRadius": 0.1
 					}
 				}
       ]
