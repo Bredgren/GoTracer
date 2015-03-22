@@ -22,7 +22,6 @@ package gotracer
 // 	}
 // }
 
-
 // func TestIntersectScaled(t *testing.T) {
 // 	scene := &Scene{}
 
@@ -87,7 +86,6 @@ package gotracer
 // 		t.Errorf("Ray %v intersected", ray)
 // 	}
 // }
-
 
 // func TestIntersectScaledTranslated(t *testing.T) {
 // 	scene := &Scene{}

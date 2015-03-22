@@ -193,7 +193,6 @@ package gotracer
 // 	}
 // }
 
-
 // var cylinder = CylinderObject{}
 
 // func TestCylinderIntersect(t *testing.T) {

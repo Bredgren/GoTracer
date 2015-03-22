@@ -24,16 +24,16 @@ type MaterialAttribute interface {
 }
 
 type Material struct {
-	Name string
-	Emissive MaterialAttribute
-	Ambient MaterialAttribute
-	Specular MaterialAttribute
-	Reflective MaterialAttribute
-	Diffuse MaterialAttribute
+	Name         string
+	Emissive     MaterialAttribute
+	Ambient      MaterialAttribute
+	Specular     MaterialAttribute
+	Reflective   MaterialAttribute
+	Diffuse      MaterialAttribute
 	Transmissive MaterialAttribute
-	Gloss MaterialAttribute
-	Index MaterialAttribute // TODO: don't forget to default to air
-	Normal MaterialAttribute
+	Gloss        MaterialAttribute
+	Index        MaterialAttribute // TODO: don't forget to default to air
+	Normal       MaterialAttribute
 }
 
 // UniformColor represents a MaterialAttribute that is the same at every location.

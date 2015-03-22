@@ -35,7 +35,7 @@ func (c Color64) Product(other Color64) Color64 {
 }
 
 func (c Color64) Len2() float64 {
-	return c[0] * c[0] + c[1] * c[1] + c[2] * c[2]
+	return c[0]*c[0] + c[1]*c[1] + c[2]*c[2]
 }
 
 func clamp(low, high float64) func(float64) float64 {

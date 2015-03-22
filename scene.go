@@ -1,17 +1,17 @@
 package gotracer
 
 import (
-	// "image/color"
-	// "math"
+// "image/color"
+// "math"
 
-	// "github.com/go-gl/mathgl/mgl64"
+// "github.com/go-gl/mathgl/mgl64"
 )
 
 type Scene struct {
 	// Camera Camera
 	// MaxDepth int
 	// AdaptiveThreshold float64
-  // AAMaxDivisions int
+	// AAMaxDivisions int
 	// AAThreshold float64
 	// AmbientLight Color64
 	// Lights []Light
@@ -132,7 +132,6 @@ type Scene struct {
 // 					return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)))
 // 				}
 // 			}
-
 
 // 			// return Color64(mgl64.Vec3(illum).Add(mgl64.Vec3(reflect)).Add(mgl64.Vec3(refract)))
 

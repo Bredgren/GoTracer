@@ -1,9 +1,9 @@
 package gotracer
 
 import (
-	// "math"
+// "math"
 
-	// "github.com/go-gl/mathgl/mgl64"
+// "github.com/go-gl/mathgl/mgl64"
 )
 
 type Camera struct {

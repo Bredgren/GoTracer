@@ -2,9 +2,9 @@ package gotracer
 
 type ShaderParams struct {
 	Lights []Light
-	Ray Ray
-	Isect Intersection
-	Mat *Material
+	Ray    Ray
+	Isect  Intersection
+	Mat    *Material
 }
 
 type Shader interface {

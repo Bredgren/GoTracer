@@ -1,10 +1,10 @@
 package gotracer
 
 import (
-	// "math"
-	// "math/rand"
+// "math"
+// "math/rand"
 
-	// "github.com/go-gl/mathgl/mgl64"
+// "github.com/go-gl/mathgl/mgl64"
 )
 
 type Light interface {
@@ -166,7 +166,6 @@ type Light interface {
 // func (s SpotLight) ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3 {
 // 	return ShadowAttenuation(s.Scene, s.Position.Sub(point), point)
 // }
-
 
 // type AreaLight struct {
 // 	Scene *Scene

@@ -20,10 +20,10 @@ const (
 )
 
 type Ray struct {
-	Type int
-	Origin mgl64.Vec3
+	Type      int
+	Origin    mgl64.Vec3
 	Direction mgl64.Vec3
-	InvDir mgl64.Vec3
+	InvDir    mgl64.Vec3
 }
 
 func NewRay(t int, origin, direction mgl64.Vec3) Ray {
@@ -62,7 +62,7 @@ func (r Ray) Reflect(isect Intersection) (reflRay Ray) {
 func (r Ray) Refract(isect Intersection, n1, n2 float64) (refrRay Ray) {
 	nn := n1 / n2
 	cosθ1 := isect.Normal.Dot(r.Direction.Mul(-1))
-	cosθ2 := math.Sqrt(1 - nn * nn * (1 - cosθ1 * cosθ1))
-	refractDir := r.Direction.Mul(nn).Add(isect.Normal.Mul(nn * cosθ1 - cosθ2))
+	cosθ2 := math.Sqrt(1 - nn*nn*(1-cosθ1*cosθ1))
+	refractDir := r.Direction.Mul(nn).Add(isect.Normal.Mul(nn*cosθ1 - cosθ2))
 	return NewRay(RefractionRay, r.At(isect.T), refractDir)
 }
