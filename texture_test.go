@@ -1,4 +1,4 @@
-package raytracer
+package gotracer
 
 import (
 	"testing"
@@ -6,13 +6,28 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
+type testPixel struct {
+	pixel mgl64.Vec2
+	color Color64
+}
+
+var testPixels []testPixel = []testPixel{
+	testPixel{mgl64.Vec2{0, 0}, Color64{1, 0, 0}},
+	testPixel{mgl64.Vec2{1, 0}, Color64{0, 1, 0}},
+	testPixel{mgl64.Vec2{0, 1}, Color64{0, 0, 1}},
+	testPixel{mgl64.Vec2{1, 1}, Color64{1, 1, 1}},
+	testPixel{mgl64.Vec2{0.5, 0.5}, Color64{0.5, 0.5, 0.5}},
+}
+
 func TestTexture(t *testing.T) {
-	material := &Material{DiffuseTextureFile: "test.png"}
-	InitMaterial(material)
-	t.Log((*material.DiffuseTexture.tex).At(0, 0))
-	t.Log((*material.DiffuseTexture.tex).At(1, 0))
-	t.Log((*material.DiffuseTexture.tex).At(0, 1))
-	t.Log((*material.DiffuseTexture.tex).At(1, 1))
-	isect := Intersection{UVCoords: mgl64.Vec2{0, 0.25}}
-	t.Log(material.GetDiffuseColor(isect))
+	var tex *Texture = NewTexture("texture/test.png")
+	if tex.Width != 2 && tex.Height != 2 {
+		t.Errorf("Texture size is %vx%v, expectd 2x2", tex.Width, tex.Height)
+	}
+	for _, p := range testPixels {
+		c := tex.ColorAt(p.pixel)
+		if c != p.color {
+			t.Errorf("Color at %v is %v, expected %v", p.pixel, c, p.color)
+		}
+	}
 }

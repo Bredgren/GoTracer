@@ -1,4 +1,4 @@
-package raytracer
+package gotracer
 
 import (
 	"math"
@@ -14,7 +14,7 @@ func checkAt(test *testing.T, ray Ray, t float64, exp mgl64.Vec3) {
 	}
 }
 
-func TestAt(t *testing.T) {
+func TestRayAt(t *testing.T) {
 	origin := mgl64.Vec3{0, 0, 1}
 	direction := mgl64.Vec3{0, 0, 1}
 	ray := NewRay(PrimaryRay, origin, direction)
@@ -34,7 +34,7 @@ func checkRay(t *testing.T, ray Ray, expOrigin, expDirection mgl64.Vec3) {
 	}
 }
 
-func TestTransform(t *testing.T) {
+func TestRayTransform(t *testing.T) {
 	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 0}, mgl64.Vec3{0, 0, 1})
 
 	translate := mgl64.Translate3D(1, 2, 3)
@@ -99,7 +99,7 @@ func checkReflectAngle(t *testing.T, angle float64) {
 	checkRay(t, reflRay, expOrigin, expDirection)
 }
 
-func TestReflect(t *testing.T) {
+func TestRayReflect(t *testing.T) {
 	for angle := 0.0; angle <= 360; angle++ {
 		checkReflectAngle(t, angle)
 	}

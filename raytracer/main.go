@@ -1,9 +1,9 @@
 /*
 TODO:
- - Cylinder
- - Cone
  - Torus
  - Disc
+ - Texture offset
+ - Beers law (again)
  - Skybox
  - BSPTree
  - Trimesh

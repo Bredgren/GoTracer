@@ -1,4 +1,4 @@
-package raytracer
+package gotracer
 
 import (
 	"math"
@@ -61,15 +61,4 @@ func (r Ray) Refract(isect Intersection, outsideIndex, insideIndex float64) (ref
 	cosθInside := math.Sqrt(1 - nn * nn * (1 - cosθOutside * cosθOutside))
 	refractDir := isect.Normal.Mul(nn * cosθOutside - cosθInside).Sub(mDir.Mul(nn))
 	return NewRay(RefractionRay, r.At(isect.T), refractDir)
-}
-
-type Intersection struct {
-	Object SceneObject
-	Normal mgl64.Vec3
-	T float64
-	UVCoords mgl64.Vec2
-}
-
-func InitIntersection(i *Intersection) {
-	i.Normal = i.Normal.Normalize()
 }
