@@ -104,3 +104,13 @@ func TestRayReflect(t *testing.T) {
 		checkReflectAngle(t, angle)
 	}
 }
+
+func TestRayRefract(t *testing.T) {
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 0}, mgl64.Vec3{0.707107, -0.707107, 0})
+	isect := Intersection{nil, mgl64.Vec3{0, 1, 0}, 1, mgl64.Vec2{}}
+	InitIntersection(&isect)
+	refrRay := ray.Refract(isect, 0.9, 1)
+	expOrigin := mgl64.Vec3{0.707107, -0.707107, 0}
+	expDirection := mgl64.Vec3{0.636396, -0.771352, 0}
+	checkRay(t, refrRay, expOrigin, expDirection)
+}

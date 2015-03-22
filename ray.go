@@ -36,17 +36,21 @@ func (r Ray) At(t float64) mgl64.Vec3 {
 	return r.Origin.Add(r.Direction.Mul(t))
 }
 
+// TransformVec3 is used to transform a vector by a matrix.
 func TransformVec3(m mgl64.Mat4, v mgl64.Vec3) mgl64.Vec3 {
 	return m.Mul4x1(v.Vec4(1)).Vec3()
 }
 
+// Transform transforms the ray by the given matrix. The length of the ray after the
+// tranformation has uses so it is returned as well.
 func (r Ray) Transform(transform mgl64.Mat4) (newRay Ray, len float64) {
 	newOrigin := TransformVec3(transform, r.Origin)
 	newDir := TransformVec3(transform, r.Origin.Add(r.Direction)).Sub(newOrigin)
 	len = newDir.Len()
-	return NewRay(CollisionRay, newOrigin, newDir), len
+	return NewRay(r.Type, newOrigin, newDir), len
 }
 
+// Reflect returns the reflected ray at the given Intersection.
 func (r Ray) Reflect(isect Intersection) (reflRay Ray) {
 	mDir := r.Direction.Mul(-1)
 	nMD2 := isect.Normal.Dot(mDir) * 2
@@ -54,11 +58,11 @@ func (r Ray) Reflect(isect Intersection) (reflRay Ray) {
 	return NewRay(ReflectionRay, r.At(isect.T), reflDir)
 }
 
-func (r Ray) Refract(isect Intersection, outsideIndex, insideIndex float64) (refrRay Ray) {
-	nn := outsideIndex / insideIndex
-	mDir := r.Direction.Mul(-1)
-	cosθOutside := isect.Normal.Dot(mDir)
-	cosθInside := math.Sqrt(1 - nn * nn * (1 - cosθOutside * cosθOutside))
-	refractDir := isect.Normal.Mul(nn * cosθOutside - cosθInside).Sub(mDir.Mul(nn))
+// Refract returns the refracted ray at the given intersection.
+func (r Ray) Refract(isect Intersection, n1, n2 float64) (refrRay Ray) {
+	nn := n1 / n2
+	cosθ1 := isect.Normal.Dot(r.Direction.Mul(-1))
+	cosθ2 := math.Sqrt(1 - nn * nn * (1 - cosθ1 * cosθ1))
+	refractDir := r.Direction.Mul(nn).Add(isect.Normal.Mul(nn * cosθ1 - cosθ2))
 	return NewRay(RefractionRay, r.At(isect.T), refractDir)
 }
