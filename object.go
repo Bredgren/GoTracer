@@ -7,6 +7,7 @@ import (
 )
 
 type SceneObject interface {
+	GetMaterial() *Material
 	// GetTransform() mgl64.Mat4
 	// GetInvTransform() mgl64.Mat4
 	// GetMaterialName() string
