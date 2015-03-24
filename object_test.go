@@ -1,15 +1,15 @@
 package gotracer
 
 import (
-	"testing"
 	"math/rand"
+	"testing"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
 
 type ExpectedIsect struct {
 	isect Intersection
-	hit bool
+	hit   bool
 }
 
 func isectEqual(i1, i2 Intersection) bool {
@@ -104,8 +104,8 @@ func BenchmarkSphereIntersectRandom(b *testing.B) {
 	max := 1.0
 	rays := make([]Ray, 0)
 	for i := 0; i < b.N; i++ {
-		x := rand.Float64() * (max - min) - max
-		y := rand.Float64() * (max - min) - max
+		x := rand.Float64()*(max-min) - max
+		y := rand.Float64()*(max-min) - max
 		ray := NewRay(PrimaryRay, mgl64.Vec3{x, y, 5}, mgl64.Vec3{0, 0, -1})
 		rays = append(rays, ray)
 	}
