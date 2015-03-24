@@ -1,89 +1,75 @@
 package gotracer
 
 import (
-// "math"
+	"math"
 
-// "github.com/go-gl/mathgl/mgl64"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
-type SceneObject interface {
-	GetMaterial() *Material
-	// GetTransform() mgl64.Mat4
-	// GetInvTransform() mgl64.Mat4
-	// GetMaterialName() string
-	// // Intersect takes a ray in local coordinates and returns an intersection and true
-	// // if the intersects the object, false otherwise.
-	// Intersect(r Ray) (isect Intersection, hit bool)
+// Intersecter describes a thing that intersects with a Ray.
+type Intersecter interface {
+	// Intersect takes a ray in local coordinates and returns an intersection and true
+	// if the intersects the object. If the ray does not hit then isect is undefined
+	// and hit is false.
+	Intersect(Ray) (isect Intersection, hit bool)
 }
 
-// type SphereObject struct {
-// 	Transform mgl64.Mat4
-// 	MaterialName string
+type Object struct {
+	Transform    mgl64.Mat4
+	TransformInv mgl64.Mat4
+	Material     *Material
+}
 
-// 	invTransform mgl64.Mat4
-// }
+func NewObject(transform mgl64.Mat4, material *Material) *Object {
+	return &Object{transform, transform.Inv(), material}
+}
 
-// func InitSphereObject(s *SphereObject) {
-// 	s.invTransform = s.Transform.Inv()
-// }
+type Sphere struct {
+	Object *Object
+}
 
-// func (s SphereObject) GetTransform() mgl64.Mat4 {
-// 	return s.Transform
-// }
+func (s Sphere) Intersect(r Ray) (isect Intersection, hit bool) {
+	isect = Intersection{Object: s.Object}
 
-// func (s SphereObject) GetInvTransform() mgl64.Mat4 {
-// 	return s.invTransform
-// }
+	// -(d . o) +- sqrt((d . o)^2 - (d . d)((o . o) - 1)) / (d . d)
+	do := r.Dir.Dot(r.Origin)
+	dd := r.Dir.Dot(r.Dir)
+	oo := r.Origin.Dot(r.Origin)
 
-// func (s SphereObject) GetMaterialName() string {
-// 	return s.MaterialName
-// }
+	discriminant := do*do - dd*(oo-1)
+	if discriminant < 0 {
+		return isect, false
+	}
 
-// func (s SphereObject) Intersect(r Ray) (isect Intersection, hit bool) {
-// 	isect = Intersection{Object: s}
+	discriminant = math.Sqrt(discriminant)
 
-// 	// -(d . o) +- sqrt((d . o)^2 - (d . d)((o . o) - 1)) / (d . d)
-// 	do := r.Direction.Dot(r.Origin)
-// 	dd := r.Direction.Dot(r.Direction)
-// 	oo := r.Origin.Dot(r.Origin)
+	t2 := (-do + discriminant) / dd
+	if t2 <= Rayε {
+		return isect, false
+	}
 
-// 	discriminant := do * do - dd * (oo - 1)
-// 	if discriminant < 0 {
-// 		return isect, false
-// 	}
+	t1 := (-do - discriminant) / dd
+	if t1 > Rayε {
+		isect.T = t1
+		// No need to normalize because it's a unit sphere at the origin
+		isect.Normal = r.At(t1)
+		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
+		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
+		isect.UVCoords = mgl64.Vec2{u, v}
+		return isect, true
+	}
 
-// 	discriminant = math.Sqrt(discriminant)
+	if t2 > Rayε {
+		isect.T = t2
+		isect.Normal = r.At(t2)
+		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
+		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
+		isect.UVCoords = mgl64.Vec2{u, v}
+		return isect, true
+	}
 
-// 	t2 := (-do + discriminant) / dd
-// 	if t2 <= Rayε {
-// 		return isect, false
-// 	}
-
-// 	t1 := (-do - discriminant) / dd
-// 	if t1 > Rayε {
-// 		isect.T = t1
-// 		// Normalize because sphere is at origin
-// 		isect.Normal = r.At(t1)
-// 		InitIntersection(&isect)
-// 		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
-// 		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
-// 		isect.UVCoords = mgl64.Vec2{u, v}
-// 		return isect, true
-// 	}
-
-// 	if t2 > Rayε {
-// 		isect.T = t2
-// 		// Normalize because sphere is at origin
-// 		isect.Normal = r.At(t2)
-// 		InitIntersection(&isect)
-// 		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
-// 		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
-// 		isect.UVCoords = mgl64.Vec2{u, v}
-// 		return isect, true
-// 	}
-
-// 	return isect, false
-// }
+	return isect, false
+}
 
 // type BoxObject struct {
 // 	Transform mgl64.Mat4

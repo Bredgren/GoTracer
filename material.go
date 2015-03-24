@@ -31,7 +31,7 @@ type Material struct {
 	Reflective   MaterialAttribute
 	Diffuse      MaterialAttribute
 	Transmissive MaterialAttribute
-	Gloss        MaterialAttribute
+	Smoothness   MaterialAttribute
 	Index        MaterialAttribute // TODO: don't forget to default to air
 	Normal       MaterialAttribute
 }

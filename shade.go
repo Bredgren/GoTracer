@@ -17,16 +17,18 @@ import (
 type BRDF func(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3
 
 func LambertianBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
-	kd := isect.Object.GetMaterial().Diffuse.ColorAt(isect.UVCoords)
+	kd := isect.Object.Material.Diffuse.ColorAt(isect.UVCoords)
 	return mgl64.Vec3(kd).Mul(wi.Dot(isect.Normal))
 }
 
-func BlinnPhongBRDF(wi, wr mgl64.Vec3, isect Intersection) float64 {
-	return 0.0
+func BlinnPhongBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
+	// diffuse := LambertianBRDF(wi, wr, isect)
+	// specular := ...
+	return mgl64.Vec3{0, 0, 0}
 }
 
-func TorranceSparrowBRDF(wi, wr mgl64.Vec3, isect Intersection) float64 {
-	return 0.0
+func TorranceSparrowBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
+	return mgl64.Vec3{0, 0, 0}
 }
 
 // Calculate Lr(wr) = sum for each light i, Li(wi) * BRDF(wi, wr) * (wi . isect.Normal)

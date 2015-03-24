@@ -26,11 +26,11 @@ func checkRay(t *testing.T, ray Ray, expOrigin, expDirection mgl64.Vec3) {
 	if !ray.Origin.ApproxEqualThreshold(expOrigin, Rayε) {
 		t.Errorf("Incorrect origin %v, expected %v", ray.Origin, expOrigin)
 	}
-	if !ray.Direction.ApproxEqualThreshold(expDirection, Rayε) {
-		t.Errorf("Incorrect direction %v, expected %v", ray.Direction, expDirection)
+	if !ray.Dir.ApproxEqualThreshold(expDirection, Rayε) {
+		t.Errorf("Incorrect direction %v, expected %v", ray.Dir, expDirection)
 	}
-	if !mgl64.FloatEqualThreshold(ray.Direction.Len(), 1.0, Rayε) {
-		t.Errorf("Direction not normal %v", ray.Direction)
+	if !mgl64.FloatEqualThreshold(ray.Dir.Len(), 1.0, Rayε) {
+		t.Errorf("Direction not normal %v", ray.Dir)
 	}
 }
 
@@ -92,7 +92,6 @@ func checkReflectAngle(t *testing.T, angle float64) {
 	y := math.Cos(rad)
 	ray := NewRay(PrimaryRay, mgl64.Vec3{x, y, 0}, mgl64.Vec3{-x, -y, 0})
 	isect := Intersection{nil, mgl64.Vec3{0, 1, 0}, 1, mgl64.Vec2{}}
-	InitIntersection(&isect)
 	reflRay := ray.Reflect(isect)
 	expOrigin := mgl64.Vec3{0, 0, 0}
 	expDirection := mgl64.Vec3{-x, y, 0}.Normalize()
@@ -108,7 +107,6 @@ func TestRayReflect(t *testing.T) {
 func TestRayRefract(t *testing.T) {
 	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 0}, mgl64.Vec3{0.707107, -0.707107, 0})
 	isect := Intersection{nil, mgl64.Vec3{0, 1, 0}, 1, mgl64.Vec2{}}
-	InitIntersection(&isect)
 	refrRay := ray.Refract(isect, 0.9, 1)
 	expOrigin := mgl64.Vec3{0.707107, -0.707107, 0}
 	expDirection := mgl64.Vec3{0.636396, -0.771352, 0}

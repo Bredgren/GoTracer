@@ -1,100 +1,120 @@
 package gotracer
 
-// import (
-// 	"testing"
+import (
+	"testing"
+	"math/rand"
 
-// 	"github.com/go-gl/mathgl/mgl64"
-// )
+	"github.com/go-gl/mathgl/mgl64"
+)
 
-// var sphere = SphereObject{}
+type ExpectedIsect struct {
+	isect Intersection
+	hit bool
+}
 
-// func checkIsect(t *testing.T, test string, isect Intersection, expNormal mgl64.Vec3, expT float64) {
-// 	if isect.Normal != expNormal {
-// 		t.Errorf("%v: Incorrect normal %v, expected %v", test, isect.Normal, expNormal)
-// 	}
-// 	if !mgl64.FloatEqualThreshold(isect.T, expT, Rayε) {
-// 		t.Errorf("%v: Incorrect T %v, expected %v", test, isect.T, expT)
-// 	}
-// }
+func isectEqual(i1, i2 Intersection) bool {
+	return i1.Object == i2.Object &&
+		i1.Normal.ApproxEqualThreshold(i2.Normal, Rayε) &&
+		mgl64.FloatEqualThreshold(i1.T, i2.T, Rayε) &&
+		i1.UVCoords.ApproxEqualThreshold(i2.UVCoords, Rayε)
+}
 
-// func checkIsectSanity(t *testing.T, test string, isect Intersection) {
-// 	if !mgl64.FloatEqualThreshold(isect.Normal.Len(), 1.0, Rayε) {
-// 		t.Errorf("%v: Incorrect normal length %v %v", test, isect.Normal.Len(), isect.Normal)
-// 	}
-// 	if isect.T < Rayε {
-// 		t.Errorf("%v: Incorrect T %v, too small", test, isect.T)
-// 	}
-// }
+// exp.isect.Object = nil means ignore isect.
+func testIsect(t *testing.T, desc string, itr Intersecter, ray Ray, exp ExpectedIsect) {
+	isect, hit := itr.Intersect(ray)
+	if !hit && hit == exp.hit {
+		return // isect is undefined if we don't hit
+	}
+	if (exp.isect.Object != nil && !isectEqual(isect, exp.isect)) || hit != exp.hit {
+		actual := ExpectedIsect{isect, hit}
+		t.Errorf("%v: Incorrect intersection. Expected %v, got %v", desc, exp, actual)
+	}
+}
 
-// func testIsect(t *testing.T, test string, object SceneObject, ray Ray, expNormal mgl64.Vec3, expT float64) {
-// 	if isect, hit := object.Intersect(ray); hit {
-// 		checkIsect(t, test, isect, expNormal, expT)
-// 	} else {
-// 		t.Errorf("%v: Ray %v did not hit object", test, ray)
-// 	}
-// }
+func TestSphereIntersect(t *testing.T) {
+	obj := NewObject(mgl64.Ident4(), nil)
+	sphere := Sphere{obj}
 
-// func testIsectHit(t *testing.T, test string, object SceneObject, ray Ray) {
-// 	if isect, hit := object.Intersect(ray); hit {
-// 		checkIsectSanity(t, test, isect)
-// 	} else {
-// 		t.Errorf("%v: Ray %v did not hit object", test, ray)
-// 	}
-// }
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	exp := ExpectedIsect{Intersection{obj, mgl64.Vec3{0, 0, 1}, 4, mgl64.Vec2{0.5, 0}}, true}
+	testIsect(t, "Origin", sphere, ray, exp)
 
-// func testIsectNoHit(t *testing.T, test string, object SceneObject, ray Ray) {
-// 	if _, hit := object.Intersect(ray); hit {
-// 		t.Errorf("%v: Ray %v hit object", test, ray)
-// 	}
-// }
+	ray.Origin = mgl64.Vec3{0, 0, -5}
+	exp.hit = false
+	testIsect(t, "Behind", sphere, ray, exp)
 
-// func TestSphereIntersect(t *testing.T) {
-// 	InitSphereObject(&sphere)
+	ray.Origin = mgl64.Vec3{-(1 - Rayε), 0, 5}
+	exp.isect.Object = nil
+	exp.hit = true
+	testIsect(t, "Left graze hit", sphere, ray, exp)
+	ray.Origin = mgl64.Vec3{-1, 0, 0}
+	exp.hit = false
+	testIsect(t, "Left graze no hit", sphere, ray, exp)
 
-// 	// Origin ray
-// 	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
-// 	testIsect(t, "Origin", sphere, ray, mgl64.Vec3{0, 0, 1}, 4)
+	ray.Origin = mgl64.Vec3{1 - Rayε, 0, 5}
+	exp.hit = true
+	testIsect(t, "Right graze hit", sphere, ray, exp)
+	ray.Origin = mgl64.Vec3{1, 0, 0}
+	exp.hit = false
+	testIsect(t, "Right graze no hit", sphere, ray, exp)
 
-// 	// Origin ray behind
-// 	ray.Origin = mgl64.Vec3{0, 0, -5}
-// 	testIsectNoHit(t, "Behind", sphere, ray)
+	ray.Origin = mgl64.Vec3{0, 0, 0}
+	exp.isect.Object = obj
+	exp.isect.Normal = mgl64.Vec3{0, 0, -1}
+	exp.isect.T = 1
+	exp.isect.UVCoords = mgl64.Vec2{0.5, 1}
+	exp.hit = true
+	testIsect(t, "Inside", sphere, ray, exp)
 
-// 	// Left graze
-// 	ray.Origin = mgl64.Vec3{-(1 - Rayε), 0, 5}
-// 	testIsectHit(t, "Left graze hit", sphere, ray)
-// 	ray.Origin = mgl64.Vec3{-1, 0, 0}
-// 	testIsectNoHit(t, "Left graze no hit", sphere, ray)
+	ray.Origin = mgl64.Vec3{0, 0, 1}
+	exp.isect.Object = obj
+	exp.isect.Normal = mgl64.Vec3{0, 0, -1}
+	exp.isect.T = 2
+	exp.isect.UVCoords = mgl64.Vec2{0.5, 1}
+	testIsect(t, "Touching front", sphere, ray, exp)
+	ray.Origin = mgl64.Vec3{0, 0, 1 + Rayε}
+	exp.isect.Normal = mgl64.Vec3{0, 0, 1}
+	exp.isect.T = Rayε
+	exp.isect.UVCoords = mgl64.Vec2{0.5, 0}
+	testIsect(t, "Close to front", sphere, ray, exp)
+	ray.Origin = mgl64.Vec3{0, 0, 1 - Rayε}
+	exp.isect.Normal = mgl64.Vec3{0, 0, -1}
+	exp.isect.T = 2 - Rayε
+	exp.isect.UVCoords = mgl64.Vec2{0.5, 1}
+	testIsect(t, "Close inside front", sphere, ray, exp)
+	ray.Origin = mgl64.Vec3{0, 0, -1}
+	exp.hit = false
+	testIsect(t, "Touching back", sphere, ray, exp)
+}
 
-// 	// Right graze
-// 	ray.Origin = mgl64.Vec3{1 - Rayε, 0, 5}
-// 	testIsectHit(t, "Right graze hit", sphere, ray)
-// 	ray.Origin = mgl64.Vec3{1, 0, 0}
-// 	testIsectNoHit(t, "Right graze hit", sphere, ray)
+func BenchmarkSphereIntersect(b *testing.B) {
+	sphere := Sphere{NewObject(mgl64.Ident4(), nil)}
 
-// 	// From inside
-// 	ray.Origin = mgl64.Vec3{0, 0, 0}
-// 	testIsect(t, "Inside", sphere, ray, mgl64.Vec3{0, 0, -1}, 1)
+	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sphere.Intersect(ray)
+	}
+}
 
-// 	// Really close
-// 	ray.Origin = mgl64.Vec3{0, 0, 1}
-// 	testIsect(t, "Touching front", sphere, ray, mgl64.Vec3{0, 0, -1}, 2)
-// 	ray.Origin = mgl64.Vec3{0, 0, 1 + Rayε}
-// 	testIsect(t, "Close to front", sphere, ray, mgl64.Vec3{0, 0, 1}, Rayε)
-// 	ray.Origin = mgl64.Vec3{0, 0, 1 - Rayε}
-// 	testIsect(t, "Close inside front", sphere, ray, mgl64.Vec3{0, 0, -1}, 2 - Rayε)
-// 	ray.Origin = mgl64.Vec3{0, 0, -1}
-// 	testIsectNoHit(t, "Touching back", sphere, ray)
-// }
+func BenchmarkSphereIntersectRandom(b *testing.B) {
+	sphere := Sphere{NewObject(mgl64.Ident4(), nil)}
 
-// func BenchmarkSphereIntersect(b *testing.B) {
-// 	InitSphereObject(&sphere)
+	min := -1.0
+	max := 1.0
+	rays := make([]Ray, 0)
+	for i := 0; i < b.N; i++ {
+		x := rand.Float64() * (max - min) - max
+		y := rand.Float64() * (max - min) - max
+		ray := NewRay(PrimaryRay, mgl64.Vec3{x, y, 5}, mgl64.Vec3{0, 0, -1})
+		rays = append(rays, ray)
+	}
 
-// 	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
-// 	b.ResetTimer()
-// 	for i := 0; i < b.N; i++ {
-// 		sphere.Intersect(ray)
-// 	}
-// }
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sphere.Intersect(rays[i])
+	}
+}
 
 // var box = BoxObject{}
 

@@ -34,9 +34,9 @@ import (
 )
 
 const (
-	sceneDir = "scene"
+	sceneDir  = "scene"
 	renderDir = "renderedscene"
-	usageStr = "Usage: raytracer scenefile"
+	usageStr  = "Usage: raytracer scenefile"
 )
 
 var (
@@ -46,12 +46,12 @@ var (
 )
 
 var (
-	sceneFile = ""
-	noImg = false
-	gridSize = 50
-	format = "jpg"
+	sceneFile   = ""
+	noImg       = false
+	gridSize    = 50
+	format      = "jpg"
 	jpegQuality = 95
-	countRays = false
+	countRays   = false
 )
 
 func init() {
@@ -80,10 +80,10 @@ func init() {
 }
 
 type grid struct {
-	scene *raytracer.Scene
+	scene                  *raytracer.Scene
 	xMin, yMin, xMax, yMax int // Min inclusive, Max exclusive
-	img *image.NRGBA
-	ch chan float64 // signal done
+	img                    *image.NRGBA
+	ch                     chan float64 // signal done
 }
 
 func traceGrid(g grid) {
@@ -131,7 +131,7 @@ func main() {
 		}
 	}
 	for g := 0.0; g < gridCount; g += <-gridChan {
-		log.Printf("%.2f%%", g / gridCount * 100)
+		log.Printf("%.2f%%", g/gridCount*100)
 	}
 	end := time.Now()
 	log.Printf("Done tracing, took %v", end.Sub(begin))
@@ -146,10 +146,10 @@ func main() {
 	}
 	count := 0
 	for _, file := range files {
-		name :=file.Name()
+		name := file.Name()
 		if strings.HasPrefix(name, "render") && len(name) > 10 &&
 			!strings.Contains(name, "Rays") && !strings.Contains(name, "scene") {
-			number, err := strconv.Atoi(name[6:len(name) - 4])
+			number, err := strconv.Atoi(name[6 : len(name)-4])
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -159,11 +159,11 @@ func main() {
 		}
 	}
 
-	baseFileName := fmt.Sprintf("%s/render%d", renderDir, count + 1)
+	baseFileName := fmt.Sprintf("%s/render%d", renderDir, count+1)
 
 	outFile := fmt.Sprintf("%s.%s", baseFileName, format)
 
- 	file, err := os.Create(outFile)
+	file, err := os.Create(outFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -176,7 +176,7 @@ func main() {
 	}
 	log.Printf("Saved %s", outFile)
 
-	copyFileContents(sceneFilePath, baseFileName + "scene.json")
+	copyFileContents(sceneFilePath, baseFileName+"scene.json")
 
 	// saveRayCounts(baseFileName)
 }
