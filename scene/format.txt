@@ -1,0 +1,47 @@
+
+Attribute Name			Type - Items listed in Object{} are attribute names
+-------------------------------------------------------------------------------------
+AAMaxDivisions		| int - See AAThreshold
+-------------------------------------------------------------------------------------
+AAThreshold				| int - default: 0 (no antialiasing) - If >0 then AA will be
+									| enabled and each pixel will be subdivided into 4 and if the
+									| difference in color is > AAThreshold then each subpixel is
+									| further divided into 4 and the process repeats for each subpixel
+									| until at most AAMaxDivisions is repeached.
+-------------------------------------------------------------------------------------
+AdaptiveThreshold	| float - Stops recursion if contribution is below this value.
+-------------------------------------------------------------------------------------
+AmbientLight			| Color
+-------------------------------------------------------------------------------------
+Background				| Object{Type, ...} - Other attributes depend on Type
+-------------------------------------------------------------------------------------
+Background:Type		| string - "Uniform" or "SkyBox" - Type of background. "Uniform"
+									| for a uniform color. "SkyBox" for a skybox.
+-------------------------------------------------------------------------------------
+Background						| Color or TextureFile - Use Color for "Uniform", otherwise use
+									| TextureFile.
+-------------------------------------------------------------------------------------
+Camera						| Object{ImageWidth, ImageHeight, Position, LooAt, UpDir, FOV,
+									| Background}
+-------------------------------------------------------------------------------------
+Color							| [float, float, float] - default: [0, 0, 0] - RGB values between
+									|	0.0 and 1.0
+-------------------------------------------------------------------------------------
+FOV								| float - default: 53 - Feild of fiew in degrees.
+-------------------------------------------------------------------------------------
+ImageHeight				| int - min: 1 - Height of the image in pixels.
+-------------------------------------------------------------------------------------
+ImageWidth				| int - min: 1 - Width of the image in pixels.
+-------------------------------------------------------------------------------------
+LookAt						| Vector - What point the camera is looking at.
+-------------------------------------------------------------------------------------
+MaxRecursiveDepth	|	int - default: 1, min: 1
+-------------------------------------------------------------------------------------
+Position					| Vector
+-------------------------------------------------------------------------------------
+TextureFile
+-------------------------------------------------------------------------------------
+UpDir							| Vector - default: [0, 1, 0] - The upward direction of the camera.
+-------------------------------------------------------------------------------------
+Vector						|	[float, float, float] - default: [0, 0, 0]
+-------------------------------------------------------------------------------------

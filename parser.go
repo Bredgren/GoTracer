@@ -9,6 +9,8 @@ import (
 // "github.com/go-gl/mathgl/mgl64"
 )
 
+type sceneSettings map[string]interface{}
+
 // type renderSettings struct {
 // 	ImageWidth int
 // 	ImageHeight int

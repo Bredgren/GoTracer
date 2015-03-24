@@ -1,0 +1,87 @@
+{
+  "ImageWidth": 1,
+  "ImageHeight": 1,
+	"Camera": {
+    "Position": [0.0, 0.0, 0.0],
+    "LookAt": [0.0, 0.0, 0.0],
+    "UpDir": [0.0, 0.0, 0.0],
+    "FOV": 53
+	},
+
+	"Background": {
+		"Type": "Uniform",
+		"Color": [0.0, 0.0, 0.0]
+	},
+	"Background2": {
+		"Type": "SkyBox",
+		"File": "path/to/file.jpg"
+	},
+
+	"AAMaxDivisions": 0,
+	"AAThreshold": 0,
+	"AdaptiveThreshold": 0.0,
+	"MaxRecursiveDepth": 1,
+	"AmbientLight": [0.0, 0.0, 0.0],
+
+	"Lights": [
+		{ "Type": "Directional",
+			"Color": [0.0, 0.0, 0.0],
+			"Orientation": [0.0, 0.0, 0.0]
+		},
+		{ "Type": "Point",
+			"Color": [0.0, 0.0, 0.0],
+			"Position": [0.0, 0.0, 0.0],
+      "ConstCoeff": 0.0,
+      "LinearCoeff": 0.0,
+      "QuadCoeff": 0.0
+		},
+		{ "Type": "Spot",
+			"Color": [0.0, 0.0, 0.0],
+			"Position": [0.0, 0.0, 0.0],
+			"Orientation": [0.0, 0.0, 0.0],
+      "Angle": 0.0,
+      "DropOff": 0.0,
+      "FadeAngle": 0.0
+		}
+	],
+
+	"Materials": [
+		{ "Name": "Material1",
+			"Parent": "",
+			"Emissive": [0.0, 0.0, 0.0],
+      "Ambient": [0.0, 0.0, 0.0],
+      "Specular": [0.0, 0.0, 0.0],
+      "Reflective": [0.0, 0.0, 0.0],
+      "Diffuse": [0.0, 0.0, 0.0],
+      "Transmissive": [0.0, 0.0, 0.0],
+      "Smoothness": 0.0,
+      "Index": 1.0003,
+			"Normal": "path/to/normal/map.png"
+		},
+		{ "Name": "Material2",
+			"Parent": "Material1",
+			"Diffuse": "path/to/file.png"
+		}
+	],
+
+	"Objects": [
+		{ "Type": "Transform",
+			"Translate": [0.0, 0.0, 0.0],
+			"RotateAxis": [0.0, 0.0, 0.0],
+			"RotateAngle": 0.0,
+			"Scale": [1.0, 1.0, 1.0],
+			"SubObjects": [
+			]
+		},
+		{ "_Comment": "A descriptive name for this object",
+			"Type": "Sphere",
+			"Material": "Material1"
+		},
+		{ "Type": "Box",
+			"Material": "Material1"
+		},
+		{ "Type": "Square",
+			"Material": "Material2"
+		}
+	]
+}

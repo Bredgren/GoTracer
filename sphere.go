@@ -6,6 +6,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
+// Sphere represents a sphere of radius 1 located at the origin.
 type Sphere struct {
 	Object *Object
 }

@@ -1,8 +1,10 @@
 // Notes:
-//  - Vector = [X, Y, Z] = [float, float, float] any float value is accepted
-//  - Color = [R, G, B] = [float, float, float] values between 0.0 and 1.0
+//  Vector = [X, Y, Z] = [float, float, float] any float value is accepted
+//  Color = [R, G, B] = [float, float, float] values between 0.0 and 1.0
+//  Attributes that do not match any listed here are ignored (watch for typos). You
+//  can use this as a way to add comments, since json doesn't have comments.
 {
-  "Render": {
+  "Global": {
     "Camera": {
       "ImageWidth": int,
       "ImageHeight": int,
@@ -16,11 +18,10 @@
       "FOV": float, // Default: 53
       // Background color
       "Background": Color
-
     },
-    // Max depth of reflection/refraction, if AdaptiveThreshold isn't hit
-    "MaxDepth": int,
-    // Stop reflection/refraction if contribution is below this value
+    // Max depth of recursion, if AdaptiveThreshold isn't hit
+    "MaxRecursiveDepth": int,
+    // Stop recursion if contribution is below this value
     "AdaptiveThreshold": float,
     // Antialiasing is enabled if AAThreshold is > 0. If enabled, 4 primary rays are
     // used per pixel and if the difference in color is above AAThreshold then each
@@ -30,73 +31,41 @@
     "AAThreshold": float,
     // Color of the scene's ambient light
     "AmbientLight": Color,
-    "DirectionalLights": [
-      {
-        "Color": Color
-        "Orientation": Vector,
-      },
-      ...
-    ],
-    "PointLights": [
-      {
-        "Color": Color,
-        "Position": Vetor,
-        "ConstCoeff": float,
-        "LinearCoeff": float,
-        "QuadCoeff": float
-      },
-      ...
-    ],
-    "SpotLights": [
-      {
-        "Color": Color
-        "Position": Vector
-        "Orientation": Vector,
-        "Angle": float, // Degrees
-        "DropOff": float,
-        "FadeAngle": float
-      },
-      // A square light source that casts soft shadows
-      "AreaLights": [
-      {
-        "Color": Color
-        "Position": Vector
-        "Orientation": Vector,
-        "UpDir": Vector,
-        "Size": float, // The width and height
-        "Samples": int // Sqrt(#samples you want)
-        "ConstCoeff": float,
-        "LinearCoeff": float,
-        "QuadCoeff": float,
-        "Accelerated": bool // Faster but slightly less accurate sometimes
-      },
-    ]
-  },
+	},
+	"Lights": [
+		{
+			"Type": "Directional" | "Point" | "Spot", // TODO: Area
+			"Color": Color,
+			"Position": Vector, // Point, Spot,
+			// Where it's pointing
+			"Orientation": Vector, // Directional, Spot
+      "ConstCoeff": float, // Point
+      "LinearCoeff": float, // Point
+      "QuadCoeff": float, // Point
+			// Degrees
+      "Angle": float, // Spot
+      "DropOff": float, // Spot
+      "FadeAngle": float, // Spot
+		},
+			...
+	],
   "Materials": [
     {
       "Name": string,
-      "Emissive": Color,
-      // Textures are png or jpeg images. Specify the file name here relative to
-      // the texture directory. If both a texture and a constant value is specified
-      // then only the texture is used.
-      "EmissiveTextureFile": string,
-      "Ambient": Color,
-      "AmbientTextureFile": string,
-      "Specular": Color,
-      "SpecularTextureFile": string,
-      "Reflective": Color,
-      "ReflectiveTextureFile": string,
-      "Diffuse": Color,
-      "DiffuseTextureFile": string,
-      "Transmissive": Color,
-      "TransmissiveTextureFile": string
-      "Shininess": float,
-      // For the Shininess and Index textures only the R value of the colors is used.
-      "ShininessTextureFile": string,
-      "Index": float, // Default: refractive index of air
-      "IndexTextureFile": string
+			"Parent": string, // Name of another material to inherit attributes from
+      // TextureFiles are png or jpeg images.
+      "Emissive": Color | TextureFile,
+      "Ambient": Color | TextureFile,
+      "Specular": Color | TextureFile,
+      "Reflective": Color | TextureFile,
+      "Diffuse": Color | TextureFile,
+      "Transmissive": Color | TextureFile,
+      // For the Smoothness and Index textures only the R value of the colors is used.
+      "Smoothness": float | TextureFile,
+      "Index": float | TextureFile, // Default: refractive index of air (1.0003)
+			"Normal": TextureFile, // Normal map
     },
-    ... // Any number of materials, each with a unique "Name"
+			... // Any number of materials, each with a unique "Name"
   ],
   "Scene": [
     {
