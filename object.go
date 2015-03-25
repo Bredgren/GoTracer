@@ -9,7 +9,8 @@ type Intersecter interface {
 	// Intersect takes a ray in local coordinates and returns an intersection and true
 	// if the intersects the object. If the ray does not hit then isect is undefined
 	// and hit is false.
-	Intersect(Ray) (isect Intersection, hit bool)
+	Intersect(*Ray) (isect Intersection, hit bool)
+	GetObject() *Object
 }
 
 type Object struct {

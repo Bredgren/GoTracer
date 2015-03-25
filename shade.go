@@ -14,22 +14,36 @@ import (
 // incident on the surface from direction wi.
 // wi - normalized negative incomming light direction (toward light)
 // wr - normalized outgoing direction (toward camera)
-type BRDF func(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3
+// type BRDF func(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3
+type BRDF func(lights []Light, ray *Ray, isect *Intersection) (color Color64)
 
-func LambertianBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
-	kd := isect.Object.Material.Diffuse.ColorAt(isect.UVCoords)
-	return mgl64.Vec3(kd).Mul(wi.Dot(isect.Normal))
+// func LambertianBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
+// 	kd := isect.Object.Material.Diffuse.ColorAt(isect.UVCoords)
+// 	return mgl64.Vec3(kd).Mul(wi.Dot(isect.Normal))
+// }
+func LambertianBRDF(lights []Light, ray *Ray, isect *Intersection) (color Color64) {
+	var point mgl64.Vec3 = ray.At(isect.T)
+	var kd Color64 = isect.Object.Material.Diffuse.ColorAt(isect.UVCoords)
+	for _, light := range lights {
+		var cosTheta float64 = isect.Normal.Dot(light.Direction(point))
+		if cosTheta > 0 {
+			var diffuse Color64 = kd.Mul(cosTheta)
+			var contribution Color64 = diffuse.Product(light.Attenuation(point))
+			color = color.Add(contribution)
+		}
+	}
+	return
 }
 
-func BlinnPhongBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
-	// diffuse := LambertianBRDF(wi, wr, isect)
-	// specular := ...
-	return mgl64.Vec3{0, 0, 0}
-}
+// func BlinnPhongBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
+// 	// diffuse := LambertianBRDF(wi, wr, isect)
+// 	// specular := ...
+// 	return mgl64.Vec3{0, 0, 0}
+// }
 
-func TorranceSparrowBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
-	return mgl64.Vec3{0, 0, 0}
-}
+// func TorranceSparrowBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
+// 	return mgl64.Vec3{0, 0, 0}
+// }
 
 // Calculate Lr(wr) = sum for each light i, Li(wi) * BRDF(wi, wr) * (wi . isect.Normal)
 // where wr = -ray, wi = direction to light, Li(wi) = radiance from light source,

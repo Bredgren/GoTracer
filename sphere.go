@@ -11,8 +11,12 @@ type Sphere struct {
 	Object *Object
 }
 
-func (s Sphere) Intersect(r Ray) (isect Intersection, hit bool) {
-	isect = Intersection{Object: s.Object}
+func (s Sphere) GetObject() *Object {
+	return s.Object
+}
+
+func (s Sphere) Intersect(r *Ray) (isect Intersection, hit bool) {
+	isect.Object = s.Object
 
 	// -(d . o) +- sqrt((d . o)^2 - (d . d)((o . o) - 1)) / (d . d)
 	do := r.Dir.Dot(r.Origin)
@@ -36,6 +40,7 @@ func (s Sphere) Intersect(r Ray) (isect Intersection, hit bool) {
 		isect.T = t1
 		// No need to normalize because it's a unit sphere at the origin
 		isect.Normal = r.At(t1)
+		// TODO: possible optimization would be to check if we even need uv coordinates
 		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
 		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
 		isect.UVCoords = mgl64.Vec2{u, v}

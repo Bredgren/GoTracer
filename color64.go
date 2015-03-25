@@ -7,7 +7,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
-type Color64 mgl64.Vec3
+type Color64 [3]float64
 
 func (c Color64) R() float64 {
 	return c[0]
@@ -28,6 +28,14 @@ func (c Color64) NRGBA() color.NRGBA {
 		uint8(Clamp01(c.B()) * 255),
 		255,
 	}
+}
+
+func (c Color64) Add(other Color64) Color64 {
+	return Color64{c[0] + other[0], c[1] + other[1], c[2] + other[2]}
+}
+
+func (c Color64) Mul(val float64) Color64 {
+	return Color64{c[0] * val, c[1] * val, c[2] * val}
 }
 
 func (c Color64) Product(other Color64) Color64 {

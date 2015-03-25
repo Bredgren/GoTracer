@@ -4,15 +4,39 @@ import (
 // "math"
 // "math/rand"
 
-// "github.com/go-gl/mathgl/mgl64"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 type Light interface {
-	// GetColor() Color64
-	// Direction(point mgl64.Vec3) mgl64.Vec3
-	// DistanceAttenuation(point mgl64.Vec3) float64
-	// ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3
+	Attenuation(point mgl64.Vec3) Color64
+	Direction(from mgl64.Vec3) mgl64.Vec3
 }
+
+const (
+	DirectionalLightDist = 1e10
+)
+
+type DirectionalLight struct {
+	Color Color64
+	OrientationInv mgl64.Vec3
+}
+
+func (l DirectionalLight) Attenuation(point mgl64.Vec3) Color64 {
+	// 	return ShadowAttenuation(d.Scene, d.Direction(point).Mul(DirectionalLightDist), point)
+	return l.Color
+}
+
+func (l DirectionalLight) Direction(from mgl64.Vec3) mgl64.Vec3 {
+	return l.OrientationInv
+}
+
+// type Light interface {
+// 	GetColor() Color64
+// 	Direction(point mgl64.Vec3) mgl64.Vec3
+// 	DistanceAttenuation(point mgl64.Vec3) float64
+// 	ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3
+// 	Attenuation(point mgl64.Vec3) mgl64.Vec3
+// }
 
 // // ShadowAttenuation takes the unnormalized direction to the light so we know when
 // // we've "hit" it.

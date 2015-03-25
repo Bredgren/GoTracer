@@ -32,8 +32,10 @@ type Material struct {
 	Diffuse      MaterialAttribute
 	Transmissive MaterialAttribute
 	Smoothness   MaterialAttribute
-	Index        MaterialAttribute // TODO: don't forget to default to air
+	Index        MaterialAttribute
 	Normal       MaterialAttribute
+	IsLiquid     MaterialAttribute
+	BRDF         BRDF
 }
 
 // UniformColor represents a MaterialAttribute that is the same at every location.
@@ -41,6 +43,6 @@ type UniformColor struct {
 	Color Color64
 }
 
-func (c *UniformColor) ColorAt(_ mgl64.Vec2) Color64 {
+func (c UniformColor) ColorAt(_ mgl64.Vec2) Color64 {
 	return c.Color
 }

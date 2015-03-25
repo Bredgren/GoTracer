@@ -1,5 +1,6 @@
 
-Attribute Name			Type - Items listed in Object{} are attribute names
+Top Level Attributes
+Name								Type - Items listed in {} are attribute names
 -------------------------------------------------------------------------------------
 AAMaxDivisions		| int - See AAThreshold
 -------------------------------------------------------------------------------------
@@ -13,35 +14,128 @@ AdaptiveThreshold	| float - Stops recursion if contribution is below this value.
 -------------------------------------------------------------------------------------
 AmbientLight			| Color
 -------------------------------------------------------------------------------------
-Background				| Object{Type, ...} - Other attributes depend on Type
+Background				| {Type, ...} - Other attributes depend on Type
 -------------------------------------------------------------------------------------
-Background:Type		| string - "Uniform" or "SkyBox" - Type of background. "Uniform"
-									| for a uniform color. "SkyBox" for a skybox.
+Background				| {Type, Color} - Uniform background color.
+	Type="Uniform"	|
 -------------------------------------------------------------------------------------
-Background						| Color or TextureFile - Use Color for "Uniform", otherwise use
-									| TextureFile.
+Background				| {Type, Texture} - Skybox for the background.
+	Type="Skybox"		|
 -------------------------------------------------------------------------------------
-Camera						| Object{ImageWidth, ImageHeight, Position, LooAt, UpDir, FOV,
-									| Background}
+Camera						| {ImageWidth, ImageHeight, Position, LooAt, UpDir, FOV,
+									|  Background}
+-------------------------------------------------------------------------------------
+Lights						| []Light - A list of lights
+-------------------------------------------------------------------------------------
+Materials					| []Material - A list of materials
+-------------------------------------------------------------------------------------
+MaxRecursiveDepth	|	int - default: 1, min: 1
+-------------------------------------------------------------------------------------
+Objects						| []Object - A list of objects
+-------------------------------------------------------------------------------------
+
+
+Sub-Attributes
+Name								Type
+-------------------------------------------------------------------------------------
+Ambient						| Color or Texture - The ambiant light illuminating the object.
+-------------------------------------------------------------------------------------
+BRDF							| string - "Lambertian", "Blinn-Phong", "Cook-Torrance"
+									| default: "Blinn-Pong"
+									| Lambertian - Perfectly diffuse (no specular or ambient)
+									| Blinn-Phong - Diffuse + specular + ambient
+									| Cook-Torrance -
+-------------------------------------------------------------------------------------
+Color							| Color
+-------------------------------------------------------------------------------------
+ConstCoeff				| float
+-------------------------------------------------------------------------------------
+Diffuse						| Color or Texture - The diffuse color of the object.
+-------------------------------------------------------------------------------------
+Emissive					| Color or Texture - An object's own glow.
+-------------------------------------------------------------------------------------
+FOV								| float - default: 53 - Feild of fiew in degrees.
+-------------------------------------------------------------------------------------
+ImageHeigh				| int - min: 1 - Height of the image in pixels.
+-------------------------------------------------------------------------------------
+ImageWidth				| int - min: 1 - Width of the image in pixels.
+-------------------------------------------------------------------------------------
+Index							| float or Texture - default: 1.0003 - Index of refraction. Only
+									| the R value is used.
+-------------------------------------------------------------------------------------
+IsLiquid					| bool or Texture - Trasparent object overlap is only defined
+									| between a liquid and a non-liquid and behaves as if the
+									| non-liquid object is submerged in the liquid.
+-------------------------------------------------------------------------------------
+Light							| {Type, ...} - Other attributes depend on Type
+-------------------------------------------------------------------------------------
+Light							|	{Type, Color, Orientation} - A light at an infinate distance.
+	Type="Directional"
+-------------------------------------------------------------------------------------
+Light							| {Type, Color, Position, ConstCoeff, LinearCoeff, QuadCoeff} - A
+	Type="Point"		|	Point light whose attenuation is specified by the Coeff
+									| attributes as so (where r is distance):
+									| 1 / (ConstCoeff + r * LinearCoeff + r * r * QuadCoeff)
+-------------------------------------------------------------------------------------
+Light							|	{Type, Color, Position, Orientation, Angle, DropOff, FadeAngle} -
+	Type="Spot"			|	A spot light where Angle controls its width, DropOff controls how
+									| fast it fades at the edges, and FadeAngle controls when it starts
+									| to fade.
+-------------------------------------------------------------------------------------
+LinearCoeff				| float
+-------------------------------------------------------------------------------------
+LookAt						| Vector - What point the camera is looking at.
+-------------------------------------------------------------------------------------
+Material					| {Name, Parent, Emissive, Ambient, Specular, Reflective, Diffuse,
+									|  Transmissive, Smoothness, Index, Normal, IsLiquid, BRDF}
+-------------------------------------------------------------------------------------
+MaterialName			| Name
+-------------------------------------------------------------------------------------
+Name							| string - Unique identifier
+-------------------------------------------------------------------------------------
+Normal						| Texture - A normal map.
+-------------------------------------------------------------------------------------
+Object						| {Type, ...} - Other attributes depend on Type
+-------------------------------------------------------------------------------------
+Object						|	{Type, Translate, RotateAxis, Scale, Objects} - Applies the given
+	Type="Transform"| transformation to all Objects under it.
+-------------------------------------------------------------------------------------
+Object						|	{Type, MaterialName} - A shere of radius 1.
+	Type="Sphere"		|
+-------------------------------------------------------------------------------------
+Object						| {Type, MaterialName} - A box with sides of length 1.
+	Type="Box"			|
+-------------------------------------------------------------------------------------
+Object						| {Type, MaterialName} - A square in the XY-plane with sides of
+	Type="Square"		|	length 1.
+-------------------------------------------------------------------------------------
+Orientation				| Vector
+-------------------------------------------------------------------------------------
+Parent						| string - The Name of another Material to inherit attributes from.
+-------------------------------------------------------------------------------------
+Position					| Vector
+-------------------------------------------------------------------------------------
+QuadCoeff					| float
+-------------------------------------------------------------------------------------
+Reflective				| Color or Texture - The color the object reflects.
+-------------------------------------------------------------------------------------
+Smoothness				| float or Texture - Only the R value is used.
+-------------------------------------------------------------------------------------
+Specular					| Color or Texture - Color of the specular highlight.
+-------------------------------------------------------------------------------------
+Transmissive			| Color or Texture - The color allowed to pass through the object.
+-------------------------------------------------------------------------------------
+UpDir 						| Vector - default: [0, 1, 0] - The upward direction of the camera.
+-------------------------------------------------------------------------------------
+
+
+Types
+Type							  JSON type
 -------------------------------------------------------------------------------------
 Color							| [float, float, float] - default: [0, 0, 0] - RGB values between
 									|	0.0 and 1.0
 -------------------------------------------------------------------------------------
-FOV								| float - default: 53 - Feild of fiew in degrees.
--------------------------------------------------------------------------------------
-ImageHeight				| int - min: 1 - Height of the image in pixels.
--------------------------------------------------------------------------------------
-ImageWidth				| int - min: 1 - Width of the image in pixels.
--------------------------------------------------------------------------------------
-LookAt						| Vector - What point the camera is looking at.
--------------------------------------------------------------------------------------
-MaxRecursiveDepth	|	int - default: 1, min: 1
--------------------------------------------------------------------------------------
-Position					| Vector
--------------------------------------------------------------------------------------
-TextureFile
--------------------------------------------------------------------------------------
-UpDir							| Vector - default: [0, 1, 0] - The upward direction of the camera.
+Texture						| string - Path to a png or jpeg image.
 -------------------------------------------------------------------------------------
 Vector						|	[float, float, float] - default: [0, 0, 0]
 -------------------------------------------------------------------------------------

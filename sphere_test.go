@@ -69,7 +69,7 @@ func BenchmarkSphereIntersect(b *testing.B) {
 	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sphere.Intersect(ray)
+		sphere.Intersect(&ray)
 	}
 }
 
@@ -78,12 +78,15 @@ func BenchmarkSphereIntersectRandom(b *testing.B) {
 
 	min := -1.0
 	max := 1.0
-	rays := make([]Ray, 0)
+	rays := make([]*Ray, 0)
 	for i := 0; i < b.N; i++ {
 		x := rand.Float64()*(max-min) - max
 		y := rand.Float64()*(max-min) - max
-		ray := NewRay(PrimaryRay, mgl64.Vec3{x, y, 5}, mgl64.Vec3{0, 0, -1})
-		rays = append(rays, ray)
+		z := rand.Float64()*(max-min) - max
+		point := mgl64.Vec3{x, y, z}
+		dir := point.Mul(-1).Normalize()
+		ray := NewRay(PrimaryRay, point, dir)
+		rays = append(rays, &ray)
 	}
 
 	b.ResetTimer()
