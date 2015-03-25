@@ -23,12 +23,6 @@ type Ray struct {
 	Type   int
 	Origin mgl64.Vec3
 	Dir    mgl64.Vec3
-	DirInv mgl64.Vec3
-}
-
-func NewRay(t int, origin, direction mgl64.Vec3) Ray {
-	dir := direction.Normalize()
-	return Ray{t, origin, dir, mgl64.Vec3{1.0 / dir.X(), 1.0 / dir.Y(), 1.0 / dir.Z()}}
 }
 
 // At returns the point marked by the ray at t
@@ -43,26 +37,26 @@ func TransformVec3(m mgl64.Mat4, v mgl64.Vec3) mgl64.Vec3 {
 
 // Transform transforms the ray by the given matrix. The length of the ray after the
 // tranformation has uses so it is returned as well.
-func (r Ray) Transform(transform mgl64.Mat4) (newRay Ray, len float64) {
-	newOrigin := TransformVec3(transform, r.Origin)
-	newDir := TransformVec3(transform, r.Origin.Add(r.Dir)).Sub(newOrigin)
+func (r Ray) Transform(transform *mgl64.Mat4) (newRay Ray, len float64) {
+	newOrigin := TransformVec3(*transform, r.Origin)
+	newDir := TransformVec3(*transform, r.Origin.Add(r.Dir)).Sub(newOrigin).Normalize()
 	len = newDir.Len()
-	return NewRay(r.Type, newOrigin, newDir), len
+	return Ray{r.Type, newOrigin, newDir}, len
 }
 
 // Reflect returns the reflected ray at the given Intersection.
-func (r Ray) Reflect(isect Intersection) (reflRay Ray) {
+func (r Ray) Reflect(isect *Intersection) (reflRay Ray) {
 	mDir := r.Dir.Mul(-1)
 	nMD2 := isect.Normal.Dot(mDir) * 2
-	reflDir := isect.Normal.Mul(nMD2).Add(r.Dir)
-	return NewRay(ReflectionRay, r.At(isect.T), reflDir)
+	reflDir := isect.Normal.Mul(nMD2).Add(r.Dir).Normalize()
+	return Ray{ReflectionRay, r.At(isect.T), reflDir}
 }
 
 // Refract returns the refracted ray at the given intersection.
-func (r Ray) Refract(isect Intersection, n1, n2 float64) (refrRay Ray) {
+func (r Ray) Refract(isect *Intersection, n1, n2 float64) (refrRay Ray) {
 	nn := n1 / n2
 	cosθ1 := isect.Normal.Dot(r.Dir.Mul(-1))
 	cosθ2 := math.Sqrt(1 - nn*nn*(1-cosθ1*cosθ1))
-	refractDir := r.Dir.Mul(nn).Add(isect.Normal.Mul(nn*cosθ1 - cosθ2))
-	return NewRay(RefractionRay, r.At(isect.T), refractDir)
+	refractDir := r.Dir.Mul(nn).Add(isect.Normal.Mul(nn*cosθ1 - cosθ2)).Normalize()
+	return Ray{RefractionRay, r.At(isect.T), refractDir}
 }

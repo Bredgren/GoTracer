@@ -11,7 +11,7 @@ func TestSphereIntersect(t *testing.T) {
 	obj := NewObject(mgl64.Ident4(), nil)
 	sphere := Sphere{obj}
 
-	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
 	exp := ExpectedIsect{Intersection{obj, mgl64.Vec3{0, 0, 1}, 4, mgl64.Vec2{0.5, 0}}, true}
 	testIsect(t, "Origin", sphere, ray, exp)
 
@@ -66,7 +66,7 @@ func TestSphereIntersect(t *testing.T) {
 func BenchmarkSphereIntersect(b *testing.B) {
 	sphere := Sphere{NewObject(mgl64.Ident4(), nil)}
 
-	ray := NewRay(PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1})
+	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		sphere.Intersect(&ray)
@@ -85,7 +85,7 @@ func BenchmarkSphereIntersectRandom(b *testing.B) {
 		z := rand.Float64()*(max-min) - max
 		point := mgl64.Vec3{x, y, z}
 		dir := point.Mul(-1).Normalize()
-		ray := NewRay(PrimaryRay, point, dir)
+		ray := Ray{PrimaryRay, point, dir}
 		rays = append(rays, &ray)
 	}
 
