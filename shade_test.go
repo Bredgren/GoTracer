@@ -41,7 +41,7 @@ func BenchmarkLambertianBRDF(b *testing.B) {
 }
 
 type bdrfStruct struct {
-	ray *Ray
+	ray   *Ray
 	isect *Intersection
 }
 

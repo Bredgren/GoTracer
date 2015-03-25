@@ -1,8 +1,8 @@
 package gotracer
 
 import (
-// "math"
-// "math/rand"
+	// "math"
+	// "math/rand"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -17,7 +17,7 @@ const (
 )
 
 type DirectionalLight struct {
-	Color Color64
+	Color          Color64
 	OrientationInv mgl64.Vec3
 }
 
