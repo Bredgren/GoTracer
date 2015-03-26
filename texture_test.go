@@ -32,7 +32,6 @@ func TestTexture(t *testing.T) {
 	}
 }
 
-
 func BenchmarkColorAt(b *testing.B) {
 	var tex *Texture = NewTexture("texture/test.png")
 
