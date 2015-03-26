@@ -13,10 +13,10 @@ func TestBlinnPhongBRDF(t *testing.T) {
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
 	expColor := Color64{1, 0, 0}
 	material := Material{
-		Emissive: UniformColor{Color64{}},
-		Ambient: UniformColor{Color64{}},
-		Diffuse: UniformColor{expColor},
-		Specular: UniformColor{Color64{}},
+		Emissive:   UniformColor{Color64{}},
+		Ambient:    UniformColor{Color64{}},
+		Diffuse:    UniformColor{expColor},
+		Specular:   UniformColor{Color64{}},
 		Smoothness: UniformColor{Color64{}},
 	}
 	obj := NewObject(mgl64.Ident4(), &material)
@@ -37,10 +37,10 @@ func BenchmarkBlinnPhongBRDF(b *testing.B) {
 	scene := Scene{Lights: lights}
 	expColor := Color64{1, 0, 0}
 	material := Material{
-		Emissive: UniformColor{Color64{}},
-		Ambient: UniformColor{Color64{}},
-		Diffuse: UniformColor{expColor},
-		Specular: UniformColor{Color64{}},
+		Emissive:   UniformColor{Color64{}},
+		Ambient:    UniformColor{Color64{}},
+		Diffuse:    UniformColor{expColor},
+		Specular:   UniformColor{Color64{}},
 		Smoothness: UniformColor{Color64{}},
 	}
 	obj := NewObject(mgl64.Ident4(), &material)
@@ -61,10 +61,10 @@ func BenchmarkBlinnPhongBRDFRandom(b *testing.B) {
 	scene := Scene{Lights: lights}
 	expColor := Color64{1, 0, 0}
 	material := Material{
-		Emissive: UniformColor{Color64{}},
-		Ambient: UniformColor{Color64{}},
-		Diffuse: UniformColor{expColor},
-		Specular: UniformColor{Color64{}},
+		Emissive:   UniformColor{Color64{}},
+		Ambient:    UniformColor{Color64{}},
+		Diffuse:    UniformColor{expColor},
+		Specular:   UniformColor{Color64{}},
 		Smoothness: UniformColor{Color64{}},
 	}
 	obj := NewObject(mgl64.Ident4(), &material)

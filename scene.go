@@ -1,8 +1,8 @@
 package gotracer
 
 import (
-// "image/color"
-// "math"
+	// "image/color"
+	// "math"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -14,8 +14,8 @@ type Scene struct {
 	// AAMaxDivisions int
 	// AAThreshold float64
 	AmbientLight Color64
-	Lights []Light
-	Objects []Intersecter
+	Lights       []Light
+	Objects      []Intersecter
 	// Material map[string]*Material
 }
 

@@ -17,8 +17,8 @@ type Object struct {
 	Transform    mgl64.Mat4
 	TransformInv mgl64.Mat4
 	// T3it = Transform.Mat3().Inv().Transpose()
-	T3it         mgl64.Mat3
-	Material     *Material
+	T3it     mgl64.Mat3
+	Material *Material
 }
 
 func NewObject(transform mgl64.Mat4, material *Material) *Object {

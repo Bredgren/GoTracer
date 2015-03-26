@@ -72,24 +72,24 @@ func BlinnPhongBRDF(scene *Scene, ray *Ray, isect *Intersection) (color Color64)
 // Calculate Lr(wr) = sum for each light i, Li(wi) * BRDF(wi, wr) * (wi . isect.Normal)
 // where wr = -ray, wi = direction to light, Li(wi) = radiance from light source,
 // func Shade(lights []*Light, ray Ray, isect Intersection) (color Color64) {
-	// var point mgl64.Vec3 = ray.At(params.isect.T)
-	// uv := isect.UVCoords
-	// colorVec := mgl64.Vec3(m.Emissive.ColorAt(uv)).Add(mgl64.Vec3(m.Ambient.ColorAt(uv).Product(scene.AmbientLight)))
-	// for _, light := range scene.Lights {
-	// 	attenuation := light.ShadowAttenuation(point).Mul(light.DistanceAttenuation(point))
-	// 	lightDir := light.Direction(point)
-	// 	shade := isect.Normal.Dot(lightDir)
-	// 	if shade > 0 {
-	// 		h := lightDir.Sub(ray.Direction).Normalize()
-	// 		s := mgl64.Vec3(m.Specular.ColorAt(uv)).Mul(math.Pow(isect.Normal.Dot(h), m.Gloss.ColorAt(uv)))
-	// 		d := mgl64.Vec3(m.Diffuse.ColorAt(uv)).Mul(shade).Add(s)
-	// 		a := Color64(attenuation).Product(Color64(d))
-	// 		contribution := mgl64.Vec3(light.GetColor().Product(a))
-	// 		colorVec = colorVec.Add(contribution)
-	// 	}
-	// }
+// var point mgl64.Vec3 = ray.At(params.isect.T)
+// uv := isect.UVCoords
+// colorVec := mgl64.Vec3(m.Emissive.ColorAt(uv)).Add(mgl64.Vec3(m.Ambient.ColorAt(uv).Product(scene.AmbientLight)))
+// for _, light := range scene.Lights {
+// 	attenuation := light.ShadowAttenuation(point).Mul(light.DistanceAttenuation(point))
+// 	lightDir := light.Direction(point)
+// 	shade := isect.Normal.Dot(lightDir)
+// 	if shade > 0 {
+// 		h := lightDir.Sub(ray.Direction).Normalize()
+// 		s := mgl64.Vec3(m.Specular.ColorAt(uv)).Mul(math.Pow(isect.Normal.Dot(h), m.Gloss.ColorAt(uv)))
+// 		d := mgl64.Vec3(m.Diffuse.ColorAt(uv)).Mul(shade).Add(s)
+// 		a := Color64(attenuation).Product(Color64(d))
+// 		contribution := mgl64.Vec3(light.GetColor().Product(a))
+// 		colorVec = colorVec.Add(contribution)
+// 	}
+// }
 
-	// return Color64(colorVec)
+// return Color64(colorVec)
 // 	return Color64{0, 0, 0}
 // }
 
