@@ -1,14 +1,45 @@
 package gotracer
 
-// import (
-// 	"testing"
+import (
+	"testing"
 
-// 	"github.com/go-gl/mathgl/mgl64"
-// )
+	"github.com/go-gl/mathgl/mgl64"
+)
 
-// func TestTraceRay(t *testing.T) {
+func TestSceneIntersect(t *testing.T) {
+	scene := Scene{}
+	sphere := Sphere{NewObject(mgl64.Ident4(), nil)}
+	scene.Objects = append(scene.Objects, &sphere)
 
-// }
+	isect := Intersection{}
+	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
+	expIsect := Intersection{sphere.Object, mgl64.Vec3{0, 0, 1}, 4, mgl64.Vec2{0.5, 0}}
+
+	hit := scene.Intersect(&ray, &isect)
+	if !hit {
+		t.Errorf("Expected intersection")
+	}
+	if !isectEqual(isect, expIsect) {
+		t.Errorf("Incorrect intersection. Expected %v, got %v", expIsect, isect)
+	}
+
+	sphere.Object = NewObject(mgl64.Translate3D(2, 0, 0), nil)
+	hit = scene.Intersect(&ray, &isect)
+	if hit {
+		t.Errorf("Expected no intersection")
+	}
+
+	ray.Origin = mgl64.Vec3{2, 0, 5}
+	expIsect.Object = sphere.Object
+
+	hit = scene.Intersect(&ray, &isect)
+	if !hit {
+		t.Errorf("Expected intersection")
+	}
+	if !isectEqual(isect, expIsect) {
+		t.Errorf("Incorrect intersection. Expected %v, got %v", expIsect, isect)
+	}
+}
 
 // func checkSceneIsect(t *testing.T, isect Intersection, expObj SceneObject, expNormal mgl64.Vec3, expT float64) {
 // 	if isect.Object != expObj {

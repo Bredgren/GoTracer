@@ -4,7 +4,7 @@ import (
 // "image/color"
 // "math"
 
-// "github.com/go-gl/mathgl/mgl64"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 type Scene struct {
@@ -13,9 +13,9 @@ type Scene struct {
 	// AdaptiveThreshold float64
 	// AAMaxDivisions int
 	// AAThreshold float64
-	// AmbientLight Color64
-	// Lights []Light
-	// Objects []SceneObject
+	AmbientLight Color64
+	Lights []Light
+	Objects []Intersecter
 	// Material map[string]*Material
 }
 
@@ -159,24 +159,25 @@ type Scene struct {
 // 	return Color64{}
 // }
 
-// // Intersect finds the first object that the given Ray intersects. Found will be
-// // false if no intersection was found.
-// func (scene *Scene) Intersect(ray Ray) (isect Intersection, found bool) {
-// 	for _, object := range scene.Objects {
-// 		inv := object.GetInvTransform()
-// 		localRay, length := ray.Transform(inv)
-// 		if i, hit := object.Intersect(localRay); hit {
-// 			i.T /= length
-// 			if !found || i.T < isect.T {
-// 				found = true
-// 				normInverse := object.GetTransform().Mat3().Inv().Transpose()
-// 				i.Normal = normInverse.Mul3x1(i.Normal).Normalize()
-// 				isect = i
-// 			}
-// 		}
-// 	}
-// 	return
-// }
+// Intersect finds the first object that the given Ray intersects. hit will be
+// false if no intersection was found.
+func (scene *Scene) Intersect(ray *Ray, isect *Intersection) (found bool) {
+	localIsect := Intersection{}
+	for _, object := range scene.Objects {
+		var inv mgl64.Mat4 = object.GetObject().TransformInv
+		localRay, length := ray.Transform(&inv)
+		if hit := object.Intersect(&localRay, &localIsect); hit {
+			localIsect.T /= length
+			if !found || localIsect.T < isect.T {
+				found = true
+				var t3it mgl64.Mat3 = object.GetObject().T3it
+				localIsect.Normal = t3it.Mul3x1(localIsect.Normal).Normalize()
+				*isect = localIsect
+			}
+		}
+	}
+	return
+}
 
 // func TotalInternalReflection(outsideIndex, insideIndex float64, normal, direction mgl64.Vec3) bool {
 // 	criticalAngle := math.Asin(insideIndex / outsideIndex)

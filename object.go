@@ -16,11 +16,14 @@ type Intersecter interface {
 type Object struct {
 	Transform    mgl64.Mat4
 	TransformInv mgl64.Mat4
+	// T3it = Transform.Mat3().Inv().Transpose()
+	T3it         mgl64.Mat3
 	Material     *Material
 }
 
 func NewObject(transform mgl64.Mat4, material *Material) *Object {
-	return &Object{transform, transform.Inv(), material}
+	t3it := transform.Mat3().Inv().Transpose()
+	return &Object{transform, transform.Inv(), t3it, material}
 }
 
 // type BoxObject struct {

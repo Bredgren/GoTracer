@@ -1,6 +1,8 @@
 package gotracer
 
 import (
+	"math"
+
 	"github.com/go-gl/mathgl/mgl64"
 )
 
@@ -15,20 +17,20 @@ import (
 // wi - normalized negative incomming light direction (toward light)
 // wr - normalized outgoing direction (toward camera)
 // type BRDF func(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3
-type BRDF func(lights []Light, ray *Ray, isect *Intersection) (color Color64)
+type BRDF func(scene *Scene, ray *Ray, isect *Intersection) (color Color64)
 
 // func LambertianBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
 // 	kd := isect.Object.Material.Diffuse.ColorAt(isect.UVCoords)
 // 	return mgl64.Vec3(kd).Mul(wi.Dot(isect.Normal))
 // }
-func LambertianBRDF(lights []Light, ray *Ray, isect *Intersection) (color Color64) {
+func LambertianBRDF(scene *Scene, ray *Ray, isect *Intersection) (color Color64) {
 	var point mgl64.Vec3 = ray.At(isect.T)
 	var kd Color64 = isect.Object.Material.Diffuse.ColorAt(isect.UVCoords)
-	for _, light := range lights {
+	for _, light := range scene.Lights {
 		var cosTheta float64 = isect.Normal.Dot(light.Direction(point))
 		if cosTheta > 0 {
 			var diffuse Color64 = kd.Mul(cosTheta)
-			var contribution Color64 = diffuse.Product(light.Attenuation(point))
+			var contribution Color64 = diffuse.Product(light.Attenuation(scene, point))
 			color = color.Add(contribution)
 		}
 	}
@@ -40,6 +42,28 @@ func LambertianBRDF(lights []Light, ray *Ray, isect *Intersection) (color Color6
 // 	// specular := ...
 // 	return mgl64.Vec3{0, 0, 0}
 // }
+func BlinnPhongBRDF(scene *Scene, ray *Ray, isect *Intersection) (color Color64) {
+	var point mgl64.Vec3 = ray.At(isect.T)
+	var mat *Material = isect.Object.Material
+	var ke Color64 = mat.Emissive.ColorAt(isect.UVCoords)
+	var ka Color64 = mat.Ambient.ColorAt(isect.UVCoords)
+	var kd Color64 = mat.Diffuse.ColorAt(isect.UVCoords)
+	var ks Color64 = mat.Specular.ColorAt(isect.UVCoords)
+	var shininess float64 = mat.Smoothness.ColorAt(isect.UVCoords).R() * 100
+	color = ke.Add(ka.Product(scene.AmbientLight))
+	for _, light := range scene.Lights {
+		var lightDir mgl64.Vec3 = light.Direction(point)
+		var cosTheta float64 = isect.Normal.Dot(lightDir)
+		if cosTheta > 0 {
+			var h mgl64.Vec3 = lightDir.Sub(ray.Dir).Normalize()
+			var specular Color64 = ks.Mul(math.Pow(isect.Normal.Dot(h), shininess))
+			var diffuse Color64 = kd.Mul(cosTheta)
+			var contribution Color64 = diffuse.Add(specular)
+			color = color.Add(contribution.Product(light.Attenuation(scene, point)))
+		}
+	}
+	return
+}
 
 // func TorranceSparrowBRDF(wi, wr mgl64.Vec3, isect Intersection) mgl64.Vec3 {
 // 	return mgl64.Vec3{0, 0, 0}
@@ -47,7 +71,7 @@ func LambertianBRDF(lights []Light, ray *Ray, isect *Intersection) (color Color6
 
 // Calculate Lr(wr) = sum for each light i, Li(wi) * BRDF(wi, wr) * (wi . isect.Normal)
 // where wr = -ray, wi = direction to light, Li(wi) = radiance from light source,
-func Shade(lights []*Light, ray Ray, isect Intersection) (color Color64) {
+// func Shade(lights []*Light, ray Ray, isect Intersection) (color Color64) {
 	// var point mgl64.Vec3 = ray.At(params.isect.T)
 	// uv := isect.UVCoords
 	// colorVec := mgl64.Vec3(m.Emissive.ColorAt(uv)).Add(mgl64.Vec3(m.Ambient.ColorAt(uv).Product(scene.AmbientLight)))
@@ -66,8 +90,8 @@ func Shade(lights []*Light, ray Ray, isect Intersection) (color Color64) {
 	// }
 
 	// return Color64(colorVec)
-	return Color64{0, 0, 0}
-}
+// 	return Color64{0, 0, 0}
+// }
 
 // func (m *Material) ShadeBlinnPhong(scene *Scene, ray Ray, isect Intersection) (color Color64) {
 // 	point := ray.At(isect.T)

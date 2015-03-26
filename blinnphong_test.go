@@ -7,12 +7,18 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
-func TestLambertianBRDF(t *testing.T) {
+func TestBlinnPhongBRDF(t *testing.T) {
 	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
 	scene := Scene{Lights: lights}
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
 	expColor := Color64{1, 0, 0}
-	material := Material{Diffuse: UniformColor{expColor}}
+	material := Material{
+		Emissive: UniformColor{Color64{}},
+		Ambient: UniformColor{Color64{}},
+		Diffuse: UniformColor{expColor},
+		Specular: UniformColor{Color64{}},
+		Smoothness: UniformColor{Color64{}},
+	}
 	obj := NewObject(mgl64.Ident4(), &material)
 	sphere := Sphere{obj}
 	isect := Intersection{}
@@ -20,17 +26,23 @@ func TestLambertianBRDF(t *testing.T) {
 	if !hit {
 		t.Fatal("didn't hit")
 	}
-	color := LambertianBRDF(&scene, &ray, &isect)
+	color := BlinnPhongBRDF(&scene, &ray, &isect)
 	if color != expColor {
 		t.Errorf("Incorrect color. Expected %v, got %v", expColor, color)
 	}
 }
 
-func BenchmarkLambertianBRDF(b *testing.B) {
+func BenchmarkBlinnPhongBRDF(b *testing.B) {
 	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
 	scene := Scene{Lights: lights}
 	expColor := Color64{1, 0, 0}
-	material := Material{Diffuse: UniformColor{expColor}}
+	material := Material{
+		Emissive: UniformColor{Color64{}},
+		Ambient: UniformColor{Color64{}},
+		Diffuse: UniformColor{expColor},
+		Specular: UniformColor{Color64{}},
+		Smoothness: UniformColor{Color64{}},
+	}
 	obj := NewObject(mgl64.Ident4(), &material)
 	sphere := Sphere{obj}
 
@@ -40,15 +52,21 @@ func BenchmarkLambertianBRDF(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		LambertianBRDF(&scene, &ray, &isect)
+		BlinnPhongBRDF(&scene, &ray, &isect)
 	}
 }
 
-func BenchmarkLambertianBRDFRandom(b *testing.B) {
+func BenchmarkBlinnPhongBRDFRandom(b *testing.B) {
 	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
 	scene := Scene{Lights: lights}
 	expColor := Color64{1, 0, 0}
-	material := Material{Diffuse: UniformColor{expColor}}
+	material := Material{
+		Emissive: UniformColor{Color64{}},
+		Ambient: UniformColor{Color64{}},
+		Diffuse: UniformColor{expColor},
+		Specular: UniformColor{Color64{}},
+		Smoothness: UniformColor{Color64{}},
+	}
 	obj := NewObject(mgl64.Ident4(), &material)
 	sphere := Sphere{obj}
 
@@ -69,6 +87,6 @@ func BenchmarkLambertianBRDFRandom(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		LambertianBRDF(&scene, tests[i].ray, tests[i].isect)
+		BlinnPhongBRDF(&scene, tests[i].ray, tests[i].isect)
 	}
 }

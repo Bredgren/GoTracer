@@ -27,11 +27,11 @@ type Material struct {
 	Name         string
 	Emissive     MaterialAttribute
 	Ambient      MaterialAttribute
+	Diffuse      MaterialAttribute
 	Specular     MaterialAttribute
 	Reflective   MaterialAttribute
-	Diffuse      MaterialAttribute
-	Transmissive MaterialAttribute
 	Smoothness   MaterialAttribute
+	Transmissive MaterialAttribute
 	Index        MaterialAttribute
 	Normal       MaterialAttribute
 	IsLiquid     MaterialAttribute

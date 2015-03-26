@@ -8,26 +8,38 @@ import (
 )
 
 type Light interface {
-	Attenuation(point mgl64.Vec3) Color64
+	Attenuation(scene *Scene, point mgl64.Vec3) Color64
 	Direction(from mgl64.Vec3) mgl64.Vec3
 }
 
-const (
-	DirectionalLightDist = 1e10
-)
+// ShadowAttenuation takes the unnormalized direction to the light so we know when
+// we've "hit" it.
+func ShadowAttenuation(scene *Scene, dir mgl64.Vec3, point mgl64.Vec3) Color64 {
+	var dist float64 = dir.Len()
+	dir = dir.Normalize()
 
-type DirectionalLight struct {
-	Color          Color64
-	OrientationInv mgl64.Vec3
-}
+	atten := Color64{1, 1, 1}
+	distTraveled := 0.0
 
-func (l DirectionalLight) Attenuation(point mgl64.Vec3) Color64 {
-	// 	return ShadowAttenuation(d.Scene, d.Direction(point).Mul(DirectionalLightDist), point)
-	return l.Color
-}
+	shadowRay := Ray{ShadowRay, point, dir}
+	isect := Intersection{}
+	hit := scene.Intersect(&shadowRay, &isect)
+	for hit && atten.Len2() > Rayε && distTraveled + isect.T < dist {
+		distTraveled += isect.T
+		material := isect.Object.Material
+		if isect.Normal.Dot(dir) > 0 {
+			// Exiting object
+			// atten = atten.Product(material.BeersTrans(isect))
+		} else {
+			// Entering object
+			atten = atten.Product(material.Transmissive.ColorAt(isect.UVCoords))
+		}
 
-func (l DirectionalLight) Direction(from mgl64.Vec3) mgl64.Vec3 {
-	return l.OrientationInv
+		shadowRay.Origin = shadowRay.At(isect.T)
+		hit = scene.Intersect(&shadowRay, &isect)
+	}
+
+	return atten
 }
 
 // type Light interface {
@@ -36,35 +48,6 @@ func (l DirectionalLight) Direction(from mgl64.Vec3) mgl64.Vec3 {
 // 	DistanceAttenuation(point mgl64.Vec3) float64
 // 	ShadowAttenuation(point mgl64.Vec3) mgl64.Vec3
 // 	Attenuation(point mgl64.Vec3) mgl64.Vec3
-// }
-
-// // ShadowAttenuation takes the unnormalized direction to the light so we know when
-// // we've "hit" it.
-// func ShadowAttenuation(scene *Scene, dir mgl64.Vec3, point mgl64.Vec3) mgl64.Vec3 {
-// 	dist := dir.Len()
-// 	dir = dir.Normalize()
-
-// 	atten := Color64{1, 1, 1}
-// 	distTraveled := 0.0
-
-// 	shadowRay := NewRay(ShadowRay, point, dir)
-// 	isect, found := scene.Intersect(shadowRay)
-// 	for found && atten.Len2() > Rayε && distTraveled + isect.T < dist {
-// 		distTraveled += isect.T
-// 		material := scene.Material[isect.Object.GetMaterialName()]
-// 		if isect.Normal.Dot(dir) > 0 {
-// 			// Exiting object
-// 			atten = atten.Product(material.BeersTrans(isect))
-// 		} else {
-// 			// Entering object
-// 			atten = atten.Product(material.GetTransmissiveColor(isect))
-// 		}
-
-// 		shadowRay = NewRay(ShadowRay, shadowRay.At(isect.T), dir)
-// 		isect, found = scene.Intersect(shadowRay)
-// 	}
-
-// 	return mgl64.Vec3(atten)
 // }
 
 // type PointLight struct {
