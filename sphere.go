@@ -15,7 +15,7 @@ func (s Sphere) GetObject() *Object {
 	return s.Object
 }
 
-func (s Sphere) Intersect(r *Ray) (isect Intersection, hit bool) {
+func (s Sphere) Intersect(r *Ray, isect *Intersection) (hit bool) {
 	isect.Object = s.Object
 
 	// -(d . o) +- sqrt((d . o)^2 - (d . d)((o . o) - 1)) / (d . d)
@@ -25,14 +25,14 @@ func (s Sphere) Intersect(r *Ray) (isect Intersection, hit bool) {
 
 	discriminant := do*do - dd*(oo-1)
 	if discriminant < 0 {
-		return isect, false
+		return false
 	}
 
 	discriminant = math.Sqrt(discriminant)
 
 	t2 := (-do + discriminant) / dd
 	if t2 <= Rayε {
-		return isect, false
+		return false
 	}
 
 	t1 := (-do - discriminant) / dd
@@ -44,7 +44,7 @@ func (s Sphere) Intersect(r *Ray) (isect Intersection, hit bool) {
 		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
 		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
 		isect.UVCoords = mgl64.Vec2{u, v}
-		return isect, true
+		return true
 	}
 
 	if t2 > Rayε {
@@ -53,8 +53,8 @@ func (s Sphere) Intersect(r *Ray) (isect Intersection, hit bool) {
 		u := 0.5 + (math.Atan2(isect.Normal.Y(), isect.Normal.X()) / (2 * math.Pi))
 		v := 0.5 - (math.Asin(isect.Normal.Z()) / math.Pi)
 		isect.UVCoords = mgl64.Vec2{u, v}
-		return isect, true
+		return true
 	}
 
-	return isect, false
+	return false
 }

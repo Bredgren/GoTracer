@@ -65,16 +65,18 @@ func TestSphereIntersect(t *testing.T) {
 
 func BenchmarkSphereIntersect(b *testing.B) {
 	sphere := Sphere{NewObject(mgl64.Ident4(), nil)}
+	isect := Intersection{}
 
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sphere.Intersect(&ray)
+		sphere.Intersect(&ray, &isect)
 	}
 }
 
 func BenchmarkSphereIntersectRandom(b *testing.B) {
 	sphere := Sphere{NewObject(mgl64.Ident4(), nil)}
+	isect := Intersection{}
 
 	min := -1.0
 	max := 1.0
@@ -91,6 +93,6 @@ func BenchmarkSphereIntersectRandom(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sphere.Intersect(rays[i])
+		sphere.Intersect(rays[i], &isect)
 	}
 }

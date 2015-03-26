@@ -20,7 +20,8 @@ func isectEqual(i1, i2 Intersection) bool {
 
 // exp.isect.Object = nil means ignore isect.
 func testIsect(t *testing.T, desc string, itr Intersecter, ray Ray, exp ExpectedIsect) {
-	isect, hit := itr.Intersect(&ray)
+	isect := Intersection{}
+	hit := itr.Intersect(&ray, &isect)
 	if !hit && hit == exp.hit {
 		return // isect is undefined if we don't hit
 	}

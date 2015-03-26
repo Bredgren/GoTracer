@@ -13,12 +13,12 @@ import (
 )
 
 // textures is a cache of the textures loaded already.
-var textures map[string]*image.Image = make(map[string]*image.Image)
+var textures map[string]image.Image = make(map[string]image.Image)
 
 // Texture is a type that satisifies the MaterialAttribute interface. It enables the
 // use of a png or jpeg image to specify an attribute of a material.
 type Texture struct {
-	tex    *image.Image
+	tex    image.Image
 	Width  float64
 	Height float64
 }
@@ -39,10 +39,10 @@ func NewTexture(fileName string) *Texture {
 		misc.Check(err)
 		img, _, err := image.Decode(file)
 		misc.Check(err)
-		t.tex = &img
-		textures[fileName] = &img
+		t.tex = img
+		textures[fileName] = img
 	}
-	bounds := (*t.tex).Bounds()
+	bounds := t.tex.Bounds()
 	t.Width = float64(bounds.Max.X - bounds.Min.X)
 	t.Height = float64(bounds.Max.Y - bounds.Min.Y)
 	return &t
@@ -56,12 +56,11 @@ func (t *Texture) ColorAt(coord mgl64.Vec2) (color Color64) {
 	var fy float64 = math.Floor(y)
 	var i int = int(fx)
 	var j int = int(fy)
-	var img image.Image = *(t.tex)
 
-	ulr, ulg, ulb, _ := img.At(i, j).RGBA()
-	urr, urg, urb, _ := img.At(i+1, j).RGBA()
-	llr, llg, llb, _ := img.At(i, j+1).RGBA()
-	lrr, lrg, lrb, _ := img.At(i+1, j+1).RGBA()
+	ulr, ulg, ulb, _ := t.tex.At(i, j).RGBA()
+	urr, urg, urb, _ := t.tex.At(i+1, j).RGBA()
+	llr, llg, llb, _ := t.tex.At(i, j+1).RGBA()
+	lrr, lrg, lrb, _ := t.tex.At(i+1, j+1).RGBA()
 
 	var dx float64 = x - fx
 	var dy float64 = y - fy

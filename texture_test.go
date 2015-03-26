@@ -31,3 +31,15 @@ func TestTexture(t *testing.T) {
 		}
 	}
 }
+
+
+func BenchmarkColorAt(b *testing.B) {
+	var tex *Texture = NewTexture("texture/test.png")
+
+	coord := mgl64.Vec2{0, 0}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		tex.ColorAt(coord)
+	}
+}
