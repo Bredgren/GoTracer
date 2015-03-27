@@ -11,18 +11,20 @@ const (
 )
 
 var (
-	DirectionalLightDefaultColor = Color64{1, 1, 1}
+	DirectionalLightDefaultColor       = Color64{1, 1, 1}
 	DirectionalLightDefaultOrientation = mgl64.Vec3{0, -1, 0}
 )
 
+// DirectionalLight simulates a point light at an infinate distance. The opposite
+// direction to it's orientation is used because more useful and saves work
 type DirectionalLight struct {
 	Color          Color64
-	// The opposite direction to it's orientation is more useful
 	OrientationInv mgl64.Vec3
+	Dir            mgl64.Vec3
 }
 
 func (l DirectionalLight) Attenuation(scene *Scene, point mgl64.Vec3) Color64 {
-	return ShadowAttenuation(scene, l.OrientationInv.Mul(DirectionalLightDist), point)
+	return ShadowAttenuation(scene, l.Dir, point)
 }
 
 func (l DirectionalLight) Direction(from mgl64.Vec3) mgl64.Vec3 {
@@ -33,8 +35,8 @@ func directionalLightParser(scene *Scene, value interface{}) {
 	log.Println("directionalLightParser", value)
 	v := value.(map[string]interface{})
 	light := DirectionalLight{
-		DirectionalLightDefaultColor,
-		DirectionalLightDefaultOrientation,
+		Color:          DirectionalLightDefaultColor,
+		OrientationInv: DirectionalLightDefaultOrientation.Mul(-1),
 	}
 	for attribute, value := range v {
 		switch attribute {
@@ -56,6 +58,7 @@ func directionalLightParser(scene *Scene, value interface{}) {
 			}
 		}
 	}
+	light.Dir = light.OrientationInv.Mul(DirectionalLightDist)
 	scene.Lights = append(scene.Lights, light)
 }
 

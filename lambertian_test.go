@@ -8,7 +8,8 @@ import (
 )
 
 func TestLambertianBRDF(t *testing.T) {
-	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
+	orient := mgl64.Vec3{0, 0, 1}
+	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, orient, orient.Mul(DirectionalLightDist)}}
 	scene := Scene{Lights: lights}
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
 	expColor := Color64{1, 0, 0}
@@ -27,7 +28,8 @@ func TestLambertianBRDF(t *testing.T) {
 }
 
 func BenchmarkLambertianBRDF(b *testing.B) {
-	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
+	orient := mgl64.Vec3{0, 0, 1}
+	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, orient, orient.Mul(DirectionalLightDist)}}
 	scene := Scene{Lights: lights}
 	expColor := Color64{1, 0, 0}
 	material := Material{Diffuse: UniformColor{expColor}}
@@ -45,7 +47,8 @@ func BenchmarkLambertianBRDF(b *testing.B) {
 }
 
 func BenchmarkLambertianBRDFRandom(b *testing.B) {
-	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
+	orient := mgl64.Vec3{0, 0, 1}
+	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, orient, orient.Mul(DirectionalLightDist)}}
 	scene := Scene{Lights: lights}
 	expColor := Color64{1, 0, 0}
 	material := Material{Diffuse: UniformColor{expColor}}

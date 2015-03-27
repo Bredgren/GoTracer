@@ -8,7 +8,8 @@ import (
 )
 
 func TestBlinnPhongBRDF(t *testing.T) {
-	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
+	orient := mgl64.Vec3{0, 0, 1}
+	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, orient, orient.Mul(DirectionalLightDist)}}
 	scene := Scene{Lights: lights}
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
 	expColor := Color64{1, 0, 0}
@@ -33,7 +34,8 @@ func TestBlinnPhongBRDF(t *testing.T) {
 }
 
 func BenchmarkBlinnPhongBRDF(b *testing.B) {
-	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
+	orient := mgl64.Vec3{0, 0, 1}
+	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, orient, orient.Mul(DirectionalLightDist)}}
 	scene := Scene{Lights: lights}
 	expColor := Color64{1, 0, 0}
 	material := Material{
@@ -57,7 +59,8 @@ func BenchmarkBlinnPhongBRDF(b *testing.B) {
 }
 
 func BenchmarkBlinnPhongBRDFRandom(b *testing.B) {
-	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, mgl64.Vec3{0, 0, 1}}}
+	orient := mgl64.Vec3{0, 0, 1}
+	lights := []Light{&DirectionalLight{Color64{1, 1, 1}, orient, orient.Mul(DirectionalLightDist)}}
 	scene := Scene{Lights: lights}
 	expColor := Color64{1, 0, 0}
 	material := Material{

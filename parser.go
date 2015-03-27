@@ -1,12 +1,12 @@
 package gotracer
 
 import (
-// "encoding/json"
-"log"
-// "io/ioutil"
+	// "encoding/json"
+	"log"
+	// "io/ioutil"
 
-// "github.com/davecgh/go-spew/spew"
-"github.com/go-gl/mathgl/mgl64"
+	// "github.com/davecgh/go-spew/spew"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 type SceneSettings map[string]interface{}

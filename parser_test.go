@@ -2,8 +2,8 @@ package gotracer
 
 import (
 	"encoding/json"
-	"testing"
 	"io/ioutil"
+	"testing"
 
 	// "github.com/go-gl/mathgl/mgl64"
 	"github.com/Bredgren/misc"

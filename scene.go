@@ -22,13 +22,14 @@ type Scene struct {
 	Lights       []Light
 	Objects      []Intersecter
 }
+
 var scene *Scene
 
 func NewScene() *Scene {
 	return &Scene{
 		AmbientLight: AmbientLightDefault,
-		Lights: make([]Light, 0),
-		Objects: make([]Intersecter, 0),
+		Lights:       make([]Light, 0),
+		Objects:      make([]Intersecter, 0),
 	}
 }
 
