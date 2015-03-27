@@ -2,14 +2,50 @@ package gotracer
 
 import (
 // "encoding/json"
-// "log"
+"log"
 // "io/ioutil"
 
 // "github.com/davecgh/go-spew/spew"
-// "github.com/go-gl/mathgl/mgl64"
+"github.com/go-gl/mathgl/mgl64"
 )
 
-type sceneSettings map[string]interface{}
+type SceneSettings map[string]interface{}
+
+type Parser func(scene *Scene, value interface{})
+
+var SettingParsers map[string]Parser = make(map[string]Parser)
+
+func ParseSettings(settings SceneSettings) *Scene {
+	var scene *Scene = NewScene()
+	for attribute, value := range settings {
+		if fn := SettingParsers[attribute]; fn != nil {
+			fn(scene, value)
+		} else {
+			log.Printf("Warning: unknown attribute '%s'", attribute)
+		}
+	}
+	return scene
+}
+
+// ParseColor64 takes an []interface{} which it assumes is actually a [3]float64
+// and converts it to a Color64.
+func ParseColor64(floatArray []interface{}) Color64 {
+	return Color64{
+		floatArray[0].(float64),
+		floatArray[1].(float64),
+		floatArray[2].(float64),
+	}
+}
+
+// ParseVector takes an []interface{} which it assumes is actually a [3]float64
+// and converts it to a mgl64.Vec3.
+func ParseVector(floatArray []interface{}) mgl64.Vec3 {
+	return mgl64.Vec3{
+		floatArray[0].(float64),
+		floatArray[1].(float64),
+		floatArray[2].(float64),
+	}
+}
 
 // type renderSettings struct {
 // 	ImageWidth int

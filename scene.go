@@ -3,8 +3,13 @@ package gotracer
 import (
 	// "image/color"
 	// "math"
+	"log"
 
 	"github.com/go-gl/mathgl/mgl64"
+)
+
+var (
+	AmbientLightDefault = Color64{0, 0, 0}
 )
 
 type Scene struct {
@@ -16,7 +21,15 @@ type Scene struct {
 	AmbientLight Color64
 	Lights       []Light
 	Objects      []Intersecter
-	// Material map[string]*Material
+}
+var scene *Scene
+
+func NewScene() *Scene {
+	return &Scene{
+		AmbientLight: AmbientLightDefault,
+		Lights: make([]Light, 0),
+		Objects: make([]Intersecter, 0),
+	}
 }
 
 // func (scene *Scene) TracePixel(x, y int) color.NRGBA {
@@ -184,3 +197,33 @@ func (scene *Scene) Intersect(ray *Ray, isect *Intersection) (found bool) {
 // 	angle := math.Acos(normal.Dot(direction))
 // 	return angle > criticalAngle
 // }
+
+func ambientLightParser(scene *Scene, value interface{}) {
+	log.Println("ambientLightParser", value)
+	scene.AmbientLight = ParseColor64(value.([]interface{}))
+}
+
+func lightsParser(scene *Scene, value interface{}) {
+	log.Println("lightsParser", value)
+	lightsList := value.([]interface{})
+	for _, lightIface := range lightsList {
+		lightMap := lightIface.(map[string]interface{})
+		lightType := lightMap["Type"]
+		if lightType == nil {
+			log.Fatal("No 'Type' specified for light")
+		}
+
+		typeName := lightMap["Type"].(string)
+		parserName := "Lights/" + typeName
+		if fn := SettingParsers[parserName]; fn != nil {
+			fn(scene, lightMap)
+		} else {
+			log.Printf("Warning: unknown light type '%s'", typeName)
+		}
+	}
+}
+
+func init() {
+	SettingParsers["AmbientLight"] = ambientLightParser
+	SettingParsers["Lights"] = lightsParser
+}
