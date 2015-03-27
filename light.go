@@ -26,7 +26,7 @@ func ShadowAttenuation(scene *Scene, dir mgl64.Vec3, point mgl64.Vec3) Color64 {
 	hit := scene.Intersect(&shadowRay, &isect)
 	for hit && atten.Len2() > Rayε && distTraveled+isect.T < dist {
 		distTraveled += isect.T
-		material := isect.Object.Material
+		material := isect.Material
 		if isect.Normal.Dot(dir) > 0 {
 			// Exiting object
 			// atten = atten.Product(material.BeersTrans(isect))

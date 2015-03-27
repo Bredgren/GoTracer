@@ -12,20 +12,20 @@ type ExpectedIsect struct {
 }
 
 func isectEqual(i1, i2 Intersection) bool {
-	return i1.Object == i2.Object &&
+	return i1.Material == i2.Material &&
 		i1.Normal.ApproxEqualThreshold(i2.Normal, Rayε) &&
 		mgl64.FloatEqualThreshold(i1.T, i2.T, Rayε) &&
 		i1.UVCoords.ApproxEqualThreshold(i2.UVCoords, Rayε)
 }
 
-// exp.isect.Object = nil means ignore isect.
+// exp.isect.Material = nil means ignore isect.
 func testIsect(t *testing.T, desc string, itr Intersecter, ray Ray, exp ExpectedIsect) {
 	isect := Intersection{}
 	hit := itr.Intersect(&ray, &isect)
 	if !hit && hit == exp.hit {
 		return // isect is undefined if we don't hit
 	}
-	if (exp.isect.Object != nil && !isectEqual(isect, exp.isect)) || hit != exp.hit {
+	if (exp.isect.Material != nil && !isectEqual(isect, exp.isect)) || hit != exp.hit {
 		actual := ExpectedIsect{isect, hit}
 		t.Errorf("%v: Incorrect intersection. Expected %v, got %v", desc, exp, actual)
 	}

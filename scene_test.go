@@ -13,7 +13,7 @@ func TestSceneIntersect(t *testing.T) {
 
 	isect := Intersection{}
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
-	expIsect := Intersection{sphere.Object, mgl64.Vec3{0, 0, 1}, 4, mgl64.Vec2{0.5, 0}}
+	expIsect := Intersection{mgl64.Vec3{0, 0, 1}, 4, nil, mgl64.Vec2{0.5, 0}}
 
 	hit := scene.Intersect(&ray, &isect)
 	if !hit {
@@ -30,7 +30,6 @@ func TestSceneIntersect(t *testing.T) {
 	}
 
 	ray.Origin = mgl64.Vec3{2, 0, 5}
-	expIsect.Object = sphere.Object
 
 	hit = scene.Intersect(&ray, &isect)
 	if !hit {

@@ -25,7 +25,7 @@ type BRDF func(scene *Scene, ray *Ray, isect *Intersection) (color Color64)
 // }
 func LambertianBRDF(scene *Scene, ray *Ray, isect *Intersection) (color Color64) {
 	var point mgl64.Vec3 = ray.At(isect.T)
-	var kd Color64 = isect.Object.Material.Diffuse.ColorAt(isect.UVCoords)
+	var kd Color64 = isect.Material.Diffuse.ColorAt(isect.UVCoords)
 	for _, light := range scene.Lights {
 		var cosTheta float64 = isect.Normal.Dot(light.Direction(point))
 		if cosTheta > 0 {
@@ -44,7 +44,7 @@ func LambertianBRDF(scene *Scene, ray *Ray, isect *Intersection) (color Color64)
 // }
 func BlinnPhongBRDF(scene *Scene, ray *Ray, isect *Intersection) (color Color64) {
 	var point mgl64.Vec3 = ray.At(isect.T)
-	var mat *Material = isect.Object.Material
+	var mat *Material = isect.Material
 	var ke Color64 = mat.Emissive.ColorAt(isect.UVCoords)
 	var ka Color64 = mat.Ambient.ColorAt(isect.UVCoords)
 	var kd Color64 = mat.Diffuse.ColorAt(isect.UVCoords)

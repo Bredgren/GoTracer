@@ -8,11 +8,12 @@ import (
 )
 
 func TestSphereIntersect(t *testing.T) {
-	obj := NewObject(mgl64.Ident4(), nil)
+	mat := &Material{}
+	obj := NewObject(mgl64.Ident4(), mat)
 	sphere := Sphere{obj}
 
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
-	exp := ExpectedIsect{Intersection{obj, mgl64.Vec3{0, 0, 1}, 4, mgl64.Vec2{0.5, 0}}, true}
+	exp := ExpectedIsect{Intersection{mgl64.Vec3{0, 0, 1}, 4, mat, mgl64.Vec2{0.5, 0}}, true}
 	testIsect(t, "Origin", sphere, ray, exp)
 
 	ray.Origin = mgl64.Vec3{0, 0, -5}
@@ -20,7 +21,7 @@ func TestSphereIntersect(t *testing.T) {
 	testIsect(t, "Behind", sphere, ray, exp)
 
 	ray.Origin = mgl64.Vec3{-(1 - Rayε), 0, 5}
-	exp.isect.Object = nil
+	exp.isect.Material = nil
 	exp.hit = true
 	testIsect(t, "Left graze hit", sphere, ray, exp)
 	ray.Origin = mgl64.Vec3{-1, 0, 0}
@@ -35,7 +36,7 @@ func TestSphereIntersect(t *testing.T) {
 	testIsect(t, "Right graze no hit", sphere, ray, exp)
 
 	ray.Origin = mgl64.Vec3{0, 0, 0}
-	exp.isect.Object = obj
+	exp.isect.Material = mat
 	exp.isect.Normal = mgl64.Vec3{0, 0, -1}
 	exp.isect.T = 1
 	exp.isect.UVCoords = mgl64.Vec2{0.5, 1}
@@ -43,7 +44,7 @@ func TestSphereIntersect(t *testing.T) {
 	testIsect(t, "Inside", sphere, ray, exp)
 
 	ray.Origin = mgl64.Vec3{0, 0, 1}
-	exp.isect.Object = obj
+	exp.isect.Material = mat
 	exp.isect.Normal = mgl64.Vec3{0, 0, -1}
 	exp.isect.T = 2
 	exp.isect.UVCoords = mgl64.Vec2{0.5, 1}

@@ -91,7 +91,7 @@ func checkReflectAngle(t *testing.T, angle float64) {
 	x := math.Sin(rad)
 	y := math.Cos(rad)
 	ray := Ray{PrimaryRay, mgl64.Vec3{x, y, 0}, mgl64.Vec3{-x, -y, 0}}
-	isect := Intersection{nil, mgl64.Vec3{0, 1, 0}, 1, mgl64.Vec2{}}
+	isect := Intersection{mgl64.Vec3{0, 1, 0}, 1, nil, mgl64.Vec2{}}
 	reflRay := ray.Reflect(&isect)
 	expOrigin := mgl64.Vec3{0, 0, 0}
 	expDirection := mgl64.Vec3{-x, y, 0}.Normalize()
@@ -106,7 +106,7 @@ func TestRayReflect(t *testing.T) {
 
 func TestRayRefract(t *testing.T) {
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 0}, mgl64.Vec3{0.707107, -0.707107, 0}}
-	isect := Intersection{nil, mgl64.Vec3{0, 1, 0}, 1, mgl64.Vec2{}}
+	isect := Intersection{mgl64.Vec3{0, 1, 0}, 1, nil, mgl64.Vec2{}}
 	refrRay := ray.Refract(&isect, 0.9, 1)
 	expOrigin := mgl64.Vec3{0.707107, -0.707107, 0}
 	expDirection := mgl64.Vec3{0.636396, -0.771352, 0}
@@ -129,7 +129,7 @@ func BenchmarkRayTransform(b *testing.B) {
 
 func BenchmarkRayReflect(b *testing.B) {
 	ray := Ray{PrimaryRay, mgl64.Vec3{1, 1, 0}, mgl64.Vec3{-1, -1, 0}}
-	isect := Intersection{nil, mgl64.Vec3{0, 1, 0}, 1, mgl64.Vec2{}}
+	isect := Intersection{mgl64.Vec3{0, 1, 0}, 1, nil, mgl64.Vec2{}}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -139,7 +139,7 @@ func BenchmarkRayReflect(b *testing.B) {
 
 func BenchmarkRayRefract(b *testing.B) {
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 0}, mgl64.Vec3{0.707107, -0.707107, 0}}
-	isect := Intersection{nil, mgl64.Vec3{0, 1, 0}, 1, mgl64.Vec2{}}
+	isect := Intersection{mgl64.Vec3{0, 1, 0}, 1, nil, mgl64.Vec2{}}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

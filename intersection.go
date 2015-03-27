@@ -5,8 +5,8 @@ import (
 )
 
 type Intersection struct {
-	Object   *Object
 	Normal   mgl64.Vec3
 	T        float64
+	Material *Material
 	UVCoords mgl64.Vec2
 }
