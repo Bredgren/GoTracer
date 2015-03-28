@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	// "github.com/go-gl/mathgl/mgl64"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/Bredgren/misc"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func TestParser(t *testing.T) {

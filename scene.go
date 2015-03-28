@@ -221,7 +221,7 @@ func (p lightsParser) Parse(scene *Scene, value interface{}) {
 		}
 
 		typeName := lightMap["Type"].(string)
-		ParseSubsetting("Lights:" + typeName, scene, lightMap)
+		ParseSubsetting("Lights:"+typeName, scene, lightMap)
 	}
 }
 

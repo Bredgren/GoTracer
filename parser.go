@@ -8,7 +8,7 @@ import (
 
 type SceneSettings map[string]interface{}
 
-type Parser interface{
+type Parser interface {
 	Parse(scene *Scene, value interface{})
 	GetDependencies() []string
 }
