@@ -23,8 +23,6 @@ type Scene struct {
 	Objects      []Intersecter
 }
 
-var scene *Scene
-
 func NewScene() *Scene {
 	return &Scene{
 		AmbientLight: AmbientLightDefault,
@@ -199,13 +197,21 @@ func (scene *Scene) Intersect(ray *Ray, isect *Intersection) (found bool) {
 // 	return angle > criticalAngle
 // }
 
-func ambientLightParser(scene *Scene, value interface{}) {
-	log.Println("ambientLightParser", value)
+type ambientLightParser struct{}
+
+func (p ambientLightParser) Parse(scene *Scene, value interface{}) {
+	log.Println("ambientLightParser.Parse", value)
 	scene.AmbientLight = ParseColor64(value.([]interface{}))
 }
 
-func lightsParser(scene *Scene, value interface{}) {
-	log.Println("lightsParser", value)
+func (p ambientLightParser) GetDependencies() []string {
+	return []string{}
+}
+
+type lightsParser struct{}
+
+func (p lightsParser) Parse(scene *Scene, value interface{}) {
+	log.Println("lightsParser.Parse", value)
 	lightsList := value.([]interface{})
 	for _, lightIface := range lightsList {
 		lightMap := lightIface.(map[string]interface{})
@@ -215,16 +221,15 @@ func lightsParser(scene *Scene, value interface{}) {
 		}
 
 		typeName := lightMap["Type"].(string)
-		parserName := "Lights/" + typeName
-		if fn := SettingParsers[parserName]; fn != nil {
-			fn(scene, lightMap)
-		} else {
-			log.Printf("Warning: unknown light type '%s'", typeName)
-		}
+		ParseSubsetting("Lights:" + typeName, scene, lightMap)
 	}
 }
 
+func (p lightsParser) GetDependencies() []string {
+	return []string{}
+}
+
 func init() {
-	SettingParsers["AmbientLight"] = ambientLightParser
-	SettingParsers["Lights"] = lightsParser
+	SettingParsers["AmbientLight"] = ambientLightParser{}
+	SettingParsers["Lights"] = lightsParser{}
 }

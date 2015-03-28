@@ -1,29 +1,81 @@
 package gotracer
 
 import (
-	// "encoding/json"
 	"log"
-	// "io/ioutil"
 
-	// "github.com/davecgh/go-spew/spew"
 	"github.com/go-gl/mathgl/mgl64"
 )
 
 type SceneSettings map[string]interface{}
 
-type Parser func(scene *Scene, value interface{})
+type Parser interface{
+	Parse(scene *Scene, value interface{})
+	GetDependencies() []string
+}
 
 var SettingParsers map[string]Parser = make(map[string]Parser)
 
-func ParseSettings(settings SceneSettings) *Scene {
-	var scene *Scene = NewScene()
-	for attribute, value := range settings {
-		if fn := SettingParsers[attribute]; fn != nil {
-			fn(scene, value)
-		} else {
-			log.Printf("Warning: unknown attribute '%s'", attribute)
+func dependenciesSatisfied(deps []string, parsed map[string]bool) bool {
+	for _, dep := range deps {
+		if !parsed[dep] {
+			return false
 		}
 	}
+	return true
+}
+
+func ParseSubsetting(name string, scene *Scene, settings map[string]interface{}) {
+	if parser := SettingParsers[name]; parser != nil {
+		if len(parser.GetDependencies()) > 0 {
+			log.Fatalf("Subsettings not allowed to have dependencies. Check '%v'", name)
+		}
+		parser.Parse(scene, settings)
+	} else {
+		log.Printf("Warning: unknown subsetting '%s'", name)
+	}
+}
+
+func ParseSettings(settings SceneSettings) *Scene {
+	log.Println("ParseSettings", settings)
+	// Keep track of which top level settings we've parsed to allow dependencies. This
+	// allows settings to ensure that other settings get handled fist (such as objects
+	// makeing sure materials are parsed first).
+	parsed := make(map[string]bool, len(settings))
+	for k := range settings {
+		parsed[k] = false
+	}
+
+	var scene *Scene = NewScene()
+
+Outer:
+	for attribute, beenParsed := range parsed {
+		if beenParsed {
+			continue
+		}
+		var parser Parser = SettingParsers[attribute]
+		if parser == nil {
+			log.Printf("Warning: unknown attribute '%s'", attribute)
+			parsed[attribute] = true
+			goto Outer
+		}
+		if dependenciesSatisfied(parser.GetDependencies(), parsed) {
+			parser.Parse(scene, settings[attribute])
+			parsed[attribute] = true
+			goto Outer
+		}
+		// Dependencies for this attribute aren't satisfied yet, check the next one
+	}
+
+	// If we get here either all have been parsed and we're done or some have
+	// impossible dependencies.
+	for attribute, beenParsed := range parsed {
+		if !beenParsed {
+			var deps []string = SettingParsers[attribute].GetDependencies()
+			log.Fatalf("Attribute %v has impossible dependencies %v", attribute, deps)
+		}
+	}
+	log.Println("Parsing done")
+
 	return scene
 }
 

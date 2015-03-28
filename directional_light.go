@@ -31,8 +31,10 @@ func (l DirectionalLight) Direction(from mgl64.Vec3) mgl64.Vec3 {
 	return l.OrientationInv
 }
 
-func directionalLightParser(scene *Scene, value interface{}) {
-	log.Println("directionalLightParser", value)
+type directionalLightParser struct{}
+
+func (p directionalLightParser) Parse(scene *Scene, value interface{}) {
+	log.Println("directionalLightParser.Parse", value)
 	v := value.(map[string]interface{})
 	light := DirectionalLight{
 		Color:          DirectionalLightDefaultColor,
@@ -42,7 +44,7 @@ func directionalLightParser(scene *Scene, value interface{}) {
 		switch attribute {
 		case "Type":
 			if value.(string) != "Directional" {
-				log.Fatal("Parsing a directional light but Type is not Directional")
+				log.Fatal("Parsing a directional light but Type is not 'Directional'")
 			}
 		case "Color":
 			light.Color = ParseColor64(value.([]interface{}))
@@ -62,6 +64,10 @@ func directionalLightParser(scene *Scene, value interface{}) {
 	scene.Lights = append(scene.Lights, light)
 }
 
+func (p directionalLightParser) GetDependencies() []string {
+	return []string{}
+}
+
 func init() {
-	SettingParsers["Lights/Directional"] = directionalLightParser
+	SettingParsers["Lights:Directional"] = directionalLightParser{}
 }
