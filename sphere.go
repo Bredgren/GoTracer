@@ -11,13 +11,13 @@ type Sphere struct {
 	*Object
 }
 
-func (s Sphere) GetObject() *Object {
+func (s *Sphere) GetObject() *Object {
 	return s.Object
 }
 
 // Intersect calculates the intersection between a ray and a unit sphere at
 // the origin.
-func (s Sphere) Intersect(r *Ray, isect *Intersection) (hit bool) {
+func (s *Sphere) Intersect(r *Ray, isect *Intersection) (hit bool) {
 	// -(d . o) +- sqrt((d . o)^2 - (d . d)((o . o) - 1)) / (d . d)
 	do := r.Dir.Dot(r.Origin)
 	dd := r.Dir.Dot(r.Dir)

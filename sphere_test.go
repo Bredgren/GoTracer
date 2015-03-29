@@ -10,7 +10,7 @@ import (
 func TestSphereIntersect(t *testing.T) {
 	mat := &Material{}
 	obj := NewObject(mgl64.Ident4(), mat)
-	sphere := Sphere{obj}
+	sphere := &Sphere{obj}
 
 	ray := Ray{PrimaryRay, mgl64.Vec3{0, 0, 5}, mgl64.Vec3{0, 0, -1}}
 	exp := ExpectedIsect{Intersection{mgl64.Vec3{0, 0, 1}, 4, mat, mgl64.Vec2{0.5, 0}}, true}

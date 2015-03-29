@@ -21,7 +21,7 @@ func TestShadowAttenuation(t *testing.T) {
 		Transmissive: UniformColor{Color64{}},
 	}
 	sphere := Sphere{NewObject(mgl64.Ident4(), &material)}
-	scene.Objects = append(scene.Objects, sphere)
+	scene.Objects = append(scene.Objects, &sphere)
 	expAtten = Color64{0, 0, 0}
 	atten = ShadowAttenuation(&scene, lightDir, point)
 	if atten != expAtten {

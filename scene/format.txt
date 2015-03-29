@@ -1,3 +1,4 @@
+Attributes that start with "_" are ignored.
 
 Top Level Attributes
 Name								Type - Items listed in {} are attribute names
@@ -89,7 +90,7 @@ LookAt						| Vector - What point the camera is looking at.
 Material					| {Name, Parent, Emissive, Ambient, Specular, Reflective, Diffuse,
 									|  Transmissive, Smoothness, Index, Normal, IsLiquid, BRDF}
 -------------------------------------------------------------------------------------
-MaterialName			| Name
+MaterialName			| Name - Existing material name
 -------------------------------------------------------------------------------------
 Name							| string - Unique identifier
 -------------------------------------------------------------------------------------
@@ -97,7 +98,7 @@ Normal						| Texture - A normal map.
 -------------------------------------------------------------------------------------
 Object						| {Type, ...} - Other attributes depend on Type
 -------------------------------------------------------------------------------------
-Object						|	{Type, Translate, RotateAxis, Scale, Objects} - Applies the given
+Object						|	{Type, Translate, Rotate, Scale, Objects} - Applies the given
 	Type="Transform"| transformation to all Objects under it.
 -------------------------------------------------------------------------------------
 Object						|	{Type, MaterialName} - A shere of radius 1.
@@ -119,9 +120,15 @@ QuadCoeff					| float
 -------------------------------------------------------------------------------------
 Reflective				| Color or Texture - The color the object reflects.
 -------------------------------------------------------------------------------------
+Rotate						| []Rotation - List of rotations to apply (applied after Scale).
+-------------------------------------------------------------------------------------
+Scale							| Vector - default: [1, 1, 1] - X, Y, and Z scale.
+-------------------------------------------------------------------------------------
 Smoothness				| float or Texture - Only the R value is used.
 -------------------------------------------------------------------------------------
 Specular					| Color or Texture - Color of the specular highlight.
+-------------------------------------------------------------------------------------
+Translate					| Vector - x, y, and z offsets (applied after Rotate).
 -------------------------------------------------------------------------------------
 Transmissive			| Color or Texture - The color allowed to pass through the object.
 -------------------------------------------------------------------------------------
@@ -133,9 +140,12 @@ Types
 Type							  JSON type
 -------------------------------------------------------------------------------------
 Color							| [float, float, float] - default: [0, 0, 0] - RGB values between
-									|	0.0 and 1.0
+									|	0.0 and 1.0.
+-------------------------------------------------------------------------------------
+Rotation					| [float, float, float, float] - default: [0, 0, 0, 0] - X, Y, and
+									| Z of axis to rotate around followed by the angle in degrees.
 -------------------------------------------------------------------------------------
 Texture						| string - Path to a png or jpeg image.
 -------------------------------------------------------------------------------------
-Vector						|	[float, float, float] - default: [0, 0, 0]
+Vector						|	[float, float, float] - default: [0, 0, 0] - X, Y, Z values.
 -------------------------------------------------------------------------------------

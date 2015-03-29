@@ -1,9 +1,9 @@
 package gotracer
 
 import (
+	"log"
 	// "image/color"
 	// "math"
-	"log"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -23,12 +23,22 @@ type Scene struct {
 	Objects      []Intersecter
 }
 
+// NewScene returns an empty scene with default values.
 func NewScene() *Scene {
 	return &Scene{
 		AmbientLight: AmbientLightDefault,
 		Lights:       make([]Light, 0),
 		Objects:      make([]Intersecter, 0),
 	}
+}
+
+// NewSceneFromFile returns a new Scene populated from the settings in the given json
+// file. The format of the file should follow the specification of scene/format.txt.
+func NewSceneFromFile(fileName string) *Scene {
+	var scene *Scene = NewScene()
+	var settings interface{} = ReadSettingsFile(fileName)
+	SettingParsers["Scene"](scene, settings)
+	return scene
 }
 
 // func (scene *Scene) TracePixel(x, y int) color.NRGBA {
@@ -197,20 +207,24 @@ func (scene *Scene) Intersect(ray *Ray, isect *Intersection) (found bool) {
 // 	return angle > criticalAngle
 // }
 
-type ambientLightParser struct{}
+func sceneParser(scene *Scene, value interface{}) {
+	log.Println("sceneParser", value)
+	sceneSettings := value.(map[string]interface{})
+	for setting, v := range sceneSettings {
+		if setting != "Objects" {
+			ParseSetting(scene, setting, v)
+		}
+	}
+	// Objects need to be parsed after materials
+	ParseSetting(scene, "Objects", sceneSettings["Objects"])
+}
 
-func (p ambientLightParser) Parse(scene *Scene, value interface{}) {
+func ambientLightParser(scene *Scene, value interface{}) {
 	log.Println("ambientLightParser.Parse", value)
-	scene.AmbientLight = ParseColor64(value.([]interface{}))
+	scene.AmbientLight = ParseColor64(value)
 }
 
-func (p ambientLightParser) GetDependencies() []string {
-	return []string{}
-}
-
-type lightsParser struct{}
-
-func (p lightsParser) Parse(scene *Scene, value interface{}) {
+func lightsParser(scene *Scene, value interface{}) {
 	log.Println("lightsParser.Parse", value)
 	lightsList := value.([]interface{})
 	for _, lightIface := range lightsList {
@@ -221,15 +235,13 @@ func (p lightsParser) Parse(scene *Scene, value interface{}) {
 		}
 
 		typeName := lightMap["Type"].(string)
-		ParseSubsetting("Lights:"+typeName, scene, lightMap)
+		_ = typeName
+		ParseSetting(scene, "Lights:"+typeName, lightMap)
 	}
 }
 
-func (p lightsParser) GetDependencies() []string {
-	return []string{}
-}
-
 func init() {
-	SettingParsers["AmbientLight"] = ambientLightParser{}
-	SettingParsers["Lights"] = lightsParser{}
+	SettingParsers["Scene"] = sceneParser
+	SettingParsers["AmbientLight"] = ambientLightParser
+	SettingParsers["Lights"] = lightsParser
 }
