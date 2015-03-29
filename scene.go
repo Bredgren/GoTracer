@@ -9,43 +9,43 @@ import (
 )
 
 var (
-	ImageHeightDefault = 1
-	ImageWidthDefault = 1
+	ImageHeightDefault       = 1
+	ImageWidthDefault        = 1
 	AdaptiveThresholdDefault = 0.0
-	AAMaxDivisionsDefault = 0
-	AAThresholdDefault = 0.0
+	AAMaxDivisionsDefault    = 0
+	AAThresholdDefault       = 0.0
 	MaxRecursiveDepthDefault = 1
-	AmbientLightDefault = Color64{0, 0, 0}
-	BackgroundDefault = UniformBackground{Color64{0, 0, 0}}
+	AmbientLightDefault      = Color64{0, 0, 0}
+	BackgroundDefault        = UniformBackground{Color64{0, 0, 0}}
 )
 
 type Scene struct {
 	// Camera Camera
-	ImageHeight int
-	ImageWidth int
+	ImageHeight       int
+	ImageWidth        int
 	AdaptiveThreshold float64
-	AAMaxDivisions int
-	AAThreshold float64
+	AAMaxDivisions    int
+	AAThreshold       float64
 	MaxRecursiveDepth int
-	AmbientLight Color64
-	Background Background
-	Lights       []Light
-	Objects      []Intersecter
+	AmbientLight      Color64
+	Background        Background
+	Lights            []Light
+	Objects           []Intersecter
 }
 
 // NewScene returns an empty scene with default values.
 func NewScene() *Scene {
 	return &Scene{
-		ImageHeight: ImageHeightDefault,
-		ImageWidth: ImageWidthDefault,
+		ImageHeight:       ImageHeightDefault,
+		ImageWidth:        ImageWidthDefault,
 		AdaptiveThreshold: AdaptiveThresholdDefault,
-		AAMaxDivisions: AAMaxDivisionsDefault,
-		AAThreshold: AAThresholdDefault,
+		AAMaxDivisions:    AAMaxDivisionsDefault,
+		AAThreshold:       AAThresholdDefault,
 		MaxRecursiveDepth: MaxRecursiveDepthDefault,
-		AmbientLight: AmbientLightDefault,
-		Background: BackgroundDefault,
-		Lights:       make([]Light, 0),
-		Objects:      make([]Intersecter, 0),
+		AmbientLight:      AmbientLightDefault,
+		Background:        BackgroundDefault,
+		Lights:            make([]Light, 0),
+		Objects:           make([]Intersecter, 0),
 	}
 }
 
