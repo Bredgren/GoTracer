@@ -3,22 +3,32 @@ package gotracer
 import (
 	"log"
 	// "image/color"
-	// "math"
+	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
 
 var (
+	ImageHeightDefault = 1
+	ImageWidthDefault = 1
+	AdaptiveThresholdDefault = 0.0
+	AAMaxDivisionsDefault = 0
+	AAThresholdDefault = 0.0
+	MaxRecursiveDepthDefault = 1
 	AmbientLightDefault = Color64{0, 0, 0}
+	BackgroundDefault = UniformBackground{Color64{0, 0, 0}}
 )
 
 type Scene struct {
 	// Camera Camera
-	// MaxDepth int
-	// AdaptiveThreshold float64
-	// AAMaxDivisions int
-	// AAThreshold float64
+	ImageHeight int
+	ImageWidth int
+	AdaptiveThreshold float64
+	AAMaxDivisions int
+	AAThreshold float64
+	MaxRecursiveDepth int
 	AmbientLight Color64
+	Background Background
 	Lights       []Light
 	Objects      []Intersecter
 }
@@ -26,7 +36,14 @@ type Scene struct {
 // NewScene returns an empty scene with default values.
 func NewScene() *Scene {
 	return &Scene{
+		ImageHeight: ImageHeightDefault,
+		ImageWidth: ImageWidthDefault,
+		AdaptiveThreshold: AdaptiveThresholdDefault,
+		AAMaxDivisions: AAMaxDivisionsDefault,
+		AAThreshold: AAThresholdDefault,
+		MaxRecursiveDepth: MaxRecursiveDepthDefault,
 		AmbientLight: AmbientLightDefault,
+		Background: BackgroundDefault,
 		Lights:       make([]Light, 0),
 		Objects:      make([]Intersecter, 0),
 	}
@@ -219,13 +236,49 @@ func sceneParser(scene *Scene, value interface{}) {
 	ParseSetting(scene, "Objects", sceneSettings["Objects"])
 }
 
+func imageHeightParser(scene *Scene, value interface{}) {
+	log.Println("imageHeightParser", value)
+	v := int(math.Max(value.(float64), 1))
+	scene.ImageHeight = v
+}
+
+func imageWidthParser(scene *Scene, value interface{}) {
+	log.Println("imageWidthParser", value)
+	v := int(math.Max(value.(float64), 1))
+	scene.ImageWidth = v
+}
+
+func adaptiveThresholdParser(scene *Scene, value interface{}) {
+	log.Println("adaptiveThresholdParser", value)
+	v := math.Max(value.(float64), 0)
+	scene.AdaptiveThreshold = v
+}
+
+func aaMaxDivisionsParser(scene *Scene, value interface{}) {
+	log.Println("aaMaxDivisionsParser", value)
+	v := int(math.Max(value.(float64), 0))
+	scene.AAMaxDivisions = v
+}
+
+func aaThresholdParser(scene *Scene, value interface{}) {
+	log.Println("aaThresholdParser", value)
+	v := math.Max(value.(float64), 0)
+	scene.AAThreshold = v
+}
+
+func maxRecursiveDepthParser(scene *Scene, value interface{}) {
+	log.Println("maxRecursiveDepthParser", value)
+	v := int(math.Max(value.(float64), 1))
+	scene.MaxRecursiveDepth = v
+}
+
 func ambientLightParser(scene *Scene, value interface{}) {
-	log.Println("ambientLightParser.Parse", value)
+	log.Println("ambientLightParser", value)
 	scene.AmbientLight = ParseColor64(value)
 }
 
 func lightsParser(scene *Scene, value interface{}) {
-	log.Println("lightsParser.Parse", value)
+	log.Println("lightsParser", value)
 	lightsList := value.([]interface{})
 	for _, lightIface := range lightsList {
 		lightMap := lightIface.(map[string]interface{})
@@ -242,6 +295,14 @@ func lightsParser(scene *Scene, value interface{}) {
 
 func init() {
 	SettingParsers["Scene"] = sceneParser
+	SettingParsers["ImageHeight"] = imageHeightParser
+	SettingParsers["ImageWidth"] = imageWidthParser
+	SettingParsers["AdaptiveThreshold"] = adaptiveThresholdParser
+	SettingParsers["AAMaxDivisions"] = aaMaxDivisionsParser
+	SettingParsers["AAThreshold"] = aaThresholdParser
+	SettingParsers["MaxRecursiveDepth"] = maxRecursiveDepthParser
 	SettingParsers["AmbientLight"] = ambientLightParser
+	// SettingParsers["Background"] =
 	SettingParsers["Lights"] = lightsParser
+	// SettingParsers["Objects"] =
 }

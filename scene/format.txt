@@ -3,11 +3,11 @@ Attributes that start with "_" are ignored.
 Top Level Attributes
 Name								Type - Items listed in {} are attribute names
 -------------------------------------------------------------------------------------
-AAMaxDivisions		| int - See AAThreshold
+AAMaxDivisions		| int - default: 0 (no antialiasing) - See AAThreshold
 -------------------------------------------------------------------------------------
-AAThreshold				| int - default: 0 (no antialiasing) - If >0 then AA will be
+AAThreshold				| float - default: 0.0 (no antialiasing) - If >0 then AA will be
 									| enabled and each pixel will be subdivided into 4 and if the
-									| difference in color is > AAThreshold then each subpixel is
+									| difference in color is >AAThreshold then each subpixel is
 									| further divided into 4 and the process repeats for each subpixel
 									| until at most AAMaxDivisions is repeached.
 -------------------------------------------------------------------------------------
@@ -23,8 +23,11 @@ Background				| {Type, Color} - Uniform background color.
 Background				| {Type, Texture} - Skybox for the background.
 	Type="Skybox"		|
 -------------------------------------------------------------------------------------
-Camera						| {ImageWidth, ImageHeight, Position, LooAt, UpDir, FOV,
-									|  Background}
+Camera						| {Position, LooAt, UpDir, FOV, Background}
+-------------------------------------------------------------------------------------
+ImageHeight				| int - min: 1 - Height of the image in pixels.
+-------------------------------------------------------------------------------------
+ImageWidth				| int - min: 1 - Width of the image in pixels.
 -------------------------------------------------------------------------------------
 Lights						| []Light - A list of lights
 -------------------------------------------------------------------------------------
@@ -56,10 +59,6 @@ Diffuse						| Color or Texture - The diffuse color of the object.
 Emissive					| Color or Texture - An object's own glow.
 -------------------------------------------------------------------------------------
 FOV								| float - default: 53 - Feild of fiew in degrees.
--------------------------------------------------------------------------------------
-ImageHeigh				| int - min: 1 - Height of the image in pixels.
--------------------------------------------------------------------------------------
-ImageWidth				| int - min: 1 - Width of the image in pixels.
 -------------------------------------------------------------------------------------
 Index							| float or Texture - default: 1.0003 - Index of refraction. Only
 									| the R value is used.
