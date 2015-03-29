@@ -47,5 +47,5 @@ func ParseColor64(floatArray interface{}) Color64 {
 // and converts it to a mgl64.Vec3.
 func ParseVector(floatArray interface{}) mgl64.Vec3 {
 	a := floatArray.([]interface{})
-	return mgl64.Vec3{a[0].(float64), a[1].(float64), a[2].(float64) }
+	return mgl64.Vec3{a[0].(float64), a[1].(float64), a[2].(float64)}
 }
