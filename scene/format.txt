@@ -23,7 +23,7 @@ Background				| {Type, Color} - Uniform background color.
 Background				| {Type, Texture} - Skybox for the background.
 	Type="Skybox"		|
 -------------------------------------------------------------------------------------
-Camera						| {Position, LooAt, UpDir, FOV, Background}
+Camera						| {Position, LooAt, UpDir, FOV}
 -------------------------------------------------------------------------------------
 ImageHeight				| int - min: 1 - Height of the image in pixels.
 -------------------------------------------------------------------------------------

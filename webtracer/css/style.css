@@ -1,0 +1,121 @@
+body {
+		background: #111;
+		margin: 0px;
+}
+
+.image-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+}
+
+.image-container img {
+		width: 100%;
+}
+
+.controls {
+    width: 300px;
+    position: absolute;
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+    background-color: #222;
+    padding: 10px;
+}
+
+.controls.open {
+}
+
+.controls.closed {
+		left: -315px;
+}
+
+.tab {
+		position: absolute;
+    right: -1em;
+    background-color: inherit;
+    border-right: 2px solid black;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    padding: 2px;
+    cursor: pointer;
+		-webkit-user-select: none;
+}
+
+.btn {
+		background-color: grey;
+		border: 1px solid black;
+		border-radius: 5px;
+		opacity: 0.8;
+		margin-bottom: 5px;
+}
+
+.btn:hover {
+		opacity: 1.0;
+}
+
+.toggle-button {
+		width: 100%;
+}
+
+.toggle-button-down {
+		/* opacity: 0.9; */
+		background-color: lightgrey;
+}
+
+.toggle-button-up {
+		/* background-color: grey; */
+		opacity: 0.3;
+}
+
+.btn-group {
+		display: flex;
+		justify-content: space-between;
+}
+
+#options {
+		color: white;
+}
+
+.option-group {
+		padding: 2px;
+		padding-left: 10px;
+		margin-bottom: 3px;
+    border-bottom: 1px solid grey;
+    border-left: 1px solid grey;
+		border-radius: 10px;
+}
+
+.option-group-header {
+    cursor: pointer;
+}
+
+.option-group-options {
+		padding-left: 10px;
+		margin-bottom: 3px;
+}
+
+.option {
+		display: table-cell;
+}
+
+.option-label {
+}
+
+input select {
+		border-radius: 5px;
+}
+/* .suboption-group { */
+/* 		margin: 5px 0 5px 0; */
+/* } */
+
+/* .suboption-label { */
+/*     text-align: left; */
+/* 		padding-left: 10px; */
+/* } */
+
+/* .suboption-group span { */
+/* 		margin-left: 5px; */
+/* } */

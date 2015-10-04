@@ -1,0 +1,103 @@
+{{define "Main"}}
+<!DOCTYPE html>
+<title>Web Tracer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap -->
+<!-- <link href="/css/bootstrap{{if not debug}}.min{{end}}.css" rel="stylesheet" media="screen"> -->
+<!-- <link href="/css/bootstrap-theme{{if not debug}}.min{{end}}.css" rel="stylesheet" media="screen"> -->
+<script src="http://code.jquery.com/jquery{{if not debug}}.min{{end}}.js"></script>
+<!-- <script src="/js/bootstrap{{if not debug}}.min{{end}}.js"></script> -->
+<link href="/css/style{{if not debug}}.min{{end}}.css" rel="stylesheet" media="screen">
+<script src="/js/script{{if not debug}}.min{{end}}.js"></script>
+<body onload="onBodyLoad()">
+	<div class="controls open">
+		<div class="tab">
+			|||
+		</div>
+		<button id="fast-render" class="btn toggle-button toggle-button-down">Fast Render</button>
+		<div class="btn-group">
+			<button id="save" class="btn">Save Scene</button>
+			<button id="load" class="btn">Load Scene</button>
+			<button id="download" class="btn">Download</button>
+		</div>
+		<div id="options">
+			<!-- {{if debug}} -->
+			<!-- <div class="option-group"> -->
+			<!-- 	<div class="option-header"> -->
+			<!-- 		Debug Options -->
+			<!-- 	</div> -->
+			<!-- </div> -->
+			<!-- {{end}} -->
+			<!-- <div class="option-group"> -->
+			<!-- 	<div class="option-header"> -->
+			<!-- 		Global Options -->
+			<!-- 	</div> -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Resolution</div> -->
+			<!-- 		<input type="number" min="1" max="16000" value="800"> -->
+			<!-- 		x -->
+			<!-- 		<input type="number" min="1" max="16000" value="600"> -->
+			<!-- 	</div> -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Camera Position</div> -->
+			<!-- 		{{template "Vector"}} -->
+			<!-- 	</div> -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Camera LookAt</div> -->
+			<!-- 		{{template "Vector"}} -->
+			<!-- 	</div> -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Camera Up Direction</div> -->
+			<!-- 		{{template "Vector"}} -->
+			<!-- 	</div> -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Camera FOV</div> -->
+			<!-- 		<input type="number" min="1" max="180" value="53"> -->
+			<!-- 	</div> -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Background</div> -->
+			<!-- 		{{template "Color"}} -->
+			<!-- 	</div> -->
+			<!-- 	TODO: do all this stuff in script.go -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Anti-Alias Max Divisions</div> -->
+			<!-- 		<input type="number" min="0" max="4" value="0"> -->
+			<!-- 	</div> -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Anti-Alias Threshold</div> -->
+			<!-- 		<input type="number" min="0.0" max="1.0" value="0.0"> -->
+			<!-- 	</div> -->
+			<!-- 	<div class="suboption-group"> -->
+			<!-- 		<div class="suboption-label">Max Recursive Depth</div> -->
+			<!-- 		<input type="number" min="0" max="100" value="0"> -->
+			<!-- 	</div> -->
+			<!-- </div> -->
+			<!-- <div class="option-group"> -->
+			<!-- 	<div class="option-header"> -->
+			<!-- 		Lights -->
+			<!-- 	</div> -->
+			<!-- </div> -->
+			<!-- <div class="option-group"> -->
+			<!-- 	<div class="option-header"> -->
+			<!-- 		Materials -->
+			<!-- 	</div> -->
+			<!-- </div> -->
+			<!-- <div class="option-group"> -->
+			<!-- 	<div class="option-header"> -->
+			<!-- 		Objects -->
+			<!-- 	</div> -->
+			<!-- </div> -->
+		</div>
+	</div>
+	<div class="image-container">
+	</div>
+</body>
+{{end}}
+{{define "Vector"}}
+x <input type="number" min="-999" max="999" value="0">
+y <input type="number" min="-999" max="999" value="0">
+z <input type="number" min="-999" max="999" value="0">
+{{end}}
+{{define "Color"}}
+<input class="color-field" type="text" placeholder="File path or hex color" value="#000000">
+{{end}}
