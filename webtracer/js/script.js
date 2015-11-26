@@ -19281,12 +19281,13 @@ $packages["github.com/Bredgren/gotracer/lib"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, htmlctrl, lib, js, jquery, reflect, funcType, ptrType, sliceType, ptrType$1, funcType$1, jq, console, main, onBodyLoad, initCallbacks, setImageSize, initOptions, addOptionSlides, onToggleControls, onSave, onLoad, onDownload;
+	var $pkg = {}, $init, htmlctrl, lib, js, jquery, reflect, strconv, funcType, ptrType, sliceType, ptrType$1, funcType$1, jq, console, main, onBodyLoad, initCallbacks, setImageSize, initOptions, addOptionSlides, onToggleControls, onSave, onLoad, onZoom;
 	htmlctrl = $packages["github.com/Bredgren/gohtmlctrl/htmlctrl"];
 	lib = $packages["github.com/Bredgren/gotracer/lib"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	jquery = $packages["github.com/gopherjs/jquery"];
 	reflect = $packages["reflect"];
+	strconv = $packages["strconv"];
 	funcType = $funcType([], [], false);
 	ptrType = $ptrType(lib.Options);
 	sliceType = $sliceType($emptyInterface);
@@ -19297,8 +19298,8 @@ $packages["main"] = (function() {
 		$global.onBodyLoad = $externalize(onBodyLoad, funcType);
 	};
 	onBodyLoad = function() {
-		var $ptr, _r, img, imgCon, options, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; img = $f.img; imgCon = $f.imgCon; options = $f.options; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _r, _r$1, _r$2, img, imgCon, jqImg, options, zoom, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; img = $f.img; imgCon = $f.imgCon; jqImg = $f.jqImg; options = $f.options; zoom = $f.zoom; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		img = [img];
 		imgCon = [imgCon];
 		$r = initCallbacks(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
@@ -19309,15 +19310,30 @@ $packages["main"] = (function() {
 		imgCon[0] = $clone(_r, jquery.JQuery);
 		img[0] = new ($global.Image)();
 		img[0].onload = $externalize((function(img, imgCon) { return function $b() {
-			var $ptr, $s, $r;
-			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			var $ptr, _tmp, _tmp$1, h, w, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _tmp = $f._tmp; _tmp$1 = $f._tmp$1; h = $f.h; w = $f.w; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 			imgCon[0].Append(new sliceType([new $jsObjectPtr(img[0])]));
-			console.log(img[0].width, img[0].height);
-			$r = setImageSize(img[0].width, img[0].height); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f.$s = $s; $f.$r = $r; return $f;
+			_tmp = $parseFloat(img[0].width);
+			_tmp$1 = $parseFloat(img[0].height);
+			w = _tmp;
+			h = _tmp$1;
+			imgCon[0].SetData("initWidth", new $Float64(w));
+			imgCon[0].SetData("initHeight", new $Float64(h));
+			console.log(w, h);
+			$r = setImageSize(w, h); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.h = h; $f.w = w; $f.$s = $s; $f.$r = $r; return $f;
 		}; })(img, imgCon), funcType);
 		img[0].src = $externalize("/img/render542.png", $String);
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onBodyLoad }; } $f.$ptr = $ptr; $f._r = _r; $f.img = img; $f.imgCon = imgCon; $f.options = options; $f.$s = $s; $f.$r = $r; return $f;
+		_r$1 = jq(new sliceType([new $jsObjectPtr(img[0])])); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		jqImg = $clone(_r$1, jquery.JQuery);
+		jqImg.Call("draggable", new sliceType([]));
+		_r$2 = jq(new sliceType([new $String("#zoom")])); /* */ $s = 5; case 5: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		zoom = $clone(_r$2, jquery.JQuery);
+		zoom.SetAttr(new sliceType([new $String("value"), new $Float64(1)]));
+		zoom.SetAttr(new sliceType([new $String("min"), new $Float64(0.1)]));
+		zoom.SetAttr(new sliceType([new $String("max"), new $Float64(10)]));
+		zoom.SetAttr(new sliceType([new $String("step"), new $Float64(0.1)]));
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onBodyLoad }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f.img = img; $f.imgCon = imgCon; $f.jqImg = jqImg; $f.options = options; $f.zoom = zoom; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	initCallbacks = function() {
 		var $ptr, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, $s, $r;
@@ -19331,8 +19347,8 @@ $packages["main"] = (function() {
 		_r$4 = jq(new sliceType([new $String("#load")])); /* */ $s = 5; case 5: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
 		_r$5 = _r$4.Call("click", new sliceType([new funcType(onLoad)])); /* */ $s = 6; case 6: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
 		_r$5;
-		_r$6 = jq(new sliceType([new $String("#download")])); /* */ $s = 7; case 7: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
-		_r$7 = _r$6.Call("click", new sliceType([new funcType(onDownload)])); /* */ $s = 8; case 8: if($c) { $c = false; _r$7 = _r$7.$blk(); } if (_r$7 && _r$7.$blk !== undefined) { break s; }
+		_r$6 = jq(new sliceType([new $String("#zoom")])); /* */ $s = 7; case 7: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
+		_r$7 = _r$6.On(new sliceType([new $String("input change"), new funcType(onZoom)])); /* */ $s = 8; case 8: if($c) { $c = false; _r$7 = _r$7.$blk(); } if (_r$7 && _r$7.$blk !== undefined) { break s; }
 		_r$7;
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: initCallbacks }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f.$s = $s; $f.$r = $r; return $f;
 	};
@@ -19341,8 +19357,8 @@ $packages["main"] = (function() {
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; h = $f.h; imgCon = $f.imgCon; w = $f.w; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		_r = jq(new sliceType([new $String(".image-container")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		imgCon = $clone(_r, jquery.JQuery);
-		imgCon.SetCss(new sliceType([new $String("width"), new $jsObjectPtr(w)]));
-		imgCon.SetCss(new sliceType([new $String("height"), new $jsObjectPtr(h)]));
+		imgCon.SetCss(new sliceType([new $String("width"), new $Float64(w)]));
+		imgCon.SetCss(new sliceType([new $String("height"), new $Float64(h)]));
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: setImageSize }; } $f.$ptr = $ptr; $f._r = _r; $f.h = h; $f.imgCon = imgCon; $f.w = w; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	initOptions = function(options) {
@@ -19435,9 +19451,27 @@ $packages["main"] = (function() {
 		var $ptr;
 		console.log($externalize("load", $String));
 	};
-	onDownload = function() {
-		var $ptr;
-		console.log($externalize("download", $String));
+	onZoom = function() {
+		var $ptr, _r, _r$1, _r$2, _r$3, _r$4, _tuple, e, imgCon, newH, newW, newZoom, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _tuple = $f._tuple; e = $f.e; imgCon = $f.imgCon; newH = $f.newH; newW = $f.newW; newZoom = $f.newZoom; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_r = jq(new sliceType([new $String("#zoom")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r$1 = _r.Val(); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		_r$2 = strconv.ParseFloat(_r$1, 64); /* */ $s = 3; case 3: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		_tuple = _r$2;
+		newZoom = _tuple[0];
+		e = _tuple[1];
+		/* */ if (!($interfaceIsEqual(e, $ifaceNil))) { $s = 4; continue; }
+		/* */ $s = 5; continue;
+		/* if (!($interfaceIsEqual(e, $ifaceNil))) { */ case 4:
+			_r$3 = e.Error(); /* */ $s = 6; case 6: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+			console.error($externalize(_r$3, $String));
+		/* } */ case 5:
+		_r$4 = jq(new sliceType([new $String(".image-container")])); /* */ $s = 7; case 7: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+		imgCon = $clone(_r$4, jquery.JQuery);
+		newW = $assertType(imgCon.Data("initWidth"), $Float64) * newZoom;
+		newH = $assertType(imgCon.Data("initHeight"), $Float64) * newZoom;
+		$r = setImageSize(newW, newH); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onZoom }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._tuple = _tuple; $f.e = e; $f.imgCon = imgCon; $f.newH = newH; $f.newW = newW; $f.newZoom = newZoom; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$init = function() {
 		$pkg.$init = function() {};
@@ -19447,6 +19481,7 @@ $packages["main"] = (function() {
 		$r = js.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = jquery.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = reflect.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = strconv.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		jq = jquery.NewJQuery;
 		console = $global.console;
 		if ($pkg === $mainPkg) {

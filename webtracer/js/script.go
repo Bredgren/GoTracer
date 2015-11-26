@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"strconv"
 
 	"github.com/Bredgren/gohtmlctrl/htmlctrl"
 	"github.com/Bredgren/gotracer/lib"
@@ -26,20 +27,32 @@ func onBodyLoad() {
 	img := js.Global.Get("Image").New()
 	img.Set("onload", func() {
 		imgCon.Append(img)
-		console.Call("log", img.Get("width"), img.Get("height"))
-		setImageSize(img.Get("width"), img.Get("height"))
+		w, h := img.Get("width").Float(), img.Get("height").Float()
+		imgCon.SetData("initWidth", w)
+		imgCon.SetData("initHeight", h)
+		console.Call("log", w, h)
+		setImageSize(w, h)
 	})
 	img.Set("src", "/img/render542.png")
+
+	jqImg := jq(img)
+	jqImg.Call("draggable")
+
+	zoom := jq("#zoom")
+	zoom.SetAttr("value", 1.0)
+	zoom.SetAttr("min", 0.1)
+	zoom.SetAttr("max", 10.0)
+	zoom.SetAttr("step", 0.1)
 }
 
 func initCallbacks() {
 	jq(".tab").Call(jquery.CLICK, onToggleControls)
 	jq("#save").Call(jquery.CLICK, onSave)
 	jq("#load").Call(jquery.CLICK, onLoad)
-	jq("#download").Call(jquery.CLICK, onDownload)
+	jq("#zoom").On("input change", onZoom)
 }
 
-func setImageSize(w, h *js.Object) {
+func setImageSize(w, h float64) {
 	imgCon := jq(".image-container")
 	imgCon.SetCss("width", w)
 	imgCon.SetCss("height", h)
@@ -100,6 +113,13 @@ func onLoad() {
 	console.Call("log", "load")
 }
 
-func onDownload() {
-	console.Call("log", "download")
+func onZoom() {
+	newZoom, e := strconv.ParseFloat(jq("#zoom").Val(), 64)
+	if e != nil {
+		console.Call("error", e.Error())
+	}
+	imgCon := jq(".image-container")
+	newW := imgCon.Data("initWidth").(float64) * newZoom
+	newH := imgCon.Data("initHeight").(float64) * newZoom
+	setImageSize(newW, newH)
 }

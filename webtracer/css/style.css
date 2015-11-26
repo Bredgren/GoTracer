@@ -14,12 +14,13 @@ body {
 }
 
 .image-container img {
-/* width: 100%; */
+    width: inherit;
+    cursor: move;
 }
 
 .controls {
     width: 350px;
-    position: absolute;
+    position: fixed;
     padding: 10px;
     color: white;
 }
@@ -49,6 +50,7 @@ body {
     opacity: 0.8;
     margin-bottom: 5px;
     color: white;
+    -webkit-user-select: none;
 }
 
 .btn:hover {
@@ -118,4 +120,12 @@ input {
 
 select {
     border-radius: 5px;
+}
+
+#zoom {
+    color: white;
+    right: 0;
+    bottom: 0;
+    position: fixed;
+    margin: 10px;
 }
