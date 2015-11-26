@@ -1,6 +1,6 @@
 body {
-		background: #111;
-		margin: 0px;
+    background: #111;
+    margin: 0px;
 }
 
 .image-container {
@@ -10,144 +10,106 @@ body {
     top: 0;
     bottom: 0;
     margin: auto;
-		z-index: -1;
+    z-index: -1;
 }
 
 .image-container img {
-		/* width: 100%; */
+/* width: 100%; */
 }
 
 .controls {
     width: 350px;
     position: absolute;
-    border-right: 2px solid black;
-    border-bottom: 2px solid black;
-    background-color: #222;
     padding: 10px;
-}
-
-.controls.open {
-}
-
-.controls.closed {
-		left: -315px;
+    color: white;
 }
 
 .tab {
-		position: absolute;
-    right: -1em;
-    background-color: inherit;
-    border-right: 2px solid black;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+    text-align: center;
+    border: 1px solid grey;
+    border-radius: 5px;
     padding: 2px;
     cursor: pointer;
-		-webkit-user-select: none;
+    -webkit-user-select: none;
+}
+
+#tab-down {
+    display: none;
 }
 
 .btn {
-		background-color: grey;
-		border: 1px solid black;
-		border-radius: 5px;
-		opacity: 0.8;
-		margin-bottom: 5px;
+    background-color: grey;
+    border: 1px solid black;
+    border-radius: 5px;
+    opacity: 0.8;
+    margin-bottom: 5px;
+    color: white;
 }
 
 .btn:hover {
-		opacity: 1.0;
-}
-
-.toggle-button {
-		width: 100%;
-}
-
-.toggle-button-down {
-		/* opacity: 0.9; */
-		background-color: lightgrey;
-}
-
-.toggle-button-up {
-		/* background-color: grey; */
-		opacity: 0.3;
-}
-
-.btn-group {
-		display: flex;
-		justify-content: space-between;
-}
-
-#options {
-		color: white;
-}
-
-/* .option-group { */
-.go-struct {
-		/* padding: 2px; */
-		margin-bottom: 3px;
-    border-bottom: 1px solid grey;
-    border-left: 1px solid grey;
-		border-radius: 10px;
-}
-
-.go-struct-field {
-		display: inline-block;
-		/* margin-left: 5px; */
-		/* margin-right: 5px; */
-		margin: 5px;
-}
-
-/* .option-list { */
-.go-slice {
-		padding: 2px;
-		padding-left: 10px;
-		margin-bottom: 3px;
-    border-bottom: 1px solid grey;
-    border-left: 1px solid grey;
-		border-radius: 10px;
-}
-
-/* .option-list-items { */
-.go-slice li {
-		padding: 2px;
-		padding-left: 10px;
-		margin-bottom: 3px;
-    border-bottom: 1px solid grey;
-    border-left: 1px solid grey;
-		border-radius: 10px;
-		list-style-type: none;
-}
-
-/* .option-list-item { */
-/* 		padding: 2px; */
-/* 		padding-left: 10px; */
-/* 		margin-bottom: 3px; */
-/*     border-bottom: 1px solid grey; */
-/*     border-left: 1px solid grey; */
-/* 		border-radius: 10px; */
-/* } */
-
-/* .option-group-header { */
-label {
+    opacity: 1.0;
     cursor: pointer;
 }
 
-/* .option-group-options { */
-/* 		padding-left: 10px; */
-/* 		margin-bottom: 3px; */
-/* } */
+.toggle-button {
+    width: 100%;
+}
 
-/* .option { */
-/* 		display: table-cell; */
-/* } */
+.toggle-button-down {
+    background-color: lightgrey;
+}
 
-/* .option-label { */
-/* } */
+.toggle-button-up {
+    opacity: 0.3;
+}
+
+#options {
+    overflow: scroll;
+    height: 600px;
+    border: 2px solid grey;
+    border-radius: 10px;
+}
+
+.go-struct {
+    margin-bottom: 3px;
+    border-bottom: 1px solid grey;
+    border-left: 1px solid grey;
+    border-radius: 10px;
+}
+
+.go-struct-field {
+    display: inline-block;
+    margin: 5px;
+}
+
+.go-slice {
+    padding: 2px;
+    padding-left: 10px;
+    margin-bottom: 3px;
+    border-bottom: 1px solid grey;
+    border-left: 1px solid grey;
+    border-radius: 10px;
+}
+
+.go-slice li {
+    padding: 2px;
+    padding-left: 10px;
+    margin-bottom: 3px;
+    border-bottom: 1px solid grey;
+    border-left: 1px solid grey;
+    border-radius: 10px;
+    list-style-type: none;
+}
+
+.go-struct-field > label {
+    cursor: pointer;
+}
 
 input {
-		border-radius: 5px;
-		margin-left: 2px;
+    border-radius: 5px;
+    margin-left: 2px;
 }
 
 select {
-		border-radius: 5px;
+    border-radius: 5px;
 }
