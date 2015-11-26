@@ -24,6 +24,10 @@ body {
     color: white;
 }
 
+#options,.tab {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
 .tab {
     text-align: center;
     border: 1px solid grey;
@@ -31,6 +35,7 @@ body {
     padding: 2px;
     cursor: pointer;
     -webkit-user-select: none;
+    margin-top: 4px;
 }
 
 #tab-down {
@@ -89,6 +94,7 @@ body {
     border-bottom: 1px solid grey;
     border-left: 1px solid grey;
     border-radius: 10px;
+    display: block;
 }
 
 .go-slice li {
