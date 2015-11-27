@@ -50,6 +50,7 @@ func initCallbacks() {
 	jq("#save").Call(jquery.CLICK, onSave)
 	jq("#load").Call(jquery.CLICK, onLoad)
 	jq("#zoom").On("input change", onZoom)
+	jq("#reset").Call(jquery.CLICK, onReset)
 }
 
 func setImageSize(w, h float64) {
@@ -122,4 +123,11 @@ func onZoom() {
 	newW := imgCon.Data("initWidth").(float64) * newZoom
 	newH := imgCon.Data("initHeight").(float64) * newZoom
 	setImageSize(newW, newH)
+}
+
+func onReset() {
+	jq("#zoom").SetVal(1.0)
+	onZoom()
+	jq("img").SetCss("left", 0)
+	jq("img").SetCss("top", 0)
 }

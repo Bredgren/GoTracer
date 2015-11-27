@@ -2,7 +2,6 @@
 <!DOCTYPE html>
 <title>Web Tracer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- <script src="http://code.jquery.com/jquery{{if not debug}}.min{{end}}.js"></script> -->
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
 <link href="/css/style{{if not debug}}.min{{end}}.css" rel="stylesheet" media="screen">
@@ -27,6 +26,7 @@
   </div>
   <div id="zoom-div">
     <input id="zoom" type="range"/>
+    <button id="reset" class="btn">Reset</button>
   </div>
 </body>
 {{end}}

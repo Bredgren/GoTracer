@@ -19281,7 +19281,7 @@ $packages["github.com/Bredgren/gotracer/lib"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, htmlctrl, lib, js, jquery, reflect, strconv, funcType, ptrType, sliceType, ptrType$1, funcType$1, jq, console, main, onBodyLoad, initCallbacks, setImageSize, initOptions, addOptionSlides, onToggleControls, onSave, onLoad, onZoom;
+	var $pkg = {}, $init, htmlctrl, lib, js, jquery, reflect, strconv, funcType, ptrType, sliceType, ptrType$1, funcType$1, jq, console, main, onBodyLoad, initCallbacks, setImageSize, initOptions, addOptionSlides, onToggleControls, onSave, onLoad, onZoom, onReset;
 	htmlctrl = $packages["github.com/Bredgren/gohtmlctrl/htmlctrl"];
 	lib = $packages["github.com/Bredgren/gotracer/lib"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
@@ -19336,8 +19336,8 @@ $packages["main"] = (function() {
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onBodyLoad }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f.img = img; $f.imgCon = imgCon; $f.jqImg = jqImg; $f.options = options; $f.zoom = zoom; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	initCallbacks = function() {
-		var $ptr, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _r$7 = $f._r$7; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, _r$8, _r$9, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _r$7 = $f._r$7; _r$8 = $f._r$8; _r$9 = $f._r$9; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		_r = jq(new sliceType([new $String(".tab")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		_r$1 = _r.Call("click", new sliceType([new funcType(onToggleControls)])); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		_r$1;
@@ -19350,7 +19350,10 @@ $packages["main"] = (function() {
 		_r$6 = jq(new sliceType([new $String("#zoom")])); /* */ $s = 7; case 7: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
 		_r$7 = _r$6.On(new sliceType([new $String("input change"), new funcType(onZoom)])); /* */ $s = 8; case 8: if($c) { $c = false; _r$7 = _r$7.$blk(); } if (_r$7 && _r$7.$blk !== undefined) { break s; }
 		_r$7;
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: initCallbacks }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f.$s = $s; $f.$r = $r; return $f;
+		_r$8 = jq(new sliceType([new $String("#reset")])); /* */ $s = 9; case 9: if($c) { $c = false; _r$8 = _r$8.$blk(); } if (_r$8 && _r$8.$blk !== undefined) { break s; }
+		_r$9 = _r$8.Call("click", new sliceType([new funcType(onReset)])); /* */ $s = 10; case 10: if($c) { $c = false; _r$9 = _r$9.$blk(); } if (_r$9 && _r$9.$blk !== undefined) { break s; }
+		_r$9;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: initCallbacks }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f._r$8 = _r$8; $f._r$9 = _r$9; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	setImageSize = function(w, h) {
 		var $ptr, _r, h, imgCon, w, $s, $r;
@@ -19472,6 +19475,21 @@ $packages["main"] = (function() {
 		newH = $assertType(imgCon.Data("initHeight"), $Float64) * newZoom;
 		$r = setImageSize(newW, newH); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onZoom }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._tuple = _tuple; $f.e = e; $f.imgCon = imgCon; $f.newH = newH; $f.newW = newW; $f.newZoom = newZoom; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	onReset = function() {
+		var $ptr, _r, _r$1, _r$2, _r$3, _r$4, _r$5, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_r = jq(new sliceType([new $String("#zoom")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r$1 = _r.SetVal(new $Float64(1)); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		_r$1;
+		$r = onZoom(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		_r$2 = jq(new sliceType([new $String("img")])); /* */ $s = 4; case 4: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		_r$3 = _r$2.SetCss(new sliceType([new $String("left"), new $Int(0)])); /* */ $s = 5; case 5: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+		_r$3;
+		_r$4 = jq(new sliceType([new $String("img")])); /* */ $s = 6; case 6: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+		_r$5 = _r$4.SetCss(new sliceType([new $String("top"), new $Int(0)])); /* */ $s = 7; case 7: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+		_r$5;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onReset }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$init = function() {
 		$pkg.$init = function() {};
