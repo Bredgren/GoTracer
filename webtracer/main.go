@@ -1,14 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"github.com/Bredgren/gotracer/lib"
 )
 
 const path = "/src/github.com/Bredgren/gotracer/webtracer"
@@ -60,6 +64,16 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		log.Println("POST", r.RequestURI)
+		body, e := ioutil.ReadAll(r.Body)
+		if e != nil {
+			log.Println("Error reading post:", e)
+			http.Error(w, e.Error(), http.StatusBadRequest)
+		}
+		r.Body.Close()
+		var options lib.Options
+		json.Unmarshal(body, &options)
+		fmt.Println(options)
+		fmt.Fprintln(w, "Received")
 	case "GET":
 		log.Println("GET", r.RequestURI)
 		renderTmpl(w, &page{})

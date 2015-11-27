@@ -119,7 +119,6 @@ func addOptionSlides(opts jquery.JQuery) {
 
 func checkFastRender() {
 	fr := jq("#fast-render").Is(":checked")
-	console.Call("log", fr)
 	jq(".fast-render").Each(func(i int, intf interface{}) {
 		obj := jq(intf.(*js.Object))
 		if fr {
@@ -175,4 +174,8 @@ func onOptionChange() {
 		return
 	}
 	console.Call("log", string(j))
+
+	jquery.Post("/", string(j), func(data, status, xhr string) {
+		console.Call("log", data, status, xhr)
+	})
 }
