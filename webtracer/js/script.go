@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"reflect"
 	"strconv"
 
@@ -12,6 +13,7 @@ import (
 
 var jq = jquery.NewJQuery
 var console = js.Global.Get("console")
+var options *lib.Options
 
 func main() {
 	js.Global.Set("onBodyLoad", onBodyLoad)
@@ -19,8 +21,7 @@ func main() {
 
 func onBodyLoad() {
 	initGlobalCallbacks()
-	options := lib.NewOptions()
-	initOptions(options)
+	initOptions()
 	initOptionCallbacks()
 	console.Call("log", options)
 
@@ -76,7 +77,8 @@ type optionItem struct {
 	st reflect.StructField
 }
 
-func initOptions(options *lib.Options) {
+func initOptions() {
+	options = lib.NewOptions()
 	opts := jq("#options")
 	o, e := htmlctrl.Struct(options, "Options", "all-options", "")
 	if e != nil {
@@ -151,4 +153,11 @@ func onOptionChange() {
 	// and new ones will be missing the callbacks.
 	addOptionSlides(jq("#all-options"))
 	initOptionCallbacks()
+
+	j, e := json.Marshal(options)
+	if e != nil {
+		console.Call("error", e.Error())
+		return
+	}
+	console.Call("log", string(j))
 }
