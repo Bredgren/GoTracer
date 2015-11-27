@@ -139,3 +139,11 @@ select {
     color: white;
     width: 200px;
 }
+
+.fast-render {
+}
+
+.fast-render-on {
+    background: rgb(255, 183, 183);
+    border-color: rgb(255, 0, 0);
+}

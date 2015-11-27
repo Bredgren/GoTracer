@@ -23,6 +23,7 @@ func onBodyLoad() {
 	initGlobalCallbacks()
 	initOptions()
 	initOptionCallbacks()
+	checkFastRender()
 	console.Call("log", options)
 
 	imgCon := jq(".image-container")
@@ -116,6 +117,19 @@ func addOptionSlides(opts jquery.JQuery) {
 	})
 }
 
+func checkFastRender() {
+	fr := jq("#fast-render").Is(":checked")
+	console.Call("log", fr)
+	jq(".fast-render").Each(func(i int, intf interface{}) {
+		obj := jq(intf.(*js.Object))
+		if fr {
+			obj.AddClass("fast-render-on")
+		} else {
+			obj.RemoveClass("fast-render-on")
+		}
+	})
+}
+
 func onToggleControls() {
 	jq("#options").SlideToggle("fast")
 	jq("#tab-up").Toggle()
@@ -153,6 +167,7 @@ func onOptionChange() {
 	// and new ones will be missing the callbacks.
 	addOptionSlides(jq("#all-options"))
 	initOptionCallbacks()
+	checkFastRender()
 
 	j, e := json.Marshal(options)
 	if e != nil {

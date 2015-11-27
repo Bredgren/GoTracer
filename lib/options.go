@@ -13,9 +13,9 @@ type Options struct {
 }
 
 type global struct {
-	FastRender       bool `title:"Disable/limit some settings in order to decrease rendering time" json:"fastRender"`
-	MaxRecursion     int  `title:"Maximum reflective/refractive rays per pixel" min:"0" max:"99" json:"maxRecursion"`
-	SoftShadowDetail int  `title:"Soft shadow detail. 0 disables soft shadows" min:"0" max:"99" json:"softShadowDetail"`
+	FastRender       bool `title:"Disable/limit some settings in order to decrease rendering time" id:"fast-render" json:"fastRender"`
+	MaxRecursion     int  `title:"Maximum reflective/refractive rays per pixel" min:"0" max:"99" class:"fast-render" json:"maxRecursion"`
+	SoftShadowDetail int  `title:"Soft shadow detail. 0 disables soft shadows" min:"0" max:"99" class:"fast-render" json:"softShadowDetail"`
 }
 
 type resolution struct {
@@ -28,7 +28,7 @@ type camera struct {
 	LookAt   vector  `title:"The point that the camera is looking at" json:"lookAt"`
 	UpDir    vector  `title:"The up direction" json:"upDir"`
 	Fov      float64 `title:"Field of view in degrees" min:"0.0" max:"360.0" json:"fov"`
-	Dof      float64 `title:"Depth of field" min:"0.0" max:"999.9" json:"dof"`
+	Dof      float64 `title:"Depth of field" min:"0.0" max:"999.9" class:"fast-render" json:"dof"`
 }
 
 type background struct {
@@ -38,8 +38,8 @@ type background struct {
 }
 
 type antiAlias struct {
-	MaxDivisions int     `title:"Maximum subdivisions of a pixel" min:"0" max:"16" json:"maxDivisions"`
-	Threshold    float64 `title:"Stop subdividing pixels when the difference is less than this" min:"0.0" max:"99" json:"threshold"`
+	MaxDivisions int     `title:"Maximum subdivisions of a pixel" min:"0" max:"16" class:"fast-render" json:"maxDivisions"`
+	Threshold    float64 `title:"Stop subdividing pixels when the difference is less than this" min:"0.0" max:"99" class:"fast-render" json:"threshold"`
 }
 
 type light struct {
@@ -47,7 +47,7 @@ type light struct {
 	Color           color  `title:"Color of the light" json:"color"`
 	Position        vector `title:"Position of the light (Point and Spot)" json:"position"`
 	Direction       vector `title:"Direction of the light (Direcitonal and Spot)" json:"direction"`
-	IlluminationMap bool   `title:"Generate an illumination map (Point and Spot)" json:"illuminationMap"`
+	IlluminationMap bool   `title:"Generate an illumination map (Point and Spot)" class:"fast-render" json:"illuminationMap"`
 	Coeff           struct {
 		Constant  float64 `json:"constant"`
 		Linear    float64 `json:"linear"`
