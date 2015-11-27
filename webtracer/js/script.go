@@ -18,9 +18,10 @@ func main() {
 }
 
 func onBodyLoad() {
-	initCallbacks()
+	initGlobalCallbacks()
 	options := lib.NewOptions()
 	initOptions(options)
+	initOptionCallbacks()
 	console.Call("log", options)
 
 	imgCon := jq(".image-container")
@@ -30,13 +31,11 @@ func onBodyLoad() {
 		w, h := img.Get("width").Float(), img.Get("height").Float()
 		imgCon.SetData("initWidth", w)
 		imgCon.SetData("initHeight", h)
-		console.Call("log", w, h)
 		setImageSize(w, h)
 	})
 	img.Set("src", "/img/render542.png")
 
-	jqImg := jq(img)
-	jqImg.Call("draggable")
+	jq(img).Call("draggable")
 
 	zoom := jq("#zoom")
 	zoom.SetAttr("value", 1.0)
@@ -45,12 +44,25 @@ func onBodyLoad() {
 	zoom.SetAttr("step", 0.1)
 }
 
-func initCallbacks() {
+func initGlobalCallbacks() {
 	jq(".tab").Call(jquery.CLICK, onToggleControls)
 	jq("#save").Call(jquery.CLICK, onSave)
 	jq("#load").Call(jquery.CLICK, onLoad)
 	jq("#zoom").On("input change", onZoom)
 	jq("#reset").Call(jquery.CLICK, onReset)
+}
+
+func initOptionCallbacks() {
+	fn := func(i int, intf interface{}) {
+		jq(intf.(*js.Object)).Off(".option")
+		jq(intf.(*js.Object)).On(jquery.CLICK+".option", onOptionChange)
+	}
+	jq(".go-bool").Each(fn)
+	jq(".go-int").Each(fn)
+	jq(".go-float64").Each(fn)
+	jq(".go-string").Each(fn)
+	jq(".go-choice").Each(fn)
+	jq(".go-slice button").Each(fn)
 }
 
 func setImageSize(w, h float64) {
@@ -82,7 +94,8 @@ func addOptionSlides(opts jquery.JQuery) {
 		obj := intf.(*js.Object)
 		label := jq(obj.Get("parentNode").Get("children").Index(0))
 		st := jq(obj)
-		jq(label).Call(jquery.CLICK, func(event jquery.Event) {
+		jq(label).Off(".option")
+		jq(label).On(jquery.CLICK+".option", func(event jquery.Event) {
 			st.SlideToggle("fast")
 			event.StopPropagation()
 		})
@@ -93,7 +106,8 @@ func addOptionSlides(opts jquery.JQuery) {
 		obj := intf.(*js.Object)
 		label := jq(obj.Get("parentNode").Get("children").Index(0))
 		st := jq(obj)
-		jq(label).Call(jquery.CLICK, func(event jquery.Event) {
+		jq(label).Off(".option")
+		jq(label).On(jquery.CLICK+".option", func(event jquery.Event) {
 			st.SlideToggle("fast")
 			event.StopPropagation()
 		})
@@ -130,4 +144,11 @@ func onReset() {
 	onZoom()
 	jq("img").SetCss("left", 0)
 	jq("img").SetCss("top", 0)
+}
+
+func onOptionChange() {
+	// Re-add callbacks because when adding/removing items from slices they destroy the previous objects
+	// and new ones will be missing the callbacks.
+	addOptionSlides(jq("#all-options"))
+	initOptionCallbacks()
 }

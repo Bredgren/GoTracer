@@ -28,6 +28,7 @@ type camera struct {
 	LookAt   vector  `title:"The point that the camera is looking at"`
 	UpDir    vector  `title:"The up direction"`
 	Fov      float64 `title:"Field of view in degrees" min:"0.0" max:"360.0"`
+	Dof      float64 `title:"Depth of field" min:"0.0" max:"999.9"`
 }
 
 type background struct {
@@ -42,11 +43,12 @@ type antiAlias struct {
 }
 
 type light struct {
-	Type      string `title:"Type of light" choice:"Directional,Point,Spot"`
-	Color     color  `title:"Color of the light"`
-	Position  vector `title:"Position of the light (Point and Spot)"`
-	Direction vector `title:"Direction of the light (Direcitonal and Spot)"`
-	Coeff     struct {
+	Type            string `title:"Type of light" choice:"Directional,Point,Spot"`
+	Color           color  `title:"Color of the light"`
+	Position        vector `title:"Position of the light (Point and Spot)"`
+	Direction       vector `title:"Direction of the light (Direcitonal and Spot)"`
+	IlluminationMap bool   `title:"Generate an illumination map (Point and Spot)"`
+	Coeff           struct {
 		Constant  float64
 		Linear    float64
 		Quadratic float64
@@ -79,7 +81,7 @@ type matProperty struct {
 }
 
 type object struct {
-	Type         string    `title:"Type of shape. The 'Transform' type is an invisible object" choice:"Transform,Sphere,Box,Square,Cylinder,Cone"`
+	Type         string    `title:"Type of shape. The 'Transform' type is an invisible object" choice:"Transform,Sphere,Box,Plane,Triangle,Trimesh,Cylinder,Cone"`
 	Transform    transform `title:"Tranform of the object"`
 	Material     string    `title:"Name of the material to use"`
 	TopRadius    float64   `title:"Top radius for cone objects"`
@@ -96,7 +98,7 @@ type transform struct {
 }
 
 type color struct {
-	R, G, B float64 `min:"0.0" max:"1.0" default:"0.0"`
+	R, G, B float64 `min:"0.0" max:"1.0" step:"0.1" default:"0.0"`
 }
 
 type vector struct {
@@ -152,7 +154,7 @@ func NewOptions() *Options {
 		},
 		Objects: []*object{
 			{
-				Type: "Square",
+				Type: "Plane",
 				Transform: transform{
 					Translate:   vector{0, 0, 0},
 					RotateAxis:  vector{1, 0, 0},

@@ -19047,7 +19047,7 @@ $packages["github.com/Bredgren/gotracer/lib"] = (function() {
 			this.Global = new global.ptr(false, 0, 0);
 			this.Resolution = new resolution.ptr(0, 0);
 			this.Background = new background.ptr("", new color.ptr(0, 0, 0), "");
-			this.Camera = new camera.ptr(new vector.ptr(0, 0, 0), new vector.ptr(0, 0, 0), new vector.ptr(0, 0, 0), 0);
+			this.Camera = new camera.ptr(new vector.ptr(0, 0, 0), new vector.ptr(0, 0, 0), new vector.ptr(0, 0, 0), 0, 0);
 			this.AntiAlias = new antiAlias.ptr(0, 0);
 			this.Lights = sliceType.nil;
 			this.Materials = sliceType$1.nil;
@@ -19085,19 +19085,21 @@ $packages["github.com/Bredgren/gotracer/lib"] = (function() {
 		this.W = W_;
 		this.H = H_;
 	});
-	camera = $pkg.camera = $newType(0, $kindStruct, "lib.camera", "camera", "github.com/Bredgren/gotracer/lib", function(Position_, LookAt_, UpDir_, Fov_) {
+	camera = $pkg.camera = $newType(0, $kindStruct, "lib.camera", "camera", "github.com/Bredgren/gotracer/lib", function(Position_, LookAt_, UpDir_, Fov_, Dof_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Position = new vector.ptr(0, 0, 0);
 			this.LookAt = new vector.ptr(0, 0, 0);
 			this.UpDir = new vector.ptr(0, 0, 0);
 			this.Fov = 0;
+			this.Dof = 0;
 			return;
 		}
 		this.Position = Position_;
 		this.LookAt = LookAt_;
 		this.UpDir = UpDir_;
 		this.Fov = Fov_;
+		this.Dof = Dof_;
 	});
 	background = $pkg.background = $newType(0, $kindStruct, "lib.background", "background", "github.com/Bredgren/gotracer/lib", function(Type_, Color_, Image_) {
 		this.$val = this;
@@ -19121,13 +19123,14 @@ $packages["github.com/Bredgren/gotracer/lib"] = (function() {
 		this.MaxDivisions = MaxDivisions_;
 		this.Threshold = Threshold_;
 	});
-	light = $pkg.light = $newType(0, $kindStruct, "lib.light", "light", "github.com/Bredgren/gotracer/lib", function(Type_, Color_, Position_, Direction_, Coeff_, Angle_, DropOff_, FadeAngle_) {
+	light = $pkg.light = $newType(0, $kindStruct, "lib.light", "light", "github.com/Bredgren/gotracer/lib", function(Type_, Color_, Position_, Direction_, IlluminationMap_, Coeff_, Angle_, DropOff_, FadeAngle_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Type = "";
 			this.Color = new color.ptr(0, 0, 0);
 			this.Position = new vector.ptr(0, 0, 0);
 			this.Direction = new vector.ptr(0, 0, 0);
+			this.IlluminationMap = false;
 			this.Coeff = new structType.ptr(0, 0, 0);
 			this.Angle = 0;
 			this.DropOff = 0;
@@ -19138,6 +19141,7 @@ $packages["github.com/Bredgren/gotracer/lib"] = (function() {
 		this.Color = Color_;
 		this.Position = Position_;
 		this.Direction = Direction_;
+		this.IlluminationMap = IlluminationMap_;
 		this.Coeff = Coeff_;
 		this.Angle = Angle_;
 		this.DropOff = DropOff_;
@@ -19255,22 +19259,22 @@ $packages["github.com/Bredgren/gotracer/lib"] = (function() {
 	sliceType$3 = $sliceType(object);
 	NewOptions = function() {
 		var $ptr, opts;
-		opts = new Options.ptr(new global.ptr(true, 2, 0), new resolution.ptr(600, 600), new background.ptr("Uniform", new color.ptr(0, 0, 0), ""), new camera.ptr(new vector.ptr(0, 5, 10), new vector.ptr(0, 0, 0), new vector.ptr(0, 1, 0), 58), new antiAlias.ptr(0, 0), new sliceType([new light.ptr("Directional", new color.ptr(1, 1, 1), new vector.ptr(0, 0, 0), new vector.ptr(-1, -1, -1), new structType.ptr(0, 0, 0), 0, 0, 0)]), new sliceType$1([new material.ptr("white", "", new matProperty.ptr("Uniform", new color.ptr(0, 0, 0), ""), new matProperty.ptr("Uniform", new color.ptr(0.3, 0.3, 0.3), ""), new matProperty.ptr("Uniform", new color.ptr(1, 1, 1), ""), new matProperty.ptr("Uniform", new color.ptr(1, 1, 1), ""), new matProperty.ptr("Uniform", new color.ptr(0, 0, 0), ""), new matProperty.ptr("Uniform", new color.ptr(0, 0, 0), ""), new matProperty.ptr("Uniform", new color.ptr(0.9, 0.9, 0.9), ""), 1, "", false, "Blinn-Phong")]), new sliceType$2([new object.ptr("Square", new transform.ptr(new vector.ptr(0, 0, 0), new vector.ptr(1, 0, 0), -90, new vector.ptr(10, 10, 0)), "white", 0, 0, false, sliceType$3.nil), new object.ptr("Box", new transform.ptr(new vector.ptr(0, 1, 0), new vector.ptr(0, 0, 0), 0, new vector.ptr(2, 2, 2)), "white", 0, 0, false, sliceType$3.nil)]));
+		opts = new Options.ptr(new global.ptr(true, 2, 0), new resolution.ptr(600, 600), new background.ptr("Uniform", new color.ptr(0, 0, 0), ""), new camera.ptr(new vector.ptr(0, 5, 10), new vector.ptr(0, 0, 0), new vector.ptr(0, 1, 0), 58, 0), new antiAlias.ptr(0, 0), new sliceType([new light.ptr("Directional", new color.ptr(1, 1, 1), new vector.ptr(0, 0, 0), new vector.ptr(-1, -1, -1), false, new structType.ptr(0, 0, 0), 0, 0, 0)]), new sliceType$1([new material.ptr("white", "", new matProperty.ptr("Uniform", new color.ptr(0, 0, 0), ""), new matProperty.ptr("Uniform", new color.ptr(0.3, 0.3, 0.3), ""), new matProperty.ptr("Uniform", new color.ptr(1, 1, 1), ""), new matProperty.ptr("Uniform", new color.ptr(1, 1, 1), ""), new matProperty.ptr("Uniform", new color.ptr(0, 0, 0), ""), new matProperty.ptr("Uniform", new color.ptr(0, 0, 0), ""), new matProperty.ptr("Uniform", new color.ptr(0.9, 0.9, 0.9), ""), 1, "", false, "Blinn-Phong")]), new sliceType$2([new object.ptr("Plane", new transform.ptr(new vector.ptr(0, 0, 0), new vector.ptr(1, 0, 0), -90, new vector.ptr(10, 10, 0)), "white", 0, 0, false, sliceType$3.nil), new object.ptr("Box", new transform.ptr(new vector.ptr(0, 1, 0), new vector.ptr(0, 0, 0), 0, new vector.ptr(2, 2, 2)), "white", 0, 0, false, sliceType$3.nil)]));
 		return opts;
 	};
 	$pkg.NewOptions = NewOptions;
 	Options.init([{prop: "Global", name: "Global", pkg: "", typ: global, tag: "title:\"Global options\""}, {prop: "Resolution", name: "Resolution", pkg: "", typ: resolution, tag: "title:\"Image width and height in pixels\""}, {prop: "Background", name: "Background", pkg: "", typ: background, tag: "title:\"Determines the color when a ray doesn't hit anything\""}, {prop: "Camera", name: "Camera", pkg: "", typ: camera, tag: "title:\"Camera position and orientation\""}, {prop: "AntiAlias", name: "AntiAlias", pkg: "", typ: antiAlias, tag: "title:\"Anti-aliasing settings\""}, {prop: "Lights", name: "Lights", pkg: "", typ: sliceType, tag: "title:\"List of all lights in the scene\""}, {prop: "Materials", name: "Materials", pkg: "", typ: sliceType$1, tag: "title:\"List of all the materials available to objects\""}, {prop: "Objects", name: "Objects", pkg: "", typ: sliceType$2, tag: "title:\"List of all objects in the scene\""}]);
 	global.init([{prop: "FastRender", name: "FastRender", pkg: "", typ: $Bool, tag: "title:\"Disable/limit some settings in order to decrease rendering time\""}, {prop: "MaxRecursion", name: "MaxRecursion", pkg: "", typ: $Int, tag: "title:\"Maximum reflective/refractive rays per pixel\" min:\"0\" max:\"99\""}, {prop: "SoftShadowDetail", name: "SoftShadowDetail", pkg: "", typ: $Int, tag: "title:\"Soft shadow detail. 0 disables soft shadows\" min:\"0\" max:\"99\""}]);
 	resolution.init([{prop: "W", name: "W", pkg: "", typ: $Int, tag: "title:\"Width in pixels\" min:\"1\" max:\"16000\""}, {prop: "H", name: "H", pkg: "", typ: $Int, tag: "title:\"Height in pixels\" min:\"1\" max:\"16000\""}]);
-	camera.init([{prop: "Position", name: "Position", pkg: "", typ: vector, tag: "title:\"Camera position\""}, {prop: "LookAt", name: "LookAt", pkg: "", typ: vector, tag: "title:\"The point that the camera is looking at\""}, {prop: "UpDir", name: "UpDir", pkg: "", typ: vector, tag: "title:\"The up direction\""}, {prop: "Fov", name: "Fov", pkg: "", typ: $Float64, tag: "title:\"Field of view in degrees\" min:\"0.0\" max:\"360.0\""}]);
+	camera.init([{prop: "Position", name: "Position", pkg: "", typ: vector, tag: "title:\"Camera position\""}, {prop: "LookAt", name: "LookAt", pkg: "", typ: vector, tag: "title:\"The point that the camera is looking at\""}, {prop: "UpDir", name: "UpDir", pkg: "", typ: vector, tag: "title:\"The up direction\""}, {prop: "Fov", name: "Fov", pkg: "", typ: $Float64, tag: "title:\"Field of view in degrees\" min:\"0.0\" max:\"360.0\""}, {prop: "Dof", name: "Dof", pkg: "", typ: $Float64, tag: "title:\"Depth of field\" min:\"0.0\" max:\"999.9\""}]);
 	background.init([{prop: "Type", name: "Type", pkg: "", typ: $String, tag: "title:\"Type of background\" choice:\"Uniform,Skybox\""}, {prop: "Color", name: "Color", pkg: "", typ: color, tag: "title:\"Color to use for a solid background (Uniform)\""}, {prop: "Image", name: "Image", pkg: "", typ: $String, tag: "title:\"Path/URL of image to use (Skybox)\""}]);
 	antiAlias.init([{prop: "MaxDivisions", name: "MaxDivisions", pkg: "", typ: $Int, tag: "title:\"Maximum subdivisions of a pixel\" min:\"0\" max:\"16\""}, {prop: "Threshold", name: "Threshold", pkg: "", typ: $Float64, tag: "title:\"Stop subdividing pixels when the difference is less than this\" min:\"0.0\" max:\"99\""}]);
-	light.init([{prop: "Type", name: "Type", pkg: "", typ: $String, tag: "title:\"Type of light\" choice:\"Directional,Point,Spot\""}, {prop: "Color", name: "Color", pkg: "", typ: color, tag: "title:\"Color of the light\""}, {prop: "Position", name: "Position", pkg: "", typ: vector, tag: "title:\"Position of the light (Point and Spot)\""}, {prop: "Direction", name: "Direction", pkg: "", typ: vector, tag: "title:\"Direction of the light (Direcitonal and Spot)\""}, {prop: "Coeff", name: "Coeff", pkg: "", typ: structType, tag: "title:\"Constant, lnear, and quadratic coefficients for point light fall off (Point)\""}, {prop: "Angle", name: "Angle", pkg: "", typ: $Float64, tag: "title:\"Spotlight angle\" Type:\"Spot\" min:\"0.0\" max:\"360.0\""}, {prop: "DropOff", name: "DropOff", pkg: "", typ: $Float64, tag: "title:\"Spotlight drop off angle\" Type:\"Spot\" min:\"0.0\" max:\"360.0\""}, {prop: "FadeAngle", name: "FadeAngle", pkg: "", typ: $Float64, tag: "title:\"Stoplight fade angle\" Type:\"Spot\" min:\"0.0\" max:\"360.0\""}]);
+	light.init([{prop: "Type", name: "Type", pkg: "", typ: $String, tag: "title:\"Type of light\" choice:\"Directional,Point,Spot\""}, {prop: "Color", name: "Color", pkg: "", typ: color, tag: "title:\"Color of the light\""}, {prop: "Position", name: "Position", pkg: "", typ: vector, tag: "title:\"Position of the light (Point and Spot)\""}, {prop: "Direction", name: "Direction", pkg: "", typ: vector, tag: "title:\"Direction of the light (Direcitonal and Spot)\""}, {prop: "IlluminationMap", name: "IlluminationMap", pkg: "", typ: $Bool, tag: "title:\"Generate an illumination map (Point and Spot)\""}, {prop: "Coeff", name: "Coeff", pkg: "", typ: structType, tag: "title:\"Constant, lnear, and quadratic coefficients for point light fall off (Point)\""}, {prop: "Angle", name: "Angle", pkg: "", typ: $Float64, tag: "title:\"Spotlight angle\" Type:\"Spot\" min:\"0.0\" max:\"360.0\""}, {prop: "DropOff", name: "DropOff", pkg: "", typ: $Float64, tag: "title:\"Spotlight drop off angle\" Type:\"Spot\" min:\"0.0\" max:\"360.0\""}, {prop: "FadeAngle", name: "FadeAngle", pkg: "", typ: $Float64, tag: "title:\"Stoplight fade angle\" Type:\"Spot\" min:\"0.0\" max:\"360.0\""}]);
 	material.init([{prop: "Name", name: "Name", pkg: "", typ: $String, tag: "title:\"Unique name for this material\""}, {prop: "Parent", name: "Parent", pkg: "", typ: $String, tag: "title:\"Name of existing material to inherit attributes from\""}, {prop: "Emissive", name: "Emissive", pkg: "", typ: matProperty, tag: "title:\"Emissive color of the material\""}, {prop: "Ambient", name: "Ambient", pkg: "", typ: matProperty, tag: "title:\"Abmient color of the material\""}, {prop: "Diffuse", name: "Diffuse", pkg: "", typ: matProperty, tag: "title:\"Diffuse color of the material\""}, {prop: "Specular", name: "Specular", pkg: "", typ: matProperty, tag: "title:\"Specular color of the material\""}, {prop: "Reflective", name: "Reflective", pkg: "", typ: matProperty, tag: "title:\"Reflectivness of the material\""}, {prop: "Transmissive", name: "Transmissive", pkg: "", typ: matProperty, tag: "title:\"Transmissivness of the material\""}, {prop: "Smoothness", name: "Smoothness", pkg: "", typ: matProperty, tag: "title:\"Smoothness of the material. Affects size of speclar spots\""}, {prop: "Index", name: "Index", pkg: "", typ: $Float64, tag: "title:\"Refractive index of the material\""}, {prop: "Normal", name: "Normal", pkg: "", typ: $String, tag: "title:\"Path/URL of image to use as a normal map\""}, {prop: "IsLiquid", name: "IsLiquid", pkg: "", typ: $Bool, tag: "title:\"Overlapping behavior is only defined for non-liquids inside liquids\""}, {prop: "Brdf", name: "Brdf", pkg: "", typ: $String, tag: "title:\"Shadding algorithm\" choice:\"Lambert,Blinn-Phong\""}]);
 	matProperty.init([{prop: "Type", name: "Type", pkg: "", typ: $String, tag: "title:\"Type of material\" choice:\"Uniform,Texture\""}, {prop: "Color", name: "Color", pkg: "", typ: color, tag: "title:\"Uniform color\""}, {prop: "Texture", name: "Texture", pkg: "", typ: $String, tag: "title:\"Path to texture file\""}]);
-	object.init([{prop: "Type", name: "Type", pkg: "", typ: $String, tag: "title:\"Type of shape. The 'Transform' type is an invisible object\" choice:\"Transform,Sphere,Box,Square,Cylinder,Cone\""}, {prop: "Transform", name: "Transform", pkg: "", typ: transform, tag: "title:\"Tranform of the object\""}, {prop: "Material", name: "Material", pkg: "", typ: $String, tag: "title:\"Name of the material to use\""}, {prop: "TopRadius", name: "TopRadius", pkg: "", typ: $Float64, tag: "title:\"Top radius for cone objects\""}, {prop: "BottomRadius", name: "BottomRadius", pkg: "", typ: $Float64, tag: "title:\"Bottom radius for cone objects\""}, {prop: "Capped", name: "Capped", pkg: "", typ: $Bool, tag: "title:\"Whether to cap the ends of cones/cylinders\""}, {prop: "Children", name: "Children", pkg: "", typ: sliceType$3, tag: "title:\"Child objects that inherit this one's transform\""}]);
+	object.init([{prop: "Type", name: "Type", pkg: "", typ: $String, tag: "title:\"Type of shape. The 'Transform' type is an invisible object\" choice:\"Transform,Sphere,Box,Plane,Triangle,Trimesh,Cylinder,Cone\""}, {prop: "Transform", name: "Transform", pkg: "", typ: transform, tag: "title:\"Tranform of the object\""}, {prop: "Material", name: "Material", pkg: "", typ: $String, tag: "title:\"Name of the material to use\""}, {prop: "TopRadius", name: "TopRadius", pkg: "", typ: $Float64, tag: "title:\"Top radius for cone objects\""}, {prop: "BottomRadius", name: "BottomRadius", pkg: "", typ: $Float64, tag: "title:\"Bottom radius for cone objects\""}, {prop: "Capped", name: "Capped", pkg: "", typ: $Bool, tag: "title:\"Whether to cap the ends of cones/cylinders\""}, {prop: "Children", name: "Children", pkg: "", typ: sliceType$3, tag: "title:\"Child objects that inherit this one's transform\""}]);
 	transform.init([{prop: "Translate", name: "Translate", pkg: "", typ: vector, tag: "title:\"Translation\""}, {prop: "RotateAxis", name: "RotateAxis", pkg: "", typ: vector, tag: "title:\"Axis to rotate around\""}, {prop: "RotateAngle", name: "RotateAngle", pkg: "", typ: $Float64, tag: "title:\"Angle to rotate around the axis in degrees\" min:\"-360.0\" max:\"360.0\""}, {prop: "Scale", name: "Scale", pkg: "", typ: vector, tag: "title:\"Scale\""}]);
-	color.init([{prop: "R", name: "R", pkg: "", typ: $Float64, tag: "min:\"0.0\" max:\"1.0\" default:\"0.0\""}, {prop: "G", name: "G", pkg: "", typ: $Float64, tag: "min:\"0.0\" max:\"1.0\" default:\"0.0\""}, {prop: "B", name: "B", pkg: "", typ: $Float64, tag: "min:\"0.0\" max:\"1.0\" default:\"0.0\""}]);
+	color.init([{prop: "R", name: "R", pkg: "", typ: $Float64, tag: "min:\"0.0\" max:\"1.0\" step:\"0.1\" default:\"0.0\""}, {prop: "G", name: "G", pkg: "", typ: $Float64, tag: "min:\"0.0\" max:\"1.0\" step:\"0.1\" default:\"0.0\""}, {prop: "B", name: "B", pkg: "", typ: $Float64, tag: "min:\"0.0\" max:\"1.0\" step:\"0.1\" default:\"0.0\""}]);
 	vector.init([{prop: "X", name: "X", pkg: "", typ: $Float64, tag: "min:\"-999\" max:\"999\" default:\"0.0\""}, {prop: "Y", name: "Y", pkg: "", typ: $Float64, tag: "min:\"-999\" max:\"999\" default:\"0.0\""}, {prop: "Z", name: "Z", pkg: "", typ: $Float64, tag: "min:\"-999\" max:\"999\" default:\"0.0\""}]);
 	$init = function() {
 		$pkg.$init = function() {};
@@ -19281,7 +19285,7 @@ $packages["github.com/Bredgren/gotracer/lib"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, htmlctrl, lib, js, jquery, reflect, strconv, funcType, ptrType, sliceType, ptrType$1, funcType$1, jq, console, main, onBodyLoad, initCallbacks, setImageSize, initOptions, addOptionSlides, onToggleControls, onSave, onLoad, onZoom, onReset;
+	var $pkg = {}, $init, htmlctrl, lib, js, jquery, reflect, strconv, funcType, ptrType, sliceType, ptrType$1, funcType$1, jq, console, main, onBodyLoad, initGlobalCallbacks, initOptionCallbacks, setImageSize, initOptions, addOptionSlides, onToggleControls, onSave, onLoad, onZoom, onReset, onOptionChange;
 	htmlctrl = $packages["github.com/Bredgren/gohtmlctrl/htmlctrl"];
 	lib = $packages["github.com/Bredgren/gotracer/lib"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
@@ -19298,15 +19302,16 @@ $packages["main"] = (function() {
 		$global.onBodyLoad = $externalize(onBodyLoad, funcType);
 	};
 	onBodyLoad = function() {
-		var $ptr, _r, _r$1, _r$2, img, imgCon, jqImg, options, zoom, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; img = $f.img; imgCon = $f.imgCon; jqImg = $f.jqImg; options = $f.options; zoom = $f.zoom; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _r, _r$1, _r$2, _r$3, img, imgCon, options, zoom, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; img = $f.img; imgCon = $f.imgCon; options = $f.options; zoom = $f.zoom; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		img = [img];
 		imgCon = [imgCon];
-		$r = initCallbacks(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = initGlobalCallbacks(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		options = lib.NewOptions();
 		$r = initOptions(options); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = initOptionCallbacks(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		console.log($externalize(options, ptrType));
-		_r = jq(new sliceType([new $String(".image-container")])); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r = jq(new sliceType([new $String(".image-container")])); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		imgCon[0] = $clone(_r, jquery.JQuery);
 		img[0] = new ($global.Image)();
 		img[0].onload = $externalize((function(img, imgCon) { return function $b() {
@@ -19319,23 +19324,22 @@ $packages["main"] = (function() {
 			h = _tmp$1;
 			imgCon[0].SetData("initWidth", new $Float64(w));
 			imgCon[0].SetData("initHeight", new $Float64(h));
-			console.log(w, h);
 			$r = setImageSize(w, h); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._tmp = _tmp; $f._tmp$1 = _tmp$1; $f.h = h; $f.w = w; $f.$s = $s; $f.$r = $r; return $f;
 		}; })(img, imgCon), funcType);
 		img[0].src = $externalize("/img/render542.png", $String);
-		_r$1 = jq(new sliceType([new $jsObjectPtr(img[0])])); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-		jqImg = $clone(_r$1, jquery.JQuery);
-		jqImg.Call("draggable", new sliceType([]));
-		_r$2 = jq(new sliceType([new $String("#zoom")])); /* */ $s = 5; case 5: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
-		zoom = $clone(_r$2, jquery.JQuery);
+		_r$1 = jq(new sliceType([new $jsObjectPtr(img[0])])); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		_r$2 = _r$1.Call("draggable", new sliceType([])); /* */ $s = 6; case 6: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		_r$2;
+		_r$3 = jq(new sliceType([new $String("#zoom")])); /* */ $s = 7; case 7: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+		zoom = $clone(_r$3, jquery.JQuery);
 		zoom.SetAttr(new sliceType([new $String("value"), new $Float64(1)]));
 		zoom.SetAttr(new sliceType([new $String("min"), new $Float64(0.1)]));
 		zoom.SetAttr(new sliceType([new $String("max"), new $Float64(10)]));
 		zoom.SetAttr(new sliceType([new $String("step"), new $Float64(0.1)]));
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onBodyLoad }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f.img = img; $f.imgCon = imgCon; $f.jqImg = jqImg; $f.options = options; $f.zoom = zoom; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onBodyLoad }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f.img = img; $f.imgCon = imgCon; $f.options = options; $f.zoom = zoom; $f.$s = $s; $f.$r = $r; return $f;
 	};
-	initCallbacks = function() {
+	initGlobalCallbacks = function() {
 		var $ptr, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, _r$8, _r$9, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _r$7 = $f._r$7; _r$8 = $f._r$8; _r$9 = $f._r$9; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		_r = jq(new sliceType([new $String(".tab")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
@@ -19353,7 +19357,41 @@ $packages["main"] = (function() {
 		_r$8 = jq(new sliceType([new $String("#reset")])); /* */ $s = 9; case 9: if($c) { $c = false; _r$8 = _r$8.$blk(); } if (_r$8 && _r$8.$blk !== undefined) { break s; }
 		_r$9 = _r$8.Call("click", new sliceType([new funcType(onReset)])); /* */ $s = 10; case 10: if($c) { $c = false; _r$9 = _r$9.$blk(); } if (_r$9 && _r$9.$blk !== undefined) { break s; }
 		_r$9;
-		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: initCallbacks }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f._r$8 = _r$8; $f._r$9 = _r$9; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: initGlobalCallbacks }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f._r$8 = _r$8; $f._r$9 = _r$9; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	initOptionCallbacks = function() {
+		var $ptr, _r, _r$1, _r$10, _r$11, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, _r$8, _r$9, fn, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$10 = $f._r$10; _r$11 = $f._r$11; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _r$7 = $f._r$7; _r$8 = $f._r$8; _r$9 = $f._r$9; fn = $f.fn; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		fn = (function $b(i, intf) {
+			var $ptr, _r, _r$1, _r$2, _r$3, i, intf, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; i = $f.i; intf = $f.intf; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			_r = jq(new sliceType([new $jsObjectPtr($assertType(intf, ptrType$1))])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			_r$1 = _r.Off(new sliceType([new $String(".option")])); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_r$1;
+			_r$2 = jq(new sliceType([new $jsObjectPtr($assertType(intf, ptrType$1))])); /* */ $s = 3; case 3: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+			_r$3 = _r$2.On(new sliceType([new $String("click.option"), new funcType(onOptionChange)])); /* */ $s = 4; case 4: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+			_r$3;
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f.i = i; $f.intf = intf; $f.$s = $s; $f.$r = $r; return $f;
+		});
+		_r = jq(new sliceType([new $String(".go-bool")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r$1 = _r.Each(fn); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		_r$1;
+		_r$2 = jq(new sliceType([new $String(".go-int")])); /* */ $s = 3; case 3: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		_r$3 = _r$2.Each(fn); /* */ $s = 4; case 4: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+		_r$3;
+		_r$4 = jq(new sliceType([new $String(".go-float64")])); /* */ $s = 5; case 5: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+		_r$5 = _r$4.Each(fn); /* */ $s = 6; case 6: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+		_r$5;
+		_r$6 = jq(new sliceType([new $String(".go-string")])); /* */ $s = 7; case 7: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
+		_r$7 = _r$6.Each(fn); /* */ $s = 8; case 8: if($c) { $c = false; _r$7 = _r$7.$blk(); } if (_r$7 && _r$7.$blk !== undefined) { break s; }
+		_r$7;
+		_r$8 = jq(new sliceType([new $String(".go-choice")])); /* */ $s = 9; case 9: if($c) { $c = false; _r$8 = _r$8.$blk(); } if (_r$8 && _r$8.$blk !== undefined) { break s; }
+		_r$9 = _r$8.Each(fn); /* */ $s = 10; case 10: if($c) { $c = false; _r$9 = _r$9.$blk(); } if (_r$9 && _r$9.$blk !== undefined) { break s; }
+		_r$9;
+		_r$10 = jq(new sliceType([new $String(".go-slice button")])); /* */ $s = 11; case 11: if($c) { $c = false; _r$10 = _r$10.$blk(); } if (_r$10 && _r$10.$blk !== undefined) { break s; }
+		_r$11 = _r$10.Each(fn); /* */ $s = 12; case 12: if($c) { $c = false; _r$11 = _r$11.$blk(); } if (_r$11 && _r$11.$blk !== undefined) { break s; }
+		_r$11;
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: initOptionCallbacks }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$10 = _r$10; $f._r$11 = _r$11; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f._r$8 = _r$8; $f._r$9 = _r$9; $f.fn = fn; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	setImageSize = function(w, h) {
 		var $ptr, _r, h, imgCon, w, $s, $r;
@@ -19391,8 +19429,8 @@ $packages["main"] = (function() {
 		_r = jq(new sliceType([new $String(".go-struct-field > .go-struct")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		structs = $clone(_r, jquery.JQuery);
 		structs.Each((function $b(i, intf) {
-			var $ptr, _r$1, _r$2, _r$3, _r$4, i, intf, label, obj, st, $s, $r;
-			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; i = $f.i; intf = $f.intf; label = $f.label; obj = $f.obj; st = $f.st; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			var $ptr, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, i, intf, label, obj, st, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; i = $f.i; intf = $f.intf; label = $f.label; obj = $f.obj; st = $f.st; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 			st = [st];
 			obj = $assertType(intf, ptrType$1);
 			_r$1 = jq(new sliceType([new $jsObjectPtr(obj.parentNode.children[0])])); /* */ $s = 1; case 1: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
@@ -19400,20 +19438,23 @@ $packages["main"] = (function() {
 			_r$2 = jq(new sliceType([new $jsObjectPtr(obj)])); /* */ $s = 2; case 2: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
 			st[0] = $clone(_r$2, jquery.JQuery);
 			_r$3 = jq(new sliceType([new label.constructor.elem(label)])); /* */ $s = 3; case 3: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
-			_r$4 = _r$3.Call("click", new sliceType([new funcType$1((function(st) { return function(event) {
+			_r$4 = _r$3.Off(new sliceType([new $String(".option")])); /* */ $s = 4; case 4: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+			_r$4;
+			_r$5 = jq(new sliceType([new label.constructor.elem(label)])); /* */ $s = 5; case 5: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+			_r$6 = _r$5.On(new sliceType([new $String("click.option"), new funcType$1((function(st) { return function(event) {
 				var $ptr, event;
 				event = $clone(event, jquery.Event);
 				st[0].SlideToggle(new sliceType([new $String("fast")]));
 				event.StopPropagation();
-			}; })(st))])); /* */ $s = 4; case 4: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
-			_r$4;
-			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f.i = i; $f.intf = intf; $f.label = label; $f.obj = obj; $f.st = st; $f.$s = $s; $f.$r = $r; return $f;
+			}; })(st))])); /* */ $s = 6; case 6: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
+			_r$6;
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f.i = i; $f.intf = intf; $f.label = label; $f.obj = obj; $f.st = st; $f.$s = $s; $f.$r = $r; return $f;
 		}));
 		_r$1 = jq(new sliceType([new $String(".go-struct-field > .go-slice")])); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
 		slices = $clone(_r$1, jquery.JQuery);
 		slices.Each((function $b(i, intf) {
-			var $ptr, _r$2, _r$3, _r$4, _r$5, i, intf, label, obj, st, $s, $r;
-			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; i = $f.i; intf = $f.intf; label = $f.label; obj = $f.obj; st = $f.st; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			var $ptr, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, i, intf, label, obj, st, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _r$7 = $f._r$7; i = $f.i; intf = $f.intf; label = $f.label; obj = $f.obj; st = $f.st; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 			st = [st];
 			obj = $assertType(intf, ptrType$1);
 			_r$2 = jq(new sliceType([new $jsObjectPtr(obj.parentNode.children[0])])); /* */ $s = 1; case 1: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
@@ -19421,14 +19462,17 @@ $packages["main"] = (function() {
 			_r$3 = jq(new sliceType([new $jsObjectPtr(obj)])); /* */ $s = 2; case 2: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
 			st[0] = $clone(_r$3, jquery.JQuery);
 			_r$4 = jq(new sliceType([new label.constructor.elem(label)])); /* */ $s = 3; case 3: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
-			_r$5 = _r$4.Call("click", new sliceType([new funcType$1((function(st) { return function(event) {
+			_r$5 = _r$4.Off(new sliceType([new $String(".option")])); /* */ $s = 4; case 4: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+			_r$5;
+			_r$6 = jq(new sliceType([new label.constructor.elem(label)])); /* */ $s = 5; case 5: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
+			_r$7 = _r$6.On(new sliceType([new $String("click.option"), new funcType$1((function(st) { return function(event) {
 				var $ptr, event;
 				event = $clone(event, jquery.Event);
 				st[0].SlideToggle(new sliceType([new $String("fast")]));
 				event.StopPropagation();
-			}; })(st))])); /* */ $s = 4; case 4: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
-			_r$5;
-			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f.i = i; $f.intf = intf; $f.label = label; $f.obj = obj; $f.st = st; $f.$s = $s; $f.$r = $r; return $f;
+			}; })(st))])); /* */ $s = 6; case 6: if($c) { $c = false; _r$7 = _r$7.$blk(); } if (_r$7 && _r$7.$blk !== undefined) { break s; }
+			_r$7;
+			/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f.i = i; $f.intf = intf; $f.label = label; $f.obj = obj; $f.st = st; $f.$s = $s; $f.$r = $r; return $f;
 		}));
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: addOptionSlides }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f.opts = opts; $f.slices = slices; $f.structs = structs; $f.$s = $s; $f.$r = $r; return $f;
 	};
@@ -19490,6 +19534,15 @@ $packages["main"] = (function() {
 		_r$5 = _r$4.SetCss(new sliceType([new $String("top"), new $Int(0)])); /* */ $s = 7; case 7: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
 		_r$5;
 		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onReset }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	onOptionChange = function() {
+		var $ptr, _r, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		console.log($externalize("option change", $String));
+		_r = jq(new sliceType([new $String("#all-options")])); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		$r = addOptionSlides(_r); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = initOptionCallbacks(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ $s = -1; case -1: } return; } if ($f === undefined) { $f = { $blk: onOptionChange }; } $f.$ptr = $ptr; $f._r = _r; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$init = function() {
 		$pkg.$init = function() {};
