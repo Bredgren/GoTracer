@@ -20,6 +20,12 @@ var options *lib.Options
 
 func main() {
 	js.Global.Set("onBodyLoad", onBodyLoad)
+	htmlctrl.RegisterValidator("validXPixel", htmlctrl.ValidateInt(func(x int) bool {
+		return x < int(jq(".image-container").Data("initWidth").(float64))
+	}))
+	htmlctrl.RegisterValidator("validYPixel", htmlctrl.ValidateInt(func(y int) bool {
+		return y < int(jq(".image-container").Data("initHeight").(float64))
+	}))
 }
 
 func onBodyLoad() {

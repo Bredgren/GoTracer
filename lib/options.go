@@ -7,6 +7,7 @@ type Options struct {
 	Background background  `title:"Determines the color when a ray doesn't hit anything" json:"background"`
 	Camera     camera      `title:"Camera position and orientation" json:"camera"`
 	AntiAlias  antiAlias   `title:"Anti-aliasing settings" json:"antiAlias"`
+	Debug      debug       `title:"Debug options" json:"debug"`
 	Lights     []*light    `title:"List of all lights in the scene" json:"lights"`
 	Materials  []*material `title:"List of all the materials available to objects" json:"materials"`
 	Objects    []*object   `title:"List of all objects in the scene" json:"objects"`
@@ -40,6 +41,18 @@ type background struct {
 type antiAlias struct {
 	MaxDivisions int     `title:"Maximum subdivisions of a pixel" min:"0" max:"16" class:"fast-render" json:"maxDivisions"`
 	Threshold    float64 `title:"Stop subdividing pixels when the difference is less than this" min:"0.0" max:"99" class:"fast-render" json:"threshold"`
+}
+
+type debug struct {
+	DebugRender bool   `title:"Produce a debug image" json:"debugRender"`
+	Type        string `title:"Type of debug image to produce" choice:"Ray Count,Anti Alias Subdivisions,Singe Pixel" json:"type"`
+	SinglePixel bool   `title:"Render one pixel" json:"singlePixel"`
+	Pixel       pixel  `title:"Pixel to render" json:"pixel"`
+}
+
+type pixel struct {
+	X int `title:"X value of the pixel" min:"0" valid:"validXPixel" json:"x"`
+	Y int `title:"Y value of the pixel" min:"0" valid:"validYPixel" json:"y"`
 }
 
 type light struct {
@@ -132,6 +145,9 @@ func NewOptions() *Options {
 		AntiAlias: antiAlias{
 			MaxDivisions: 0,
 			Threshold:    0,
+		},
+		Debug: debug{
+			DebugRender: false,
 		},
 		Lights: []*light{
 			{
