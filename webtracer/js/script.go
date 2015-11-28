@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/Bredgren/gohtmlctrl/htmlctrl"
 	"github.com/Bredgren/gotracer/lib"
@@ -61,10 +64,11 @@ func setImage(path string) {
 		imgCon := jq(".image-container")
 		imgCon.Empty()
 		imgCon.Append(img)
-		w, h := img.Get("width").Float(), img.Get("height").Float()
+		w, h := img.Get("naturalWidth").Float(), img.Get("naturalHeight").Float()
 		imgCon.SetData("initWidth", w)
 		imgCon.SetData("initHeight", h)
 		setImageSize(w, h)
+		onReset()
 	})
 	img.Set("onerror", func() {
 		console.Call("error", "unable to load image "+path)
@@ -208,7 +212,6 @@ func onOptionChange() {
 }
 
 func triggerRender() {
-	console.Call("log", "Rendering...")
 	j, e := json.Marshal(options)
 	if e != nil {
 		console.Call("error", e.Error())
@@ -216,9 +219,27 @@ func triggerRender() {
 	}
 
 	jq(".image-container").Empty()
-	// TODO: Start animation
+	done := make(chan bool)
+	go func(done <-chan bool) {
+		anim := jq("#animation")
+		anim.SetCss("color", "rgb(255,255,255)")
+		anim.Show()
+		for i := 0.0; ; i += 0.15 {
+			select {
+			case <-done:
+				anim.Hide()
+				return
+			case <-time.After(time.Duration(33) * time.Millisecond):
+				anim.SetCss("color", fmt.Sprintf("rgb(%d,%[1]d,%[1]d)", int((math.Cos(i)*0.4+(1-0.4))*255.0)))
+			}
+		}
+	}(done)
 	jquery.Post("/", string(j), func(data, status, xhr string) {
-		console.Call("log", "Render done.", data, status)
+		if status != "success" {
+			console.Call("error", "Render wasn't success:", status, data, xhr)
+		}
+		// Not allowed to block in callback
+		go func() { done <- true }()
 		setImage(data)
 	})
 }

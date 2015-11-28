@@ -154,3 +154,12 @@ select {
     background: rgb(255, 183, 183);
     border-color: rgb(255, 0, 0);
 }
+
+#animation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -100px;
+    font-size: 50px;
+}

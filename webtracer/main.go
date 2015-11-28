@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"text/template"
+	"time"
 
 	"github.com/Bredgren/gotracer/lib"
 )
@@ -79,6 +81,8 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Println(options)
+		// Simulate render time with random wait
+		<-time.After(time.Duration(rand.Intn(10)) * time.Second)
 		fmt.Fprintln(w, "/img/render542.png")
 	case "GET":
 		log.Println("GET", r.RequestURI)
