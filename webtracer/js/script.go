@@ -21,23 +21,10 @@ func main() {
 
 func onBodyLoad() {
 	initGlobalCallbacks()
+	options = lib.NewOptions()
 	initOptions()
-	initOptionCallbacks()
-	checkFastRender()
-	console.Call("log", options)
 
-	imgCon := jq(".image-container")
-	img := js.Global.Get("Image").New()
-	img.Set("onload", func() {
-		imgCon.Append(img)
-		w, h := img.Get("width").Float(), img.Get("height").Float()
-		imgCon.SetData("initWidth", w)
-		imgCon.SetData("initHeight", h)
-		setImageSize(w, h)
-	})
-	img.Set("src", "/img/render542.png")
-
-	jq(img).Call("draggable")
+	setImage("/img/render542.png")
 
 	zoom := jq("#zoom")
 	zoom.SetAttr("value", 1.0)
@@ -50,6 +37,7 @@ func initGlobalCallbacks() {
 	jq(".tab").Call(jquery.CLICK, onToggleControls)
 	jq("#save").Call(jquery.CLICK, onSave)
 	jq("#load").Call(jquery.CLICK, onLoad)
+	jq("#load-file").Call(jquery.CHANGE, onFileChange)
 	jq("#zoom").On("input change", onZoom)
 	jq("#reset").Call(jquery.CLICK, onReset)
 }
@@ -67,6 +55,24 @@ func initOptionCallbacks() {
 	jq(".go-slice button").Each(fn)
 }
 
+func setImage(path string) {
+	img := js.Global.Get("Image").New()
+	img.Set("onload", func() {
+		imgCon := jq(".image-container")
+		imgCon.Empty()
+		imgCon.Append(img)
+		w, h := img.Get("width").Float(), img.Get("height").Float()
+		imgCon.SetData("initWidth", w)
+		imgCon.SetData("initHeight", h)
+		setImageSize(w, h)
+	})
+	img.Set("onerror", func() {
+		console.Call("error", "unable to load image "+path)
+	})
+	img.Set("src", path)
+	jq(img).Call("draggable")
+}
+
 func setImageSize(w, h float64) {
 	imgCon := jq(".image-container")
 	imgCon.SetCss("width", w)
@@ -79,8 +85,8 @@ type optionItem struct {
 }
 
 func initOptions() {
-	options = lib.NewOptions()
 	opts := jq("#options")
+	opts.Empty()
 	o, e := htmlctrl.Struct(options, "Options", "all-options", "")
 	if e != nil {
 		console.Call("error", e.Error())
@@ -89,6 +95,8 @@ func initOptions() {
 	opts.Append(o)
 
 	addOptionSlides(o)
+	initOptionCallbacks()
+	checkFastRender()
 }
 
 func addOptionSlides(opts jquery.JQuery) {
@@ -137,10 +145,38 @@ func onToggleControls() {
 
 func onSave() {
 	console.Call("log", "save")
+
+	j, e := json.Marshal(options)
+	if e != nil {
+		console.Call("error", e.Error())
+		return
+	}
+	text := string(j)
+
+	csvData := "data:application/csv;charset=utf-8," + js.Global.Call("encodeURIComponent", text).String()
+	l := jq("#save")
+	l.SetProp("href", csvData)
+	l.SetProp("target", "_blank")
+	l.SetProp("download", "scene.json")
 }
 
 func onLoad() {
-	console.Call("log", "load")
+	jq("#load-file").Call("trigger", "click")
+}
+
+func onFileChange(event *js.Object) {
+	reader := js.Global.Get("FileReader").New()
+	reader.Set("onload", func(evt *js.Object) {
+		content := evt.Get("target").Get("result").String()
+		e := json.Unmarshal([]byte(content), options)
+		if e != nil {
+			console.Call("error", e)
+			return
+		}
+		initOptions()
+		triggerRender()
+	})
+	reader.Call("readAsText", event.Get("target").Get("files").Index(0))
 }
 
 func onZoom() {
@@ -168,14 +204,21 @@ func onOptionChange() {
 	initOptionCallbacks()
 	checkFastRender()
 
+	triggerRender()
+}
+
+func triggerRender() {
+	console.Call("log", "Rendering...")
 	j, e := json.Marshal(options)
 	if e != nil {
 		console.Call("error", e.Error())
 		return
 	}
-	console.Call("log", string(j))
 
+	jq(".image-container").Empty()
+	// TODO: Start animation
 	jquery.Post("/", string(j), func(data, status, xhr string) {
-		console.Call("log", data, status, xhr)
+		console.Call("log", "Render done.", data, status)
+		setImage(data)
 	})
 }

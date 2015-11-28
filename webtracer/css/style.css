@@ -63,6 +63,13 @@ body {
     cursor: pointer;
 }
 
+a#save {
+    text-decoration: initial;
+    font-size: 11px;
+    font-family: sans-serif;
+    padding: 3px 5px 2px 5px;
+}
+
 .toggle-button {
     width: 100%;
 }

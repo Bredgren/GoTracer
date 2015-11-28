@@ -68,12 +68,18 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 		if e != nil {
 			log.Println("Error reading post:", e)
 			http.Error(w, e.Error(), http.StatusBadRequest)
+			return
 		}
 		r.Body.Close()
 		var options lib.Options
-		json.Unmarshal(body, &options)
+		e = json.Unmarshal(body, &options)
+		if e != nil {
+			log.Println("Error decoding json:", e)
+			http.Error(w, e.Error(), http.StatusBadRequest)
+			return
+		}
 		fmt.Println(options)
-		fmt.Fprintln(w, "Received")
+		fmt.Fprintln(w, "/img/render542.png")
 	case "GET":
 		log.Println("GET", r.RequestURI)
 		renderTmpl(w, &page{})
