@@ -1,4 +1,4 @@
-package lib
+package trace
 
 // Options contains all the options possible
 type Options struct {

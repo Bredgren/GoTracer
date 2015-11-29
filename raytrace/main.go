@@ -8,12 +8,15 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/Bredgren/gotracer/lib"
+	"github.com/Bredgren/gotracer/trace"
 )
 
 const (
@@ -33,7 +36,7 @@ var (
 	gridSize    = 50
 	format      = "jpg"
 	jpegQuality = 95
-	verbose     = false
+	// verbose     = false
 )
 
 func init() {
@@ -46,7 +49,7 @@ func init() {
 	flag.IntVar(&gridSize, "gridSize", gridSize, "The image is divided into a grid an each section rendered in parallel. This is the size in pixels of each square")
 	flag.StringVar(&format, "format", format, fmt.Sprintf("Image format, one of %s", imgFormats))
 	flag.IntVar(&jpegQuality, "jpegQuality", jpegQuality, "JPEG quality")
-	flag.BoolVar(&verbose, "v", verbose, "Print progress reports")
+	// flag.BoolVar(&verbose, "v", verbose, "Print progress reports")
 }
 
 // type grid struct {
@@ -103,7 +106,8 @@ func main() {
 	if e != nil {
 		log.Fatalf("decoding json: %s\n", e)
 	}
-	fmt.Println(options)
+
+	img := trace.Trace(options, gridSize)
 
 	// Choose stdout or user-specified file
 	var outWriter io.Writer = os.Stdout
@@ -114,7 +118,14 @@ func main() {
 			log.Fatalf("creating file to write: %s\n", e)
 		}
 	}
-	_ = outWriter
+
+	// Send/save image
+	switch format {
+	case "jpg", "jpeg":
+		jpeg.Encode(outWriter, img, &jpeg.Options{Quality: jpegQuality})
+	case "png":
+		png.Encode(outWriter, img)
+	}
 
 	// 	sceneFilePath := sceneDir + "/" + sceneFile
 	// 	scene := raytracer.Parse(sceneFilePath)

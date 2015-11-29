@@ -9,14 +9,14 @@ import (
 	"time"
 
 	"github.com/Bredgren/gohtmlctrl/htmlctrl"
-	"github.com/Bredgren/gotracer/lib"
+	"github.com/Bredgren/gotracer/trace"
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/gopherjs/jquery"
 )
 
 var jq = jquery.NewJQuery
 var console = js.Global.Get("console")
-var options *lib.Options
+var options *trace.Options
 
 func main() {
 	js.Global.Set("onBodyLoad", onBodyLoad)
@@ -30,7 +30,7 @@ func main() {
 
 func onBodyLoad() {
 	initGlobalCallbacks()
-	options = lib.NewOptions()
+	options = trace.NewOptions()
 	initOptions()
 
 	setImage("/img/render542.png")
