@@ -1,20 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"text/template"
-	"time"
-
-	"github.com/Bredgren/gotracer/lib"
 )
 
 const path = "/src/github.com/Bredgren/gotracer/webtracer"
@@ -73,17 +69,23 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		r.Body.Close()
-		var options lib.Options
-		e = json.Unmarshal(body, &options)
+		imgName := "img/render.jpg"
+		cmd := exec.Command("raytrace", "-out", imgName)
+		cmdIn, e := cmd.StdinPipe()
 		if e != nil {
-			log.Println("Error decoding json:", e)
-			http.Error(w, e.Error(), http.StatusBadRequest)
+			log.Println("Error getting stdin pipe:", e)
+			http.Error(w, e.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Println(options)
-		// Simulate render time with random wait
-		<-time.After(time.Duration(rand.Intn(10)) * time.Second)
-		fmt.Fprintln(w, "/img/render542.png")
+		fmt.Fprintln(cmdIn, string(body))
+		cmdIn.Close()
+		output, e := cmd.CombinedOutput()
+		if e != nil {
+			log.Printf("Error running raytrace: %s: %s\n", e, string(output))
+			http.Error(w, e.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintln(w, imgName)
 	case "GET":
 		log.Println("GET", r.RequestURI)
 		renderTmpl(w, &page{})

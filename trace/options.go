@@ -33,9 +33,9 @@ type camera struct {
 }
 
 type background struct {
-	Type  string `title:"Type of background" choice:"Uniform,Skybox" json:"type"`
-	Color color  `title:"Color to use for a solid background (Uniform)" json:"color"`
-	Image string `title:"Path/URL of image to use (Skybox)" json:"image"`
+	Type  string    `title:"Type of background" choice:"Uniform,Skybox" json:"type"`
+	Color colorNorm `title:"Color to use for a solid background (Uniform)" json:"color"`
+	Image string    `title:"Path/URL of image to use (Skybox)" json:"image"`
 }
 
 type antiAlias struct {
@@ -56,11 +56,11 @@ type pixel struct {
 }
 
 type light struct {
-	Type            string `title:"Type of light" choice:"Directional,Point,Spot" json:"type"`
-	Color           color  `title:"Color of the light" json:"color"`
-	Position        vector `title:"Position of the light (Point and Spot)" json:"position"`
-	Direction       vector `title:"Direction of the light (Direcitonal and Spot)" json:"direction"`
-	IlluminationMap bool   `title:"Generate an illumination map (Point and Spot)" class:"fast-render" json:"illuminationMap"`
+	Type            string    `title:"Type of light" choice:"Directional,Point,Spot" json:"type"`
+	Color           colorNorm `title:"Color of the light" json:"color"`
+	Position        vector    `title:"Position of the light (Point and Spot)" json:"position"`
+	Direction       vector    `title:"Direction of the light (Direcitonal and Spot)" json:"direction"`
+	IlluminationMap bool      `title:"Generate an illumination map (Point and Spot)" class:"fast-render" json:"illuminationMap"`
 	Coeff           struct {
 		Constant  float64 `json:"constant"`
 		Linear    float64 `json:"linear"`
@@ -88,9 +88,9 @@ type material struct {
 }
 
 type matProperty struct {
-	Type    string `title:"Type of material" choice:"Uniform,Texture" json:"type"`
-	Color   color  `title:"Uniform color" json:"color"`
-	Texture string `title:"Path to texture file" json:"texture"`
+	Type    string    `title:"Type of material" choice:"Uniform,Texture" json:"type"`
+	Color   colorNorm `title:"Uniform color" json:"color"`
+	Texture string    `title:"Path to texture file" json:"texture"`
 }
 
 type object struct {
@@ -110,7 +110,7 @@ type transform struct {
 	Scale       vector  `title:"Scale" json:"scale"`
 }
 
-type color struct {
+type colorNorm struct {
 	R float64 `min:"0.0" max:"1.0" step:"0.1" default:"0.0" json:"r"`
 	G float64 `min:"0.0" max:"1.0" step:"0.1" default:"0.0" json:"g"`
 	B float64 `min:"0.0" max:"1.0" step:"0.1" default:"0.0" json:"b"`
@@ -139,7 +139,7 @@ func NewOptions() *Options {
 		},
 		Background: background{
 			Type:  "Uniform",
-			Color: color{0, 0, 0},
+			Color: colorNorm{0, 0, 0},
 			Image: "",
 		},
 		AntiAlias: antiAlias{
@@ -152,20 +152,20 @@ func NewOptions() *Options {
 		Lights: []*light{
 			{
 				Type:      "Directional",
-				Color:     color{1, 1, 1},
+				Color:     colorNorm{1, 1, 1},
 				Direction: vector{-1, -1, -1},
 			},
 		},
 		Materials: []*material{
 			{
 				Name:         "white",
-				Emissive:     matProperty{Type: "Uniform", Color: color{0, 0, 0}},
-				Ambient:      matProperty{Type: "Uniform", Color: color{0.3, 0.3, 0.3}},
-				Diffuse:      matProperty{Type: "Uniform", Color: color{1, 1, 1}},
-				Specular:     matProperty{Type: "Uniform", Color: color{1, 1, 1}},
-				Reflective:   matProperty{Type: "Uniform", Color: color{0, 0, 0}},
-				Transmissive: matProperty{Type: "Uniform", Color: color{0, 0, 0}},
-				Smoothness:   matProperty{Type: "Uniform", Color: color{0.9, 0.9, 0.9}},
+				Emissive:     matProperty{Type: "Uniform", Color: colorNorm{0, 0, 0}},
+				Ambient:      matProperty{Type: "Uniform", Color: colorNorm{0.3, 0.3, 0.3}},
+				Diffuse:      matProperty{Type: "Uniform", Color: colorNorm{1, 1, 1}},
+				Specular:     matProperty{Type: "Uniform", Color: colorNorm{1, 1, 1}},
+				Reflective:   matProperty{Type: "Uniform", Color: colorNorm{0, 0, 0}},
+				Transmissive: matProperty{Type: "Uniform", Color: colorNorm{0, 0, 0}},
+				Smoothness:   matProperty{Type: "Uniform", Color: colorNorm{0.9, 0.9, 0.9}},
 				Index:        1,
 				Normal:       "",
 				IsLiquid:     false,

@@ -1,8 +1,9 @@
 package trace
 
 import (
-	"fmt"
 	"image"
+	"image/color"
+	"math/rand"
 	"sync"
 )
 
@@ -34,8 +35,14 @@ func Trace(options *Options, gridSize int) *image.NRGBA {
 			go func() {
 				for y := y; y < yMax; y++ {
 					for x := x; x < xMax; x++ {
-						fmt.Println(x, y)
-						// img.SetNRGBA(x, y, scene.TracePixel(x, y))
+						// color := scene.TracePixel(x, y)
+						color := color.NRGBA{
+							R: uint8(rand.Intn(255)),
+							G: uint8(rand.Intn(255)),
+							B: uint8(rand.Intn(255)),
+							A: 255,
+						}
+						img.SetNRGBA(x, y, color)
 					}
 				}
 				gridGroup.Done()

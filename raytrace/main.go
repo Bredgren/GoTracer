@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/Bredgren/gotracer/trace"
 )
@@ -35,7 +36,6 @@ var (
 	gridSize    = 50
 	format      = "jpg"
 	jpegQuality = 95
-	// verbose     = false
 )
 
 func init() {
@@ -44,15 +44,19 @@ func init() {
 		flag.PrintDefaults()
 	}
 	flag.StringVar(&inFile, "in", inFile, "Read scene from this json file instead of stdin")
-	flag.StringVar(&outFile, "out", outFile, "Save image here instead of sending to stdout. If the format option is unspecified then it will attempt to determine the format from the file name")
+	flag.StringVar(&outFile, "out", outFile, "Save image here instead of sending to stdout. The file extension will override the format option")
 	flag.IntVar(&gridSize, "gridSize", gridSize, "The image is divided into a grid an each section rendered in parallel. This is the size in pixels of each square")
 	flag.StringVar(&format, "format", format, fmt.Sprintf("Image format, one of %s", imgFormats))
 	flag.IntVar(&jpegQuality, "jpegQuality", jpegQuality, "JPEG quality")
-	// flag.BoolVar(&verbose, "v", verbose, "Print progress reports")
 }
 
 func main() {
 	flag.Parse()
+
+	// Use file extension
+	if outFile != "" {
+		format = filepath.Ext(outFile)[1:]
+	}
 
 	// Verify requested format
 	imgFormat := ""

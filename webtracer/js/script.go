@@ -33,7 +33,7 @@ func onBodyLoad() {
 	options = trace.NewOptions()
 	initOptions()
 
-	setImage("/img/render542.png")
+	triggerRender()
 
 	zoom := jq("#zoom")
 	zoom.SetAttr("value", 1.0)
