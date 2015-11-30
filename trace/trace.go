@@ -2,16 +2,13 @@ package trace
 
 import (
 	"image"
-	"image/color"
-	"math/rand"
 	"sync"
 )
 
 // Trace renders an image according to the given options. Renders the image in chuncks of the given
 // size in parallel.
 func Trace(options *Options, gridSize int) *image.NRGBA {
-	// Create scene
-	// ...
+	scene := NewScene(options)
 
 	imgW := options.Resolution.W
 	imgH := options.Resolution.H
@@ -35,14 +32,7 @@ func Trace(options *Options, gridSize int) *image.NRGBA {
 			go func() {
 				for y := y; y < yMax; y++ {
 					for x := x; x < xMax; x++ {
-						// color := scene.TracePixel(x, y)
-						color := color.NRGBA{
-							R: uint8(rand.Intn(255)),
-							G: uint8(rand.Intn(255)),
-							B: uint8(rand.Intn(255)),
-							A: 255,
-						}
-						img.SetNRGBA(x, y, color)
+						img.SetNRGBA(x, y, scene.ColorAt(x, y))
 					}
 				}
 				gridGroup.Done()
