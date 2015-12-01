@@ -29,7 +29,14 @@ type cameraOpts struct {
 	LookAt   vectorOpts `title:"The point that the camera is looking at" json:"look_at"`
 	UpDir    vectorOpts `title:"The up direction" json:"up_dir"`
 	Fov      float64    `title:"Field of view in degrees" min:"0.0" max:"360.0" json:"fov"`
-	Dof      float64    `title:"Depth of field" min:"0.0" max:"999.9" class:"fast-render" json:"dof"`
+	Dof      dofOpts    `title:"Depth of field" json:"dof"`
+}
+
+type dofOpts struct {
+	Enabled           bool    `title:"Enable depth of field" class:"fast-render" json:"enabled"`
+	FocalDistance     float64 `title:"Distance from the camera of the focal point" min:"0.01" max:"999.9" json:"focal_distance"`
+	ApertureRadius    float64 `title:"Radius of the aperture" min:"0.00001" max:"999.9" json:"aperture_radius"`
+	AdaptiveThreshold float64 `title:"Rays will continue to be created for each pixel until the contribution to the overall color is less than this" min:"0.00001" json:"adaptive_threshold"`
 }
 
 type backgroundOpts struct {
@@ -136,6 +143,12 @@ func NewOptions() *Options {
 			LookAt:   vectorOpts{0, 0, 0},
 			UpDir:    vectorOpts{0, 1, 0},
 			Fov:      58,
+			Dof: dofOpts{
+				Enabled:           false,
+				FocalDistance:     5.0,
+				ApertureRadius:    0.001,
+				AdaptiveThreshold: 0.1,
+			},
 		},
 		Background: backgroundOpts{
 			Type:  "Uniform",
