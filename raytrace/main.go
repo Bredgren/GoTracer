@@ -52,6 +52,8 @@ func init() {
 
 func main() {
 	flag.Parse()
+	log.SetPrefix("raytrace: ")
+	log.SetFlags(0)
 
 	// Use file extension
 	if outFile != "" {
@@ -67,7 +69,7 @@ func main() {
 		}
 	}
 	if imgFormat == "" {
-		fmt.Fprintf(os.Stderr, "Invalid image format '%s'\n", format)
+		fmt.Fprintf(os.Stderr, "Invalid image format: %s\n", format)
 		flag.Usage()
 		return
 	}
@@ -75,35 +77,43 @@ func main() {
 	// Choose stdin or user-specified file
 	var inReader io.Reader = os.Stdin
 	if inFile != "" {
-		file, e := os.Open(inFile)
+		f, e := os.Open(inFile)
 		if e != nil {
 			log.Fatalf("opening file to read: %s\n", e)
 		}
-		defer file.Close()
-		inReader = io.Reader(file)
+		inReader = f
+		defer func() {
+			if e := f.Close(); e != nil {
+				log.Fatalf("closing input file: %v\n", e)
+			}
+		}()
 	}
 
 	// Read and decode options
 	var options trace.Options
 	jsonOpts, e := ioutil.ReadAll(inReader)
 	if e != nil {
-		log.Fatalf("reading file: %s\n", e)
+		log.Fatalf("reading options: %v\n", e)
 	}
-	e = json.Unmarshal(jsonOpts, &options)
-	if e != nil {
-		log.Fatalf("decoding json: %s\n", e)
+	if e := json.Unmarshal(jsonOpts, &options); e != nil {
+		log.Fatalf("decoding options: %v\n", e)
 	}
 
 	img := trace.Trace(&options, gridSize)
 
-	// Choose stdout or user-specified file
+	// Choose stdout/user-specified file
 	var outWriter io.Writer = os.Stdout
 	if outFile != "" {
-		var e error
-		outWriter, e = os.Create(outFile)
+		f, e := os.Create(outFile)
 		if e != nil {
-			log.Fatalf("creating file to write: %s\n", e)
+			log.Fatalf("creating output file: %v\n", e)
 		}
+		outWriter = f
+		defer func() {
+			if e := f.Close(); e != nil {
+				log.Fatalf("closing output file: %v\n", e)
+			}
+		}()
 	}
 
 	// Send/save image
@@ -112,5 +122,7 @@ func main() {
 		jpeg.Encode(outWriter, img, &jpeg.Options{Quality: jpegQuality})
 	case "png":
 		png.Encode(outWriter, img)
+	default:
+		panic(fmt.Sprintf("Saving image as format %s is not implemented", format))
 	}
 }

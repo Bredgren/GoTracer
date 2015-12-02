@@ -6,17 +6,30 @@ const (
 	ε = 0.00001
 )
 
+// Type identifies the type of ray.
 type Type int
 
 const (
+	// Unspecified is a ray with an unspecified ty.pe
 	Unspecified Type = iota
+	// Camera is a ray whose origin is the camera.
 	Camera
+	// Collision is a ray used to detect collision.
 	Collision
+	// Reflection is a ray generated from a reflection.
 	Reflection
+	// Refraction is a ray generated from a refraction.
 	Refraction
+	// Shadow is a ray toward a light source.
 	Shadow
+	// Illumination is a ray whose origin is a light source.
+	Illumination
+	// NumTypes is the number of ray types. Useful for using an array to map types to some value instead
+	// of a map.
+	NumTypes
 )
 
+// Ray is a 3D ray with an origin and a direction.
 type Ray struct {
 	Type   Type
 	Origin mgl64.Vec3

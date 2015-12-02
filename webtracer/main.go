@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,6 +12,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
+	"sync"
 	"text/template"
 )
 
@@ -21,13 +26,15 @@ var templ *template.Template
 
 var (
 	// debug is set by the -D command line flag.
-	debug bool
-	port  int
+	debug      bool
+	port       int
+	maxHistory int
 )
 
 func init() {
 	flag.BoolVar(&debug, "D", false, "Debug mode. More logs, use unminified assets, etc.")
 	flag.IntVar(&port, "p", 8080, "Set http port")
+	flag.IntVar(&maxHistory, "history", 20, "Maximum render history to keep track of")
 }
 
 func main() {
@@ -59,32 +66,53 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer func() {
+		if e := r.Body.Close(); e != nil {
+			log.Printf("Error closing body: %v\n", e)
+		}
+	}()
+
 	switch r.Method {
 	case "POST":
 		log.Println("POST", r.RequestURI)
+
+		// Read scene from body
 		body, e := ioutil.ReadAll(r.Body)
 		if e != nil {
-			log.Println("Error reading post:", e)
-			http.Error(w, e.Error(), http.StatusBadRequest)
+			msg := fmt.Sprintf("Error reading post body: %v", e)
+			log.Println(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
 			return
 		}
-		r.Body.Close()
-		imgName := "img/render.jpg"
-		cmd := exec.Command("raytrace", "-out", imgName)
-		cmdIn, e := cmd.StdinPipe()
+
+		// Run raytrace command
+		tmpImage := "img/render.jpg"
+		if e := runRaytrace(tmpImage, string(body)); e != nil {
+			msg := fmt.Sprintf("Error running raytrace: %v", e)
+			log.Println(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+
+		// Save scene file
+		tmpScene := "scene.json"
+		if e := saveScene(tmpScene, body); e != nil {
+			msg := fmt.Sprintf("Error saving %s: %v", tmpScene, e)
+			log.Println(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+
+		// Deal with history and get final image name
+		imgName, e := saveImageAndScene(tmpImage, tmpScene)
 		if e != nil {
-			log.Println("Error getting stdin pipe:", e)
-			http.Error(w, e.Error(), http.StatusInternalServerError)
+			msg := fmt.Sprintf("Error saving/renmaing img/scene files: %v", e)
+			log.Println(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintln(cmdIn, string(body))
-		cmdIn.Close()
-		output, e := cmd.CombinedOutput()
-		if e != nil {
-			log.Printf("Error running raytrace: %s: %s\n", e, string(output))
-			http.Error(w, e.Error(), http.StatusInternalServerError)
-			return
-		}
+
+		// Send final image name back to client
 		fmt.Fprintln(w, imgName)
 	case "GET":
 		log.Println("GET", r.RequestURI)
@@ -100,4 +128,140 @@ func renderTmpl(w http.ResponseWriter, p *page) {
 }
 
 type page struct {
+	// Nothing here for now...
+}
+
+func runRaytrace(imgName, scene string) error {
+	cmd := exec.Command("raytrace", "-out", imgName)
+
+	// Grab stdin and send scene through it
+	cmdIn, e := cmd.StdinPipe()
+	if e != nil {
+		return fmt.Errorf("getting stdin pipe: %v", e)
+	}
+	fmt.Fprintln(cmdIn, scene)
+	if e := cmdIn.Close(); e != nil {
+		return fmt.Errorf("closing stdin to raytrace: %v", e)
+	}
+
+	if output, e := cmd.CombinedOutput(); e != nil {
+		return fmt.Errorf("running raytrace: %v: %s", e, string(output))
+	}
+
+	return nil
+}
+
+func saveScene(name string, body []byte) error {
+	sceneFile, e := os.Create(name)
+	if e != nil {
+		return fmt.Errorf("opening %s: %v", name, e)
+	}
+	_, e = io.Copy(sceneFile, bytes.NewReader(body))
+	if e != nil {
+		return fmt.Errorf("copying to %s: %v", name, e)
+	}
+	e = sceneFile.Close()
+	if e != nil {
+		return fmt.Errorf("closing %s: %v", name, e)
+	}
+	return nil
+}
+
+var renderFileRe = regexp.MustCompile(`render(\d+).jpg`)
+var sceneFileRe = regexp.MustCompile(`scene(\d+).jpg`)
+var fileMu sync.Mutex
+
+// This helper figures out what name to give new files and shifts files around so that
+// they're consistently numbered, 0 is oldest and maxHistory-1 is newest.
+func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
+	// Since this is a server it's possible to be handling more than one client at the same
+	// time so we don't want any trouble with race conditions here.
+	fileMu.Lock()
+	defer fileMu.Unlock()
+
+	dir, e := os.Open("img")
+	defer func() {
+		// Only reporet this error if no others have happened
+		if e := dir.Close(); e != nil && err == nil {
+			err = fmt.Errorf("closing img dir: %v", e)
+		}
+	}()
+	if e != nil {
+		return "", fmt.Errorf("opening img dir: %v", e)
+	}
+	allFiles, e := dir.Readdirnames(-1)
+	if e != nil {
+		return "", fmt.Errorf("reading dirnames: %v", e)
+	}
+
+	// Find all files
+	renderFiles := make([]string, maxHistory)
+	sceneFiles := make([]string, maxHistory)
+	for _, f := range allFiles {
+		if i, match := getFileIndex(renderFileRe, f); match && i < maxHistory {
+			renderFiles[i] = f
+		} else if i, match := getFileIndex(sceneFileRe, f); match && i < maxHistory {
+			sceneFiles[i] = f
+		}
+	}
+
+	// Combine file pairs and remove pairs that have at least one missing
+	pairs := zip(renderFiles, sceneFiles)
+	pairs = append(pairs, [2]string{tmpImg, tmpScn})
+	if len(pairs) == maxHistory {
+		// We're full, make room by clearing the first entry, compress will remove it
+		pairs[0][0] = ""
+	}
+	pairs = compress(pairs)
+
+	// Rename files based on their index
+	for i, p := range pairs {
+		newImgName = "render" + strconv.Itoa(i) + ".jpg"
+		e := os.Rename(p[0], newImgName)
+		if e != nil {
+			return "", fmt.Errorf("renaming %s to %s: %v", p[0], newImgName, e)
+		}
+		newSceneName := "scene" + strconv.Itoa(i) + ".jpg"
+		e = os.Rename(p[1], newSceneName)
+		if e != nil {
+			return "", fmt.Errorf("renaming %s to %s: %v", p[1], newSceneName, e)
+		}
+	}
+	return newImgName, nil
+}
+
+func getFileIndex(re *regexp.Regexp, file string) (int, bool) {
+	if match := re.FindStringSubmatch(file); match != nil {
+		i, e := strconv.Atoi(match[0])
+		if e != nil {
+			// Should be impossible since the regex ensures the match is an int
+			panic(fmt.Errorf("converting index of %s to int: %v", file, e))
+		}
+		return i, true
+	}
+	return -1, false
+}
+
+func zip(s1, s2 []string) (zipped [][2]string) {
+	// Assumes len(s1) == len(s2)
+	zipped = make([][2]string, len(s1))
+	for i := range s1 {
+		zipped[i][0] = s1[i]
+		zipped[i][1] = s2[i]
+	}
+	return
+}
+
+func compress(pairs [][2]string) [][2]string {
+	// Removes elements that are missing or aren't paired
+	var toRemove []int
+	for i, p := range pairs {
+		if p[0] == "" || p[1] == "" {
+			toRemove = append(toRemove, i)
+		}
+	}
+	for _, i := range toRemove {
+		pairs = append(pairs[:i], pairs[i+1:]...)
+	}
+	return pairs
 }

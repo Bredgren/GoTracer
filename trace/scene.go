@@ -30,7 +30,7 @@ func (s *Scene) ColorAt(x, y int) color.NRGBA {
 // of each type of ray that was produced.
 type Result struct {
 	Color    Color64
-	RayCount map[ray.Type]int
+	RayCount [ray.NumTypes]int
 }
 
 func (s *Scene) colorAtSub(xMin, yMin, xMax, yMax float64, depth int) *Result {
