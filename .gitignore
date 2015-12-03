@@ -3,3 +3,4 @@ renderedscene/*
 cpu.out
 gotracer.test.exe
 mem.out
+webtracer/img/*
