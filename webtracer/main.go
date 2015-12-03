@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -42,6 +43,8 @@ func main() {
 	setup()
 
 	http.HandleFunc("/", httpHandler)
+	http.HandleFunc("/render", renderHandler)
+	http.HandleFunc("/history", historyHandler)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
 
@@ -63,9 +66,11 @@ func setup() {
 
 func httpHandler(w http.ResponseWriter, r *http.Request) {
 	if r.RequestURI != "/" {
+		log.Println("serve file", r.RequestURI)
 		http.ServeFile(w, r, "./"+r.RequestURI)
 		return
 	}
+	log.Println("handle", r.RequestURI)
 
 	defer func() {
 		if e := r.Body.Close(); e != nil {
@@ -73,52 +78,86 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	switch r.Method {
-	case "POST":
-		log.Println("POST", r.RequestURI)
+	renderTmpl(w, &page{})
+}
 
-		// Read scene from body
-		body, e := ioutil.ReadAll(r.Body)
-		if e != nil {
-			msg := fmt.Sprintf("Error reading post body: %v", e)
-			log.Println(msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
+func renderHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
+
+	defer func() {
+		if e := r.Body.Close(); e != nil {
+			log.Printf("Error closing body: %v\n", e)
 		}
+	}()
 
-		// Run raytrace command
-		tmpImage := "img/render.jpg"
-		if e := runRaytrace(tmpImage, string(body)); e != nil {
-			msg := fmt.Sprintf("Error running raytrace: %v", e)
-			log.Println(msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
-
-		// Save scene file
-		tmpScene := "scene.json"
-		if e := saveScene(tmpScene, body); e != nil {
-			msg := fmt.Sprintf("Error saving %s: %v", tmpScene, e)
-			log.Println(msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
-
-		// Deal with history and get final image name
-		imgName, e := saveImageAndScene(tmpImage, tmpScene)
-		if e != nil {
-			msg := fmt.Sprintf("Error saving/renmaing img/scene files: %v", e)
-			log.Println(msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
-
-		// Send final image name back to client
-		fmt.Fprintln(w, imgName)
-	case "GET":
-		log.Println("GET", r.RequestURI)
-		renderTmpl(w, &page{})
+	if r.Method == "GET" {
+		log.Println("redirect to /")
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
 	}
+
+	// Read scene from body
+	body, e := ioutil.ReadAll(r.Body)
+	if e != nil {
+		msg := fmt.Sprintf("Error reading post body: %v", e)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Run raytrace command
+	tmpImage := "img/render.jpg"
+	if e := runRaytrace(tmpImage, string(body)); e != nil {
+		msg := fmt.Sprintf("Error running raytrace: %v", e)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Save scene file
+	tmpScene := "img/scene.json"
+	if e := saveScene(tmpScene, body); e != nil {
+		msg := fmt.Sprintf("Error saving %s: %v", tmpScene, e)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Deal with history and get final image name
+	imgName, e := saveImageAndScene(tmpImage, tmpScene)
+	if e != nil {
+		msg := fmt.Sprintf("Error saving/renmaing img/scene files: %v", e)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Send final image name back to client
+	fmt.Fprintln(w, imgName)
+}
+
+func historyHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RequestURI)
+
+	defer func() {
+		if e := r.Body.Close(); e != nil {
+			log.Printf("Error closing body: %v\n", e)
+		}
+	}()
+
+	if r.Method == "GET" {
+		log.Println("redirect to /")
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	history, e := getHistory()
+	if e != nil {
+		msg := fmt.Sprintf("Error getting history: %v", e)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+	}
+	fmt.Fprintln(w, history)
 }
 
 func renderTmpl(w http.ResponseWriter, p *page) {
@@ -126,6 +165,7 @@ func renderTmpl(w http.ResponseWriter, p *page) {
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 	}
+	fmt.Fprintln(w, "Not implemented")
 }
 
 type page struct {
@@ -146,7 +186,7 @@ func runRaytrace(imgName, scene string) error {
 	}
 
 	if output, e := cmd.CombinedOutput(); e != nil {
-		return fmt.Errorf("running raytrace: %v: %s", e, string(output))
+		return fmt.Errorf("running and getting output: %v: %s", e, string(output))
 	}
 
 	return nil
@@ -180,34 +220,12 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 	fileMu.Lock()
 	defer fileMu.Unlock()
 
-	dir, e := os.Open("img")
-	defer func() {
-		// Only reporet this error if no others have happened
-		if e := dir.Close(); e != nil && err == nil {
-			err = fmt.Errorf("closing img dir: %v", e)
-		}
-	}()
-	if e != nil {
-		return "", fmt.Errorf("opening img dir: %v", e)
-	}
-	allFiles, e := dir.Readdirnames(-1)
-	if e != nil {
-		return "", fmt.Errorf("reading dirnames: %v", e)
-	}
-
-	// Find all files
-	renderFiles := make([]string, maxHistory)
-	sceneFiles := make([]string, maxHistory)
-	for _, f := range allFiles {
-		if i, match := getFileIndex(renderFileRe, f); match && i < maxHistory {
-			renderFiles[i] = f
-		} else if i, match := getFileIndex(sceneFileRe, f); match && i < maxHistory {
-			sceneFiles[i] = f
-		}
-	}
-
 	// Combine file pairs and remove pairs that have at least one missing
-	pairs := zip(renderFiles, sceneFiles)
+	pairs, e := getFilePairs()
+	if e != nil {
+		return "", fmt.Errorf("getting file pairs: %v", e)
+	}
+	// Add the new ones
 	pairs = append(pairs, [2]string{tmpImg, tmpScn})
 	if len(pairs) == maxHistory {
 		// We're full, make room by clearing the first entry, compress will remove it
@@ -229,6 +247,53 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 		}
 	}
 	return newImgName, nil
+}
+
+func getHistory() (history string, err error) {
+	fileMu.Lock()
+	defer fileMu.Unlock()
+
+	pairs, e := getFilePairs()
+	if e != nil {
+		return "", fmt.Errorf("getting file pairs: %v", e)
+	}
+	pairs = compress(pairs)
+
+	j, e := json.Marshal(pairs)
+	if e != nil {
+		return "", fmt.Errorf("marshal pairs to json: %v", e)
+	}
+
+	return string(j), nil
+}
+
+func getFilePairs() (pairs [][2]string, err error) {
+	dir, e := os.Open("img")
+	defer func() {
+		// Only reporet this error if no others have happened
+		if e := dir.Close(); e != nil && err == nil {
+			err = fmt.Errorf("closing img dir: %v", e)
+		}
+	}()
+	if e != nil {
+		return nil, fmt.Errorf("opening img dir: %v", e)
+	}
+	allFiles, e := dir.Readdirnames(-1)
+	if e != nil {
+		return nil, fmt.Errorf("reading dirnames: %v", e)
+	}
+
+	renderFiles := make([]string, maxHistory)
+	sceneFiles := make([]string, maxHistory)
+	for _, f := range allFiles {
+		if i, match := getFileIndex(renderFileRe, f); match && i < maxHistory {
+			renderFiles[i] = "img/" + f
+		} else if i, match := getFileIndex(sceneFileRe, f); match && i < maxHistory {
+			sceneFiles[i] = "img/" + f
+		}
+	}
+
+	return zip(renderFiles, sceneFiles), nil
 }
 
 func getFileIndex(re *regexp.Regexp, file string) (int, bool) {

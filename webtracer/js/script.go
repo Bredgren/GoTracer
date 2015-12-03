@@ -240,7 +240,7 @@ func triggerRender() {
 			}
 		}
 	}(done)
-	jquery.Post("/", string(j), func(data, status, xhr string) {
+	jquery.Post("/render", string(j), func(data, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Render wasn't success:", status, data, xhr)
 		}
