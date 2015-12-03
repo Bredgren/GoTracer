@@ -8,7 +8,7 @@
 <script src="/js/script{{if not debug}}.min{{end}}.js"></script>
 <script src="/js/jquery.imagedrag{{if not debug}}.min{{end}}.js"></script>
 <body onload="onBodyLoad()">
-  <div class="controls">
+  <div id="controls">
     <div class="btn-group">
       <a id="save" class="btn">Save Scene</a>
       <button id="load" class="btn">Load Scene</button>
@@ -17,12 +17,22 @@
     <div id="options">
     </div>
     <div id="tab-up" class="tab">
-      ▲
+      Options ▲
     </div>
     <div id="tab-down" class="tab">
-      ▼
+      Options ▼
     </div>
   </div>
+  <!-- <div id="history"> -->
+  <!--   <div class="history-list"> -->
+  <!--   </div> -->
+  <!--   <div id="history-tab-up" class="tab"> -->
+  <!--     History ▲ -->
+  <!--   </div> -->
+  <!--   <div id="history-tab-down" class="tab"> -->
+  <!--     History ▼ -->
+  <!--   </div> -->
+  <!-- </div> -->
   <div class="image-container">
   </div>
   <div id="zoom-div">

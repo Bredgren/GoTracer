@@ -19,7 +19,7 @@ body {
     cursor: move;
 }
 
-.controls {
+#controls {
     width: 350px;
     position: fixed;
     padding: 10px;

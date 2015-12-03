@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"sync"
 	"text/template"
@@ -216,12 +217,12 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 
 	// Rename files based on their index
 	for i, p := range pairs {
-		newImgName = "render" + strconv.Itoa(i) + ".jpg"
+		newImgName = "img/render" + strconv.Itoa(i) + ".jpg"
 		e := os.Rename(p[0], newImgName)
 		if e != nil {
 			return "", fmt.Errorf("renaming %s to %s: %v", p[0], newImgName, e)
 		}
-		newSceneName := "scene" + strconv.Itoa(i) + ".jpg"
+		newSceneName := "img/scene" + strconv.Itoa(i) + ".jpg"
 		e = os.Rename(p[1], newSceneName)
 		if e != nil {
 			return "", fmt.Errorf("renaming %s to %s: %v", p[1], newSceneName, e)
@@ -232,7 +233,7 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 
 func getFileIndex(re *regexp.Regexp, file string) (int, bool) {
 	if match := re.FindStringSubmatch(file); match != nil {
-		i, e := strconv.Atoi(match[0])
+		i, e := strconv.Atoi(match[1])
 		if e != nil {
 			// Should be impossible since the regex ensures the match is an int
 			panic(fmt.Errorf("converting index of %s to int: %v", file, e))
@@ -260,6 +261,7 @@ func compress(pairs [][2]string) [][2]string {
 			toRemove = append(toRemove, i)
 		}
 	}
+	sort.Sort(sort.Reverse(sort.IntSlice(toRemove)))
 	for _, i := range toRemove {
 		pairs = append(pairs[:i], pairs[i+1:]...)
 	}
