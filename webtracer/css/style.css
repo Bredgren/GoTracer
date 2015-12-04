@@ -27,7 +27,16 @@ body {
     -webkit-user-select: none;
 }
 
-#options,.tab {
+#history {
+    width: 150px;
+    position: fixed;
+    right: 0;
+    padding: 10px;
+    color: white;
+    -webkit-user-select: none;
+}
+
+#options,#history-list,.tab {
     background-color: rgba(0, 0, 0, 0.6);
 }
 
@@ -43,6 +52,36 @@ body {
 
 #tab-down {
     display: none;
+}
+
+#history-tab-up {
+    display: none;
+}
+
+#history-list {
+    display: none;
+    padding: 4px;
+}
+
+#history-list > .history-item {
+    width: 80%;
+    margin: 4px auto 4px auto;
+    padding: 10px;
+    border-top: 1px solid white;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.history-item > img {
+    width: 100%;
+}
+
+#history-list > .history-item:hover {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+#history-list > .history-selected {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .btn-group {
@@ -82,7 +121,7 @@ a#save {
     opacity: 0.3;
 }
 
-#options {
+#options,#history-list {
     overflow: scroll;
     height: 600px;
     border: 2px solid grey;

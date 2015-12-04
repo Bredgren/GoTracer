@@ -6,6 +6,7 @@ import (
 	"math"
 	"reflect"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/Bredgren/gohtmlctrl/htmlctrl"
@@ -40,28 +41,19 @@ func onBodyLoad() {
 	zoom.SetAttr("min", 0.1)
 	zoom.SetAttr("max", 10.0)
 	zoom.SetAttr("step", 0.1)
+
+	refreshHistory()
 }
 
 func initGlobalCallbacks() {
-	jq(".tab").Call(jquery.CLICK, onToggleControls)
+	jq(".option-tab").Call(jquery.CLICK, onToggleOptions)
+	jq(".history-tab").Call(jquery.CLICK, onToggleHistory)
 	jq("#save").Call(jquery.CLICK, onSave)
 	jq("#load").Call(jquery.CLICK, onLoad)
 	jq("#load-file").Call(jquery.CHANGE, onFileChange)
+	jq("#render").Call(jquery.CLICK, onOptionChange)
 	jq("#zoom").On("input change", onZoom)
 	jq("#reset").Call(jquery.CLICK, onReset)
-}
-
-func initOptionCallbacks() {
-	fn := func(i int, intf interface{}) {
-		jq(intf.(*js.Object)).Off(".option")
-		jq(intf.(*js.Object)).On(jquery.CLICK+".option", onOptionChange)
-	}
-	jq(".go-bool").Each(fn)
-	jq(".go-int").Each(fn)
-	jq(".go-float64").Each(fn)
-	jq(".go-string").Each(fn)
-	jq(".go-choice").Each(fn)
-	jq(".go-slice button").Each(fn)
 }
 
 func setImage(path string) {
@@ -105,7 +97,6 @@ func initOptions() {
 	opts.Append(o)
 
 	addOptionSlides(o)
-	initOptionCallbacks()
 	checkFastRender()
 }
 
@@ -147,15 +138,19 @@ func checkFastRender() {
 	})
 }
 
-func onToggleControls() {
+func onToggleOptions() {
 	jq("#options").SlideToggle("fast")
 	jq("#tab-up").Toggle()
 	jq("#tab-down").Toggle()
 }
 
-func onSave() {
-	console.Call("log", "save")
+func onToggleHistory() {
+	jq("#history-list").SlideToggle("fast")
+	jq("#history-tab-up").Toggle()
+	jq("#history-tab-down").Toggle()
+}
 
+func onSave() {
 	j, e := json.Marshal(options)
 	if e != nil {
 		console.Call("error", e.Error())
@@ -208,13 +203,16 @@ func onReset() {
 }
 
 func onOptionChange() {
+	// Not allowing options to be changed while rendering
+	jq("#options input").SetProp("disabled", true)
+
 	// Re-add callbacks because when adding/removing items from slices they destroy the previous objects
 	// and new ones will be missing the callbacks.
 	addOptionSlides(jq("#all-options"))
-	initOptionCallbacks()
 	checkFastRender()
 
 	triggerRender()
+	refreshHistory()
 }
 
 func triggerRender() {
@@ -246,6 +244,84 @@ func triggerRender() {
 		}
 		// Not allowed to block in callback
 		go func() { done <- true }()
+		jq("#options input").SetProp("disabled", false)
 		setImage(data)
+	})
+}
+
+func refreshHistory() {
+	jquery.Post("/history", "", func(data, status, xhr string) {
+		if status != "success" {
+			console.Call("error", "Failed to retrieve history:", status, data, xhr)
+		}
+		var history [][2]string
+		e := json.Unmarshal([]byte(data), &history)
+		if e != nil {
+			console.Call("error", "Unmarshaling history:", e.Error())
+			return
+		}
+		var done chan bool
+		go populateHistory(history, done)
+		go func() {
+			<-done
+			console.Call("log", "done populating history")
+		}()
+	})
+}
+
+func populateHistory(history [][2]string, done chan<- bool) {
+	imgList := make([]*js.Object, len(history))
+	var wg sync.WaitGroup
+	for i, p := range history {
+		i, p := i, p
+		wg.Add(1)
+		img := js.Global.Get("Image").New()
+		img.Set("onload", func() {
+			wg.Done()
+			imgList[i] = img
+		})
+		img.Set("onerror", func() {
+			wg.Done()
+			console.Call("error", "unable to load image "+p[0])
+		})
+		img.Set("src", p[0])
+	}
+	wg.Wait()
+	list := jq("#history-list")
+	list.Empty()
+	for i := len(imgList) - 1; i >= 0; i-- {
+		img := imgList[i]
+		item := jq("<div>").AddClass("history-item")
+		text := strconv.Itoa(i)
+		label := jq("<label>").SetText(text)
+		item.Append(label)
+		item.Append(img)
+		item.On(jquery.CLICK, getOnHistoryItemSelect(item, history[i][0], history[i][1]))
+		list.Append(item)
+	}
+	done <- true
+}
+
+func getOnHistoryItemSelect(item jquery.JQuery, img, scene string) func() {
+	return func() {
+		jq(".history-item").RemoveClass("history-selected")
+		item.AddClass("history-selected")
+		setImage(img)
+		setOptions(scene)
+	}
+}
+
+func setOptions(scene string) {
+	jquery.Get(scene, "", func(data *js.Object, status, xhr string) {
+		if status != "success" {
+			console.Call("error", "Failed to retrieve scene:", status, data, xhr)
+		}
+
+		e := json.Unmarshal([]byte(data.String()), &options)
+		if e != nil {
+			console.Call("error", "Unmarshaling options:", e.Error())
+			return
+		}
+		initOptions()
 	})
 }

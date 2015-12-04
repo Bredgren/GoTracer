@@ -105,6 +105,9 @@ func renderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fileMu.Lock()
+	defer fileMu.Unlock()
+
 	// Run raytrace command
 	tmpImage := "img/render.jpg"
 	if e := runRaytrace(tmpImage, string(body)); e != nil {
@@ -150,6 +153,9 @@ func historyHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
+
+	fileMu.Lock()
+	defer fileMu.Unlock()
 
 	history, e := getHistory()
 	if e != nil {
@@ -215,11 +221,6 @@ var fileMu sync.Mutex
 // This helper figures out what name to give new files and shifts files around so that
 // they're consistently numbered, 0 is oldest and maxHistory-1 is newest.
 func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
-	// Since this is a server it's possible to be handling more than one client at the same
-	// time so we don't want any trouble with race conditions here.
-	fileMu.Lock()
-	defer fileMu.Unlock()
-
 	// Combine file pairs and remove pairs that have at least one missing
 	pairs, e := getFilePairs()
 	if e != nil {
@@ -227,11 +228,13 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 	}
 	// Add the new ones
 	pairs = append(pairs, [2]string{tmpImg, tmpScn})
-	if len(pairs) == maxHistory {
+	if len(pairs) == maxHistory+1 {
 		// We're full, make room by clearing the first entry, compress will remove it
 		pairs[0][0] = ""
 	}
+	log.Println("pairs before", pairs)
 	pairs = compress(pairs)
+	log.Println("pairs after", pairs)
 
 	// Rename files based on their index
 	for i, p := range pairs {
@@ -250,9 +253,6 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 }
 
 func getHistory() (history string, err error) {
-	fileMu.Lock()
-	defer fileMu.Unlock()
-
 	pairs, e := getFilePairs()
 	if e != nil {
 		return "", fmt.Errorf("getting file pairs: %v", e)
