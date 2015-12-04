@@ -215,7 +215,7 @@ func saveScene(name string, body []byte) error {
 }
 
 var renderFileRe = regexp.MustCompile(`render(\d+).jpg`)
-var sceneFileRe = regexp.MustCompile(`scene(\d+).jpg`)
+var sceneFileRe = regexp.MustCompile(`scene(\d+).json`)
 var fileMu sync.Mutex
 
 // This helper figures out what name to give new files and shifts files around so that
@@ -228,13 +228,12 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 	}
 	// Add the new ones
 	pairs = append(pairs, [2]string{tmpImg, tmpScn})
+	pairs = compress(pairs)
 	if len(pairs) == maxHistory+1 {
 		// We're full, make room by clearing the first entry, compress will remove it
 		pairs[0][0] = ""
 	}
-	log.Println("pairs before", pairs)
 	pairs = compress(pairs)
-	log.Println("pairs after", pairs)
 
 	// Rename files based on their index
 	for i, p := range pairs {
@@ -243,7 +242,7 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 		if e != nil {
 			return "", fmt.Errorf("renaming %s to %s: %v", p[0], newImgName, e)
 		}
-		newSceneName := "img/scene" + strconv.Itoa(i) + ".jpg"
+		newSceneName := "img/scene" + strconv.Itoa(i) + ".json"
 		e = os.Rename(p[1], newSceneName)
 		if e != nil {
 			return "", fmt.Errorf("renaming %s to %s: %v", p[1], newSceneName, e)

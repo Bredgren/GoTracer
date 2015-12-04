@@ -315,13 +315,14 @@ func setOptions(scene string) {
 	jquery.Get(scene, "", func(data *js.Object, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Failed to retrieve scene:", status, data, xhr)
+			return
 		}
 
 		e := json.Unmarshal([]byte(data.String()), &options)
 		if e != nil {
-			console.Call("error", "Unmarshaling options:", e.Error())
+			console.Call("error", "Unmarshaling options:", data.String(), e.Error())
 			return
 		}
 		initOptions()
-	})
+	}, "text")
 }
