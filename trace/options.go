@@ -3,7 +3,7 @@ package trace
 // Options contains all the options possible
 type Options struct {
 	Global     globalOpts      `title:"Global options" json:"global"`
-	Resolution resolutionOpts  `title:"Image width and height in pixels" json:"resolution"`
+	Resolution resolutionOpts  `title:"Image width and height in pixels. Larger resolution will increase rendering time." json:"resolution"`
 	Background backgroundOpts  `title:"Determines the color when a ray doesn't hit anything" json:"background"`
 	Camera     cameraOpts      `title:"Camera position and orientation" json:"camera"`
 	AntiAlias  antiAliasOpts   `title:"Anti-aliasing settings" json:"anti_alias"`
@@ -15,13 +15,13 @@ type Options struct {
 
 type globalOpts struct {
 	FastRender       bool `title:"Disable/limit some settings in order to decrease rendering time" id:"fast-render" json:"fast_render"`
-	MaxRecursion     int  `title:"Maximum reflective/refractive rays per pixel" min:"0" max:"99" class:"fast-render" json:"max_recursion"`
-	SoftShadowDetail int  `title:"Soft shadow detail. 0 disables soft shadows" min:"0" max:"99" class:"fast-render" json:"soft_shadow_detail"`
+	MaxRecursion     int  `title:"Maximum reflective/refractive rays per pixel. Larger values increase quality and rendering time." min:"0" max:"99" class:"fast-render" json:"max_recursion"`
+	SoftShadowDetail int  `title:"Soft shadow detail. 0 disables soft shadows. Larger values increase quality and rendering time. " min:"0" max:"99" class:"fast-render" json:"soft_shadow_detail"`
 }
 
 type resolutionOpts struct {
-	W int `title:"Width in pixels" min:"1" max:"16000" json:"w"`
-	H int `title:"Height in pixels" min:"1" max:"16000" json:"h"`
+	W int `title:"Width in pixels. Larger values increase rendering time." min:"1" max:"16000" json:"w"`
+	H int `title:"Height in pixels. Larger values increase rendering time." min:"1" max:"16000" json:"h"`
 }
 
 type cameraOpts struct {
@@ -33,10 +33,10 @@ type cameraOpts struct {
 }
 
 type dofOpts struct {
-	Enabled           bool    `title:"Enable depth of field" class:"fast-render" json:"enabled"`
+	Enabled           bool    `title:"Enable depth of field. Enabling DOF will increase rendering time." class:"fast-render" json:"enabled"`
 	FocalDistance     float64 `title:"Distance from the camera of the focal point" min:"0.01" max:"999.9" json:"focal_distance"`
 	ApertureRadius    float64 `title:"Radius of the aperture" min:"0.00001" max:"999.9" json:"aperture_radius"`
-	AdaptiveThreshold float64 `title:"Rays will continue to be created for each pixel until the contribution to the overall color is less than this" min:"0.00001" json:"adaptive_threshold"`
+	AdaptiveThreshold float64 `title:"Rays will continue to be created for each pixel until the contribution to the overall color is less than this. Smaller values increase quality and rendering time." min:"0.00001" json:"adaptive_threshold"`
 }
 
 type backgroundOpts struct {
@@ -46,8 +46,8 @@ type backgroundOpts struct {
 }
 
 type antiAliasOpts struct {
-	MaxDivisions int     `title:"Maximum subdivisions of a pixel" min:"0" max:"16" class:"fast-render" json:"max_divisions"`
-	Threshold    float64 `title:"Stop subdividing pixels when the difference is less than this" min:"0.0" max:"99" class:"fast-render" json:"threshold"`
+	MaxDivisions int     `title:"Maximum subdivisions of a pixel. Larger values increase quality and rendering time." min:"0" max:"16" class:"fast-render" json:"max_divisions"`
+	Threshold    float64 `title:"Stop subdividing pixels when the difference is less than this. Smaller values increase quality and rendering time." min:"0.0" max:"99" class:"fast-render" json:"threshold"`
 }
 
 type debugOpts struct {
@@ -67,7 +67,7 @@ type lightOpts struct {
 	Color           colorOpts  `title:"Color of the light" json:"color"`
 	Position        vectorOpts `title:"Position of the light (Point and Spot)" json:"position"`
 	Direction       vectorOpts `title:"Direction of the light (Direcitonal and Spot)" json:"direction"`
-	IlluminationMap bool       `title:"Generate an illumination map (Point and Spot)" class:"fast-render" json:"illumination_map"`
+	IlluminationMap bool       `title:"Generate an illumination map (Point and Spot). Increases rendering time." class:"fast-render" json:"illumination_map"`
 	Coeff           struct {
 		Constant  float64 `json:"constant"`
 		Linear    float64 `json:"linear"`
