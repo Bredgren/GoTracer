@@ -5,23 +5,32 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"text/template"
+	"time"
+
+	"github.com/Bredgren/gotracer/webtracer/lib"
+	"github.com/nfnt/resize"
 )
 
 const path = "/src/github.com/Bredgren/gotracer/webtracer"
 const imgType = "jpg"
+const thumbnailSize = 128
 
 var goPath = os.Getenv("GOPATH")
 
@@ -88,7 +97,6 @@ func renderTmpl(w http.ResponseWriter, p *page) {
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 	}
-	fmt.Fprintln(w, "Not implemented")
 }
 
 type page struct {
@@ -127,7 +135,7 @@ func (h *handler) renderHandler(w http.ResponseWriter, r *http.Request) {
 	defer h.Unlock()
 
 	// Run raytrace command
-	tmpImage := "img/render." + imgType
+	tmpImage := "img/tmp." + r.FormValue("format")
 	if e := runRaytrace(tmpImage, string(body)); e != nil {
 		msg := fmt.Sprintf("Error running raytrace: %v", e)
 		log.Println(msg)
@@ -136,7 +144,7 @@ func (h *handler) renderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save scene file
-	tmpScene := "img/scene.json"
+	tmpScene := "img/tmp.json"
 	if e := saveScene(tmpScene, body); e != nil {
 		msg := fmt.Sprintf("Error saving %s: %v", tmpScene, e)
 		log.Println(msg)
@@ -169,13 +177,18 @@ func (h *handler) historyHandler(w http.ResponseWriter, r *http.Request) {
 	h.Lock()
 	defer h.Unlock()
 
-	history, e := getHistory()
-	if e != nil {
-		msg := fmt.Sprintf("Error getting history: %v", e)
-		log.Println(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+	if r.FormValue("_") == "recent" {
+		history, e := getRecentHistory()
+		if e != nil {
+			msg := fmt.Sprintf("Error getting history: %v", e)
+			log.Println(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintln(w, history)
+		return
 	}
-	fmt.Fprintln(w, history)
+
 }
 
 func runRaytrace(imgName, scene string) error {
@@ -214,61 +227,103 @@ func saveScene(name string, body []byte) error {
 	return nil
 }
 
-var renderFileRe = regexp.MustCompile(`render(\d+).` + imgType)
-var sceneFileRe = regexp.MustCompile(`scene(\d+).json`)
+func saveImageAndScene(tmpImg, tmpScn string) (newImg string, err error) {
+	timeStamp := strconv.FormatInt(time.Now().UnixNano(), 10)
 
-// This helper figures out what name to give new files and shifts files around so that
-// they're consistently numbered, 0 is oldest and maxHistory-1 is newest.
-func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
-	// Combine file pairs and remove pairs that have at least one missing
-	pairs, e := getFilePairs()
-	if e != nil {
-		return "", fmt.Errorf("getting file pairs: %v", e)
-	}
-	// Add the new ones
-	pairs = append(pairs, [2]string{tmpImg, tmpScn})
-	pairs = compress(pairs)
-	// Check if we're full and make room by clearing the first entry, compress will remove it
-	if len(pairs) > maxHistory {
-		pairs[0][0] = ""
-	}
-	pairs = compress(pairs)
+	base := "img/render-" + timeStamp
+	newImg = base + filepath.Ext(tmpImg)
+	newScn := base + ".json"
 
-	// Rename files based on their index
-	for i, p := range pairs {
-		newImgName = "img/render" + strconv.Itoa(i) + "." + imgType
-		e := os.Rename(p[0], newImgName)
-		if e != nil {
-			return "", fmt.Errorf("renaming %s to %s: %v", p[0], newImgName, e)
-		}
-		newSceneName := "img/scene" + strconv.Itoa(i) + ".json"
-		e = os.Rename(p[1], newSceneName)
-		if e != nil {
-			return "", fmt.Errorf("renaming %s to %s: %v", p[1], newSceneName, e)
-		}
+	if e := os.Rename(tmpImg, newImg); e != nil {
+		return "", fmt.Errorf("renaming %s to %s: %v", tmpImg, newImg, e)
 	}
-	return newImgName, nil
+
+	if e := os.Rename(tmpScn, newScn); e != nil {
+		return "", fmt.Errorf("renaming %s to %s: %v", tmpScn, newScn, e)
+	}
+
+	if e := saveThumbnail(newImg); e != nil {
+		return "", fmt.Errorf("saving thumbnail: %v", e)
+	}
+
+	return
 }
 
-func getHistory() (history string, err error) {
-	pairs, e := getFilePairs()
+func saveThumbnail(imgName string) (err error) {
+	imgFile, e := os.Open(imgName)
 	if e != nil {
-		return "", fmt.Errorf("getting file pairs: %v", e)
+		return fmt.Errorf("opening image %s: %v", imgName, e)
 	}
-	pairs = compress(pairs)
+	defer func() {
+		if e := imgFile.Close(); e != nil && err == nil {
+			err = fmt.Errorf("closing img: %v", e)
+		}
+	}()
 
-	j, e := json.Marshal(pairs)
+	img, _, e := image.Decode(imgFile)
 	if e != nil {
-		return "", fmt.Errorf("marshal pairs to json: %v", e)
+		return fmt.Errorf("decoding image %s: %v", imgName, e)
+	}
+
+	thumbImg := resize.Thumbnail(thumbnailSize, thumbnailSize, img, resize.Bilinear)
+
+	format := filepath.Ext(imgName)
+	thumbFileName := strings.Split(imgName, ".")[0] + "-thumb" + format
+
+	thumbFile, e := os.Create(thumbFileName)
+	if e != nil {
+		return fmt.Errorf("creating thumbnail file: %v", e)
+	}
+	defer func() {
+		if e := thumbFile.Close(); e != nil && err == nil {
+			err = fmt.Errorf("closing thumbnail image: %v", e)
+		}
+	}()
+
+	switch format[1:] {
+	case "jpg", "jpeg":
+		jpeg.Encode(thumbFile, thumbImg, nil)
+	case "png":
+		png.Encode(thumbFile, thumbImg)
+	default:
+		panic(fmt.Sprintf("Saving image as format %s is not implemented", format[1:]))
+	}
+
+	return nil
+}
+
+type byDate []*lib.RenderItem
+
+func (h byDate) Len() int {
+	return len(h)
+}
+
+func (h byDate) Less(i, j int) bool {
+	return h[i].Date.Before(h[j].Date)
+}
+
+func (h byDate) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+}
+
+func getRecentHistory() (historyJSON string, err error) {
+	all, e := getAllHistory()
+	if e != nil {
+		return "", fmt.Errorf("getting all history: %v", e)
+	}
+
+	j, e := json.Marshal(all[:int(math.Min(float64(len(all)), float64(maxHistory)))])
+	if e != nil {
+		return "", fmt.Errorf("marshal recent history to json: %v", e)
 	}
 
 	return string(j), nil
 }
 
-func getFilePairs() (pairs [][2]string, err error) {
+// Returns all history sorted by date with newest first
+func getAllHistory() (items []*lib.RenderItem, err error) {
 	dir, e := os.Open("img")
 	defer func() {
-		// Only report this error if no others have happened
 		if e := dir.Close(); e != nil && err == nil {
 			err = fmt.Errorf("closing img dir: %v", e)
 		}
@@ -276,57 +331,43 @@ func getFilePairs() (pairs [][2]string, err error) {
 	if e != nil {
 		return nil, fmt.Errorf("opening img dir: %v", e)
 	}
+
 	allFiles, e := dir.Readdirnames(-1)
 	if e != nil {
 		return nil, fmt.Errorf("reading dirnames: %v", e)
 	}
 
-	renderFiles := make([]string, maxHistory)
-	sceneFiles := make([]string, maxHistory)
+	itemMap := make(map[time.Time]*lib.RenderItem)
 	for _, f := range allFiles {
-		if i, match := getFileIndex(renderFileRe, f); match && i < maxHistory {
-			renderFiles[i] = "img/" + f
-		} else if i, match := getFileIndex(sceneFileRe, f); match && i < maxHistory {
-			sceneFiles[i] = "img/" + f
+		if match := lib.RenderFileRe.FindStringSubmatch(f); match != nil {
+			unixTime, e := strconv.ParseInt(match[1], 10, 64)
+			if e != nil {
+				// Should be impossible since the regex ensures the match is an int
+				panic(fmt.Errorf("converting time of %s to int: %v", f, e))
+			}
+			date := time.Unix(0, unixTime)
+			if _, ok := itemMap[date]; !ok {
+				itemMap[date] = &lib.RenderItem{Date: date}
+			}
+			isThumb := match[2] != ""
+			format := match[3]
+			if isThumb {
+				itemMap[date].Thumb = "img/" + f
+			} else if format == "json" {
+				itemMap[date].Scene = "img/" + f
+			} else {
+				itemMap[date].Render = "img/" + f
+			}
 		}
 	}
 
-	return zip(renderFiles, sceneFiles), nil
-}
-
-func getFileIndex(re *regexp.Regexp, file string) (int, bool) {
-	if match := re.FindStringSubmatch(file); match != nil {
-		i, e := strconv.Atoi(match[1])
-		if e != nil {
-			// Should be impossible since the regex ensures the match is an int
-			panic(fmt.Errorf("converting index of %s to int: %v", file, e))
-		}
-		return i, true
+	items = make([]*lib.RenderItem, len(itemMap))
+	i := 0
+	for _, item := range itemMap {
+		items[i] = item
+		i++
 	}
-	return -1, false
-}
+	sort.Sort(sort.Reverse(byDate(items)))
 
-func zip(s1, s2 []string) (zipped [][2]string) {
-	// Assumes len(s1) == len(s2)
-	zipped = make([][2]string, len(s1))
-	for i := range s1 {
-		zipped[i][0] = s1[i]
-		zipped[i][1] = s2[i]
-	}
 	return
-}
-
-func compress(pairs [][2]string) [][2]string {
-	// Removes elements that are missing or aren't paired
-	var toRemove []int
-	for i, p := range pairs {
-		if p[0] == "" || p[1] == "" {
-			toRemove = append(toRemove, i)
-		}
-	}
-	sort.Sort(sort.Reverse(sort.IntSlice(toRemove)))
-	for _, i := range toRemove {
-		pairs = append(pairs[:i], pairs[i+1:]...)
-	}
-	return pairs
 }

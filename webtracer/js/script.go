@@ -11,6 +11,7 @@ import (
 
 	"github.com/Bredgren/gohtmlctrl/htmlctrl"
 	"github.com/Bredgren/gotracer/trace"
+	"github.com/Bredgren/gotracer/webtracer/lib"
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/gopherjs/jquery"
 )
@@ -34,7 +35,7 @@ func onBodyLoad() {
 	options = trace.NewOptions()
 	initOptions()
 
-	triggerRender()
+	triggerRender("jpg")
 
 	zoom := jq("#zoom")
 	zoom.SetAttr("value", 1.0)
@@ -51,14 +52,17 @@ func initGlobalCallbacks() {
 	jq("#save").Call(jquery.CLICK, onSave)
 	jq("#load").Call(jquery.CLICK, onLoad)
 	jq("#load-file").Call(jquery.CHANGE, onFileChange)
-	jq("#render").Call(jquery.CLICK, onOptionChange)
+	jq("#render-jpg").Call(jquery.CLICK, onRenderJpg)
+	jq("#render-png").Call(jquery.CLICK, onRenderPng)
 	jq("#zoom").On("input change", onZoom)
 	jq("#reset").Call(jquery.CLICK, onReset)
 }
 
 func setImage(path string) {
+	console.Call("log", "set image", path)
 	img := js.Global.Get("Image").New()
 	img.Set("onload", func() {
+		console.Call("log", "image loaded", path)
 		imgCon := jq(".image-container")
 		imgCon.Empty()
 		imgCon.Append(img)
@@ -179,7 +183,7 @@ func onFileChange(event *js.Object) {
 			return
 		}
 		initOptions()
-		triggerRender()
+		triggerRender("jpg")
 	})
 	reader.Call("readAsText", event.Get("target").Get("files").Index(0))
 }
@@ -202,7 +206,15 @@ func onReset() {
 	jq("img").SetCss("top", 0)
 }
 
-func onOptionChange() {
+func onRenderJpg() {
+	onRender("jpg")
+}
+
+func onRenderPng() {
+	onRender("png")
+}
+
+func onRender(format string) {
 	// Not allowing options to be changed while rendering
 	jq("#options input").SetProp("disabled", true)
 
@@ -211,11 +223,11 @@ func onOptionChange() {
 	addOptionSlides(jq("#all-options"))
 	checkFastRender()
 
-	triggerRender()
+	triggerRender(format)
 	refreshHistory()
 }
 
-func triggerRender() {
+func triggerRender(format string) {
 	j, e := json.Marshal(options)
 	if e != nil {
 		console.Call("error", e.Error())
@@ -224,7 +236,7 @@ func triggerRender() {
 
 	jq(".image-container").Empty()
 	anim := startPulseAnimation("#animation")
-	jquery.Post("/render", string(j), func(data, status, xhr string) {
+	jquery.Post("/render?format="+format, string(j), func(data, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Render wasn't success:", status, data, xhr)
 		}
@@ -235,19 +247,18 @@ func triggerRender() {
 }
 
 func refreshHistory() {
-	jquery.Get("/history", "", func(data, status, xhr string) {
+	console.Call("log", "get history")
+	jquery.Get("/history?_=recent", "", func(data, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Failed to retrieve history:", status, data, xhr)
 		}
-		var history [][2]string
+		var history []*lib.RenderItem
 		e := json.Unmarshal([]byte(data), &history)
 		if e != nil {
 			console.Call("error", "Unmarshaling history:", e.Error())
 			return
 		}
 		var done chan bool
-		// TODO: history doesn't seem right sometimes
-		console.Call("log", history)
 		go populateHistory(history, done)
 		go func() {
 			<-done
@@ -256,11 +267,12 @@ func refreshHistory() {
 	})
 }
 
-func populateHistory(history [][2]string, done chan<- bool) {
+func populateHistory(history []*lib.RenderItem, done chan<- bool) {
+	console.Call("log", "populate history")
 	imgList := make([]*js.Object, len(history))
 	var wg sync.WaitGroup
-	for i, p := range history {
-		i, p := i, p
+	for i, item := range history {
+		i, item := i, item
 		wg.Add(1)
 		img := js.Global.Get("Image").New()
 		img.Set("onload", func() {
@@ -269,26 +281,24 @@ func populateHistory(history [][2]string, done chan<- bool) {
 		})
 		img.Set("onerror", func() {
 			wg.Done()
-			console.Call("error", "unable to load image "+p[0])
+			console.Call("error", "unable to load image "+item.Thumb)
 		})
-		img.Set("src", p[0])
+		img.Set("src", item.Thumb)
 	}
 	wg.Wait()
 	list := jq("#history-list")
 	list.Empty()
-	for i := len(imgList) - 1; i >= 0; i-- {
+	for i, img := range imgList {
 		i := i
-		img := imgList[i]
 		item := jq("<div>").AddClass("history-item")
-		text := strconv.Itoa(i)
-		label := jq("<label>").SetText(text)
+		label := jq("<label>").SetText(history[i].Date.Format(time.Stamp))
 		item.Append(label)
 		item.Append(img)
 		item.On(jquery.CLICK, func() {
 			jq(".history-item").RemoveClass("history-selected")
 			item.AddClass("history-selected")
-			setImage(history[i][0])
-			setOptions(history[i][1])
+			setImage(history[i].Render)
+			setOptions(history[i].Scene)
 		})
 		list.Append(item)
 	}
@@ -296,6 +306,7 @@ func populateHistory(history [][2]string, done chan<- bool) {
 }
 
 func setOptions(scene string) {
+	console.Call("log", "get scene", scene)
 	jquery.Get(scene, "", func(data *js.Object, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Failed to retrieve scene:", status, data, xhr)
@@ -326,7 +337,7 @@ func startPulseAnimation(selector string) (stop chan bool) {
 			}
 		}
 	}()
-	return
+	return make(chan bool)
 }
 
 func stopPulseAnimation(stop chan<- bool) {
