@@ -223,19 +223,19 @@ func triggerRender() {
 	}
 
 	jq(".image-container").Empty()
-	done := startPulseAnimation("#animation")
+	anim := startPulseAnimation("#animation")
 	jquery.Post("/render", string(j), func(data, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Render wasn't success:", status, data, xhr)
 		}
-		stopPulseAnimation(done)
+		stopPulseAnimation(anim)
 		jq("#options input").SetProp("disabled", false)
 		setImage(data)
 	})
 }
 
 func refreshHistory() {
-	jquery.Post("/history", "", func(data, status, xhr string) {
+	jquery.Get("/history", "", func(data, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Failed to retrieve history:", status, data, xhr)
 		}
@@ -311,14 +311,14 @@ func setOptions(scene string) {
 	}, "text")
 }
 
-func startPulseAnimation(selector string) (done chan bool) {
+func startPulseAnimation(selector string) (stop chan bool) {
 	go func() {
 		anim := jq(selector)
 		anim.SetCss("color", "rgb(255,255,255)")
 		anim.Show()
 		for i := 0.0; ; i += 0.15 {
 			select {
-			case <-done:
+			case <-stop:
 				anim.Hide()
 				return
 			case <-time.After(time.Duration(33) * time.Millisecond):
@@ -329,6 +329,6 @@ func startPulseAnimation(selector string) (done chan bool) {
 	return
 }
 
-func stopPulseAnimation(done chan<- bool) {
-	go func() { done <- true }()
+func stopPulseAnimation(stop chan<- bool) {
+	go func() { stop <- true }()
 }

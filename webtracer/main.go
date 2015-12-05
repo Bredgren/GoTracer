@@ -21,13 +21,13 @@ import (
 )
 
 const path = "/src/github.com/Bredgren/gotracer/webtracer"
+const imgType = "jpg"
 
 var goPath = os.Getenv("GOPATH")
 
 var templ *template.Template
 
 var (
-	// debug is set by the -D command line flag.
 	debug      bool
 	port       int
 	maxHistory int
@@ -43,8 +43,9 @@ func main() {
 	setup()
 
 	http.HandleFunc("/", httpHandler)
-	http.HandleFunc("/render", renderHandler)
-	http.HandleFunc("/history", historyHandler)
+	h := &handler{}
+	http.HandleFunc("/render", h.renderHandler)
+	http.HandleFunc("/history", h.historyHandler)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
 
@@ -65,6 +66,7 @@ func setup() {
 }
 
 func httpHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("host:", r.Host) // TODO: restrict host?
 	if r.RequestURI != "/" {
 		log.Println("serve file", r.RequestURI)
 		http.ServeFile(w, r, "./"+r.RequestURI)
@@ -81,7 +83,23 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 	renderTmpl(w, &page{})
 }
 
-func renderHandler(w http.ResponseWriter, r *http.Request) {
+func renderTmpl(w http.ResponseWriter, p *page) {
+	e := templ.ExecuteTemplate(w, "Main", p)
+	if e != nil {
+		http.Error(w, e.Error(), http.StatusInternalServerError)
+	}
+	fmt.Fprintln(w, "Not implemented")
+}
+
+type page struct {
+	// Nothing here for now...
+}
+
+type handler struct {
+	sync.Mutex
+}
+
+func (h *handler) renderHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RequestURI)
 
 	defer func() {
@@ -99,17 +117,17 @@ func renderHandler(w http.ResponseWriter, r *http.Request) {
 	// Read scene from body
 	body, e := ioutil.ReadAll(r.Body)
 	if e != nil {
-		msg := fmt.Sprintf("Error reading post body: %v", e)
+		msg := fmt.Sprintf("Error reading body of POST: %v", e)
 		log.Println(msg)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
 
-	fileMu.Lock()
-	defer fileMu.Unlock()
+	h.Lock()
+	defer h.Unlock()
 
 	// Run raytrace command
-	tmpImage := "img/render.jpg"
+	tmpImage := "img/render." + imgType
 	if e := runRaytrace(tmpImage, string(body)); e != nil {
 		msg := fmt.Sprintf("Error running raytrace: %v", e)
 		log.Println(msg)
@@ -139,7 +157,7 @@ func renderHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, imgName)
 }
 
-func historyHandler(w http.ResponseWriter, r *http.Request) {
+func (h *handler) historyHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.RequestURI)
 
 	defer func() {
@@ -148,14 +166,8 @@ func historyHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if r.Method == "GET" {
-		log.Println("redirect to /")
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-
-	fileMu.Lock()
-	defer fileMu.Unlock()
+	h.Lock()
+	defer h.Unlock()
 
 	history, e := getHistory()
 	if e != nil {
@@ -164,18 +176,6 @@ func historyHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusInternalServerError)
 	}
 	fmt.Fprintln(w, history)
-}
-
-func renderTmpl(w http.ResponseWriter, p *page) {
-	e := templ.ExecuteTemplate(w, "Main", p)
-	if e != nil {
-		http.Error(w, e.Error(), http.StatusInternalServerError)
-	}
-	fmt.Fprintln(w, "Not implemented")
-}
-
-type page struct {
-	// Nothing here for now...
 }
 
 func runRaytrace(imgName, scene string) error {
@@ -214,9 +214,8 @@ func saveScene(name string, body []byte) error {
 	return nil
 }
 
-var renderFileRe = regexp.MustCompile(`render(\d+).jpg`)
+var renderFileRe = regexp.MustCompile(`render(\d+).` + imgType)
 var sceneFileRe = regexp.MustCompile(`scene(\d+).json`)
-var fileMu sync.Mutex
 
 // This helper figures out what name to give new files and shifts files around so that
 // they're consistently numbered, 0 is oldest and maxHistory-1 is newest.
@@ -229,15 +228,15 @@ func saveImageAndScene(tmpImg, tmpScn string) (newImgName string, err error) {
 	// Add the new ones
 	pairs = append(pairs, [2]string{tmpImg, tmpScn})
 	pairs = compress(pairs)
-	if len(pairs) == maxHistory+1 {
-		// We're full, make room by clearing the first entry, compress will remove it
+	// Check if we're full and make room by clearing the first entry, compress will remove it
+	if len(pairs) > maxHistory {
 		pairs[0][0] = ""
 	}
 	pairs = compress(pairs)
 
 	// Rename files based on their index
 	for i, p := range pairs {
-		newImgName = "img/render" + strconv.Itoa(i) + ".jpg"
+		newImgName = "img/render" + strconv.Itoa(i) + "." + imgType
 		e := os.Rename(p[0], newImgName)
 		if e != nil {
 			return "", fmt.Errorf("renaming %s to %s: %v", p[0], newImgName, e)
@@ -269,7 +268,7 @@ func getHistory() (history string, err error) {
 func getFilePairs() (pairs [][2]string, err error) {
 	dir, e := os.Open("img")
 	defer func() {
-		// Only reporet this error if no others have happened
+		// Only report this error if no others have happened
 		if e := dir.Close(); e != nil && err == nil {
 			err = fmt.Errorf("closing img dir: %v", e)
 		}
