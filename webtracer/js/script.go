@@ -223,27 +223,12 @@ func triggerRender() {
 	}
 
 	jq(".image-container").Empty()
-	done := make(chan bool)
-	go func(done <-chan bool) {
-		anim := jq("#animation")
-		anim.SetCss("color", "rgb(255,255,255)")
-		anim.Show()
-		for i := 0.0; ; i += 0.15 {
-			select {
-			case <-done:
-				anim.Hide()
-				return
-			case <-time.After(time.Duration(33) * time.Millisecond):
-				anim.SetCss("color", fmt.Sprintf("rgb(%d,%[1]d,%[1]d)", int((math.Cos(i)*0.4+(1-0.4))*255.0)))
-			}
-		}
-	}(done)
+	done := startPulseAnimation("#animation")
 	jquery.Post("/render", string(j), func(data, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Render wasn't success:", status, data, xhr)
 		}
-		// Not allowed to block in callback
-		go func() { done <- true }()
+		stopPulseAnimation(done)
 		jq("#options input").SetProp("disabled", false)
 		setImage(data)
 	})
@@ -261,6 +246,8 @@ func refreshHistory() {
 			return
 		}
 		var done chan bool
+		// TODO: history doesn't seem right sometimes
+		console.Call("log", history)
 		go populateHistory(history, done)
 		go func() {
 			<-done
@@ -290,25 +277,22 @@ func populateHistory(history [][2]string, done chan<- bool) {
 	list := jq("#history-list")
 	list.Empty()
 	for i := len(imgList) - 1; i >= 0; i-- {
+		i := i
 		img := imgList[i]
 		item := jq("<div>").AddClass("history-item")
 		text := strconv.Itoa(i)
 		label := jq("<label>").SetText(text)
 		item.Append(label)
 		item.Append(img)
-		item.On(jquery.CLICK, getOnHistoryItemSelect(item, history[i][0], history[i][1]))
+		item.On(jquery.CLICK, func() {
+			jq(".history-item").RemoveClass("history-selected")
+			item.AddClass("history-selected")
+			setImage(history[i][0])
+			setOptions(history[i][1])
+		})
 		list.Append(item)
 	}
 	done <- true
-}
-
-func getOnHistoryItemSelect(item jquery.JQuery, img, scene string) func() {
-	return func() {
-		jq(".history-item").RemoveClass("history-selected")
-		item.AddClass("history-selected")
-		setImage(img)
-		setOptions(scene)
-	}
 }
 
 func setOptions(scene string) {
@@ -325,4 +309,26 @@ func setOptions(scene string) {
 		}
 		initOptions()
 	}, "text")
+}
+
+func startPulseAnimation(selector string) (done chan bool) {
+	go func() {
+		anim := jq(selector)
+		anim.SetCss("color", "rgb(255,255,255)")
+		anim.Show()
+		for i := 0.0; ; i += 0.15 {
+			select {
+			case <-done:
+				anim.Hide()
+				return
+			case <-time.After(time.Duration(33) * time.Millisecond):
+				anim.SetCss("color", fmt.Sprintf("rgb(%d,%[1]d,%[1]d)", int((math.Cos(i)*0.4+(1-0.4))*255.0)))
+			}
+		}
+	}()
+	return
+}
+
+func stopPulseAnimation(done chan<- bool) {
+	go func() { done <- true }()
 }
