@@ -332,7 +332,7 @@ func setOptions(scene string) {
 
 		e := json.Unmarshal([]byte(data.String()), &options)
 		if e != nil {
-			// TODO: Show message in options window that scene may have old version
+			jq("#options").SetText("Error parsing scene file. It may have been created with an older version and can no longer be used.")
 			console.Call("error", "Unmarshaling options:", data.String(), e.Error())
 			return
 		}
