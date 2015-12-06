@@ -8,6 +8,7 @@
 <script src="/js/script{{if not debug}}.min{{end}}.js"></script>
 <script src="/js/jquery.imagedrag{{if not debug}}.min{{end}}.js"></script>
 <body onload="onBodyLoad()">
+  <div id="initial" style="display:none">{{.InitialItem}}</div>
   <div id="controls">
     <div class="btn-group">
       <a id="save" class="btn">Save Scene</a>
@@ -67,10 +68,10 @@
 </div>
 <div id="img-browser">
   {{range .Items}}
-  <div class="item">
+  <a class="item" href="/?initial={{.Scene}}">
     <label>{{formatTime .Date}}</label>
      <img src="{{.Thumb}}"/>
-  </div>
+  </a>
   {{end}}
 </div>
 </body>

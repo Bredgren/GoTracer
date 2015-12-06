@@ -33,7 +33,10 @@ func main() {
 func onBodyLoad() {
 	initGlobalCallbacks()
 	options = trace.NewOptions()
-	initOptions()
+	if !handleInitialItem() {
+		// setOptions may have already called this in handleInitialItem
+		initOptions()
+	}
 
 	zoom := jq("#zoom")
 	zoom.SetAttr("value", 1.0)
@@ -42,6 +45,25 @@ func onBodyLoad() {
 	zoom.SetAttr("step", 0.1)
 
 	refreshHistory()
+}
+
+func handleInitialItem() bool {
+	initItemJ := jq("#initial").Text()
+	var initItem lib.RenderItem
+	e := json.Unmarshal([]byte(initItemJ), &initItem)
+	if e != nil {
+		console.Call("log", "Can't unmarshal initial item", e.Error())
+		return false
+	}
+
+	if initItem.Render == "" {
+		// Initial item unspecified
+		return false
+	}
+
+	setOptions(initItem.Scene)
+	setImage(initItem.Render)
+	return true
 }
 
 func initGlobalCallbacks() {

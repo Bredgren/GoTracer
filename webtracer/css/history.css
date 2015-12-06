@@ -55,6 +55,8 @@ form {
     padding: 8px;
     border-top: 1px solid grey;
     border-radius: 15px;
+    color: white;
+    text-decoration: none;
     cursor: pointer;
 }
 

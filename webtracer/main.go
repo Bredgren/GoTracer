@@ -77,7 +77,7 @@ func setup() {
 
 func httpHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("host:", r.Host) // TODO: restrict host?
-	if r.RequestURI != "/" {
+	if r.RequestURI != "/" && !strings.Contains(r.RequestURI, "?") {
 		log.Println("serve file", r.RequestURI)
 		http.ServeFile(w, r, "./"+r.RequestURI)
 		return
@@ -90,14 +90,48 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	e := templ.ExecuteTemplate(w, "Main", &renderPage{})
+	initItem := &lib.RenderItem{}
+
+	initScene := r.FormValue("initial")
+	if initScene != "" {
+		allHistory, e := getAllHistory()
+		if e != nil {
+			msg := fmt.Sprintf("Error getting all history: %v", e)
+			log.Println(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		found := false
+		for _, h := range allHistory {
+			if h.Scene == initScene {
+				initItem = h
+				found = true
+				break
+			}
+		}
+		if !found {
+			http.Error(w, fmt.Sprintf("Scene not found: %v", initScene), http.StatusNotFound)
+			return
+		}
+	}
+
+	initItemJ, e := json.Marshal(initItem)
+	if e != nil {
+		msg := fmt.Sprintf("Error marshalling initial item: %v", e)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+	e = templ.ExecuteTemplate(w, "Main", &renderPage{
+		InitialItem: string(initItemJ),
+	})
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 	}
 }
 
 type renderPage struct {
-	// Nothing here for now...
+	InitialItem string
 }
 
 type handler struct {
