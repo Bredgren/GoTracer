@@ -28,7 +28,7 @@ body {
 }
 
 #history {
-    width: 150px;
+    width: 170px;
     position: fixed;
     right: 0;
     padding: 10px;
@@ -65,20 +65,21 @@ body {
 }
 
 #history-list > .history-item {
-    width: 80%;
-    margin: 4px auto 4px auto;
-    padding: 10px;
-    border-top: 1px solid white;
-    border-radius: 10px;
+    margin: 5px;
+    display: inline-block;
+    text-align: center;
+    padding: 8px;
+    border-top: 1px solid grey;
+    border-radius: 15px;
     cursor: pointer;
 }
 
 .history-item > img {
-    width: 100%;
 }
 
 #history-list > .history-item:hover {
     border: 2px solid rgba(255, 255, 255, 0.5);
+    margin: 3.5px;
 }
 
 #history-list > .history-selected {
