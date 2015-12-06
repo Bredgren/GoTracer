@@ -35,8 +35,6 @@ func onBodyLoad() {
 	options = trace.NewOptions()
 	initOptions()
 
-	triggerRender("jpg")
-
 	zoom := jq("#zoom")
 	zoom.SetAttr("value", 1.0)
 	zoom.SetAttr("min", 0.1)
@@ -59,10 +57,8 @@ func initGlobalCallbacks() {
 }
 
 func setImage(path string) {
-	console.Call("log", "set image", path)
 	img := js.Global.Get("Image").New()
 	img.Set("onload", func() {
-		console.Call("log", "image loaded", path)
 		imgCon := jq(".image-container")
 		imgCon.Empty()
 		imgCon.Append(img)
@@ -101,6 +97,7 @@ func initOptions() {
 	opts.Append(o)
 
 	addOptionSlides(o)
+	jq("#fast-render").Call(jquery.CHANGE, checkFastRender)
 	checkFastRender()
 }
 
@@ -247,7 +244,6 @@ func triggerRender(format string) {
 }
 
 func refreshHistory() {
-	console.Call("log", "get history")
 	jquery.Get("/history?_=recent", "", func(data, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Failed to retrieve history:", status, data, xhr)
@@ -258,17 +254,15 @@ func refreshHistory() {
 			console.Call("error", "Unmarshaling history:", e.Error())
 			return
 		}
-		var done chan bool
+		done := make(chan bool)
 		go populateHistory(history, done)
 		go func() {
 			<-done
-			console.Call("log", "done populating history")
 		}()
 	})
 }
 
 func populateHistory(history []*lib.RenderItem, done chan<- bool) {
-	console.Call("log", "populate history")
 	imgList := make([]*js.Object, len(history))
 	var wg sync.WaitGroup
 	for i, item := range history {
@@ -308,7 +302,6 @@ func populateHistory(history []*lib.RenderItem, done chan<- bool) {
 }
 
 func setOptions(scene string) {
-	console.Call("log", "get scene", scene)
 	jquery.Get(scene, "", func(data *js.Object, status, xhr string) {
 		if status != "success" {
 			console.Call("error", "Failed to retrieve scene:", status, data, xhr)
