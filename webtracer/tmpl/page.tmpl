@@ -1,7 +1,7 @@
 {{define "Main"}}
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <title>Web Tracer</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui.min.js"></script>
 <link href="/css/style{{if not debug}}.min{{end}}.css" rel="stylesheet" media="screen">
@@ -44,5 +44,34 @@
   <div id="animation" style="display:none">
     Rendering...
   </div>
+</body>
+{{end}}
+
+{{define "History"}}
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<title>Web Tracer History</title>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+<link href="/css/history{{if not debug}}.min{{end}}.css" rel="stylesheet" media="screen">
+<!-- <script src="/js/history{{if not debug}}.min{{end}}.js"></script> -->
+<body>
+<div id="header">
+  <a id="back-btn" href="/">⬅</a>
+  <form>
+    Date Range:
+    <input type="date" name="start" defaultValue={{.DefaultStartDate}} value={{.StartDate}}> -
+    <input type="date" name="end" defaultValue={{.DefaultEndDate}} value={{.EndDate}}>
+    <input type="submit" value="⟳">
+  </form>
+</div>
+<div id="img-browser">
+  {{range .Items}}
+  <div class="item">
+    <label>{{formatTime .Date}}</label>
+     <img src="{{.Thumb}}"/>
+  </div>
+  {{end}}
+</div>
 </body>
 {{end}}

@@ -302,6 +302,8 @@ func populateHistory(history []*lib.RenderItem, done chan<- bool) {
 		})
 		list.Append(item)
 	}
+	linkToAll := jq("<a>").SetAttr("href", "/history").SetText("All History")
+	list.Append(linkToAll)
 	done <- true
 }
 

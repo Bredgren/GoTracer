@@ -45,7 +45,7 @@ var (
 func init() {
 	flag.BoolVar(&debug, "D", false, "Debug mode. More logs, use unminified assets, etc.")
 	flag.IntVar(&port, "p", 8080, "Set http port")
-	flag.IntVar(&maxHistory, "history", 20, "Maximum render history to keep track of")
+	flag.IntVar(&maxHistory, "history", 10, "Maximum render history to keep track of")
 }
 
 func main() {
@@ -70,7 +70,8 @@ func setup() {
 	}
 
 	templ = template.Must(template.New("templ").Funcs(template.FuncMap{
-		"debug": func() bool { return debug },
+		"debug":      func() bool { return debug },
+		"formatTime": func(t time.Time) string { return t.Format(time.Stamp) },
 	}).ParseFiles("./tmpl/page.tmpl"))
 }
 
@@ -89,17 +90,13 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	renderTmpl(w, &page{})
-}
-
-func renderTmpl(w http.ResponseWriter, p *page) {
-	e := templ.ExecuteTemplate(w, "Main", p)
+	e := templ.ExecuteTemplate(w, "Main", &renderPage{})
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusInternalServerError)
 	}
 }
 
-type page struct {
+type renderPage struct {
 	// Nothing here for now...
 }
 
@@ -189,6 +186,74 @@ func (h *handler) historyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	start, end := r.FormValue("start"), r.FormValue("end")
+
+	allHistory, e := getAllHistory()
+	if e != nil {
+		msg := fmt.Sprintf("Error getting all history: %v", e)
+		log.Println(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	// Remember that the oldest item is last
+	defaultStartDate := allHistory[len(allHistory)-1].Date
+	defaultEndDate := allHistory[0].Date
+
+	// Use default if unspecified
+	if start == "" {
+		start = defaultStartDate.Format("2006-01-02")
+	}
+	if end == "" {
+		end = defaultEndDate.Format("2006-01-02")
+	}
+
+	// Parse dates, if malformed then use default
+	startDate, e := time.ParseInLocation("2006-01-02", start, time.Local)
+	if e != nil {
+		log.Printf("Error parsing start time: %v: %v", start, e)
+		startDate = defaultStartDate
+	}
+	endDate, e := time.ParseInLocation("2006-01-02", end, time.Local)
+	if e != nil {
+		log.Printf("Error parsing end time: %v: %v\n", end, e)
+		endDate = defaultEndDate
+	}
+
+	e = templ.ExecuteTemplate(w, "History", &historyPage{
+		DefaultStartDate: defaultStartDate.Format("2006-01-02"),
+		DefaultEndDate:   defaultEndDate.Format("2006-01-02"),
+		StartDate:        start,
+		EndDate:          end,
+		Items:            historyRange(allHistory, startDate, endDate),
+	})
+	if e != nil {
+		http.Error(w, e.Error(), http.StatusInternalServerError)
+	}
+}
+
+type historyPage struct {
+	DefaultStartDate, DefaultEndDate string
+	StartDate, EndDate               string
+	Items                            []*lib.RenderItem
+}
+
+func historyRange(history []*lib.RenderItem, start, end time.Time) []*lib.RenderItem {
+	if end.Before(start) {
+		end = start
+	}
+
+	// Add 1 day to include the end day
+	end = end.Add(time.Duration(24) * time.Hour)
+	firstIndex := sort.Search(len(history), func(i int) bool {
+		return !end.Before(history[i].Date)
+	})
+
+	lastIndex := sort.Search(len(history), func(i int) bool {
+		return !start.Before(history[i].Date)
+	})
+
+	return history[firstIndex:lastIndex]
 }
 
 func runRaytrace(imgName, scene string) error {

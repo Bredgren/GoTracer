@@ -61,6 +61,7 @@ body {
 #history-list {
     display: none;
     padding: 4px;
+    text-align: center;
 }
 
 #history-list > .history-item {
@@ -70,7 +71,6 @@ body {
     border-top: 1px solid white;
     border-radius: 10px;
     cursor: pointer;
-    text-align: center;
 }
 
 .history-item > img {
@@ -83,6 +83,10 @@ body {
 
 #history-list > .history-selected {
     background-color: rgba(255, 255, 255, 0.3);
+}
+
+#history-list > a {
+    color: white;
 }
 
 .btn-group {
