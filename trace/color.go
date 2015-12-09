@@ -2,7 +2,6 @@ package trace
 
 import (
 	"image/color"
-	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
 )
@@ -29,9 +28,9 @@ func (c Color64) B() float64 {
 // 0.0 and 1.0 and treated as a percent of 255.
 func (c Color64) NRGBA() color.NRGBA {
 	return color.NRGBA{
-		uint8(math.Min(1, math.Max(0, c.R())) * 255),
-		uint8(math.Min(1, math.Max(0, c.G())) * 255),
-		uint8(math.Min(1, math.Max(0, c.B())) * 255),
+		uint8(mgl64.Clamp(c.R(), 0, 1) * 255),
+		uint8(mgl64.Clamp(c.G(), 0, 1) * 255),
+		uint8(mgl64.Clamp(c.B(), 0, 1) * 255),
 		255,
 	}
 }

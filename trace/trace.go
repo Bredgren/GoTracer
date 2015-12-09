@@ -5,8 +5,8 @@ import (
 	"sync"
 )
 
-// Trace renders an image according to the given options. Renders the image in chuncks of the given
-// size in parallel.
+// Trace renders an image according to the given options. It renders the image in chuncks
+// of the given size in parallel.
 func Trace(options *Options, gridSize int) *image.NRGBA {
 	scene := NewScene(options)
 

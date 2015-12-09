@@ -35,3 +35,8 @@ type Ray struct {
 	Origin mgl64.Vec3
 	Dir    mgl64.Vec3
 }
+
+// At returns the point marked by the ray at t.
+func (r *Ray) At(t float64) mgl64.Vec3 {
+	return r.Origin.Add(r.Dir.Mul(t))
+}

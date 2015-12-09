@@ -28,7 +28,7 @@ type cameraOpts struct {
 	Position vectorOpts `title:"Camera position" json:"position"`
 	LookAt   vectorOpts `title:"The point that the camera is looking at" json:"look_at"`
 	UpDir    vectorOpts `title:"The up direction" json:"up_dir"`
-	Fov      float64    `title:"Field of view in degrees" min:"0.0" max:"360.0" json:"fov"`
+	Fov      float64    `title:"Field of view in degrees" min:"0.1" max:"360.0" json:"fov"`
 	Dof      dofOpts    `title:"Depth of field" json:"dof"`
 }
 
