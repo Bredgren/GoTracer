@@ -79,7 +79,6 @@ func fovMinMax(opts *cameraOpts) (min, max float64) {
 // RayThrough takes normalized window coordinates and returns the ray that goes
 // through that point starting from the camera.
 func (c *Camera) RayThrough(nx, ny float64, r *ray.Ray) {
-	r.Type = ray.Camera
 	r.Origin = c.Position
 	r.Dir = c.ViewDir.Add(c.u.Mul(nx - 0.5)).Add(c.v.Mul(ny - 0.5))
 }
@@ -87,7 +86,7 @@ func (c *Camera) RayThrough(nx, ny float64, r *ray.Ray) {
 // DofRayThrough takes a center ray (which is not midified) and modifies r to be a randomized
 // ray, according do depth of field settings, whose origin is slightly off the center but
 func (c *Camera) DofRayThrough(center, r *ray.Ray) {
-	focalPoint := r.At(c.FocalDistance)
+	focalPoint := center.At(c.FocalDistance)
 
 	offsetU := c.u.Mul(rand.Float64()*c.ApertureRadius*2 - c.ApertureRadius)
 	offsetV := c.v.Mul(rand.Float64()*c.ApertureRadius*2 - c.ApertureRadius)

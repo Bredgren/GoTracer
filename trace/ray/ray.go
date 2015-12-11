@@ -29,9 +29,11 @@ const (
 	NumTypes
 )
 
+// Counts holds counts of each ray type
+type Counts [NumTypes]int
+
 // Ray is a 3D ray with an origin and a direction.
 type Ray struct {
-	Type   Type
 	Origin mgl64.Vec3
 	Dir    mgl64.Vec3
 }

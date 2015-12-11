@@ -36,7 +36,8 @@ type dofOpts struct {
 	Enabled           bool    `title:"Enable depth of field. Enabling DOF will increase rendering time." class:"fast-render" json:"enabled"`
 	FocalDistance     float64 `title:"Distance from the camera of the focal point" min:"0.01" max:"999.9" json:"focal_distance"`
 	ApertureRadius    float64 `title:"Radius of the aperture" min:"0.00001" max:"999.9" json:"aperture_radius"`
-	AdaptiveThreshold float64 `title:"Rays will continue to be created for each pixel until the contribution to the overall color is less than this. Smaller values increase quality and rendering time." min:"0.00001" step:"0.01" json:"adaptive_threshold"`
+	MaxRays           int     `title:"Maximum DOF rays to cast per pixel" min:"1" json:"max_rays"`
+	AdaptiveThreshold float64 `title:"Rays will continue to be cast for each pixel until the contribution to the overall color is less than this, or until MaxRays is reached, whichever is first. Smaller values increase quality and rendering time." min:"0.00001" step:"0.01" json:"adaptive_threshold"`
 }
 
 type backgroundOpts struct {
@@ -156,6 +157,7 @@ func NewOptions() *Options {
 				Enabled:           false,
 				FocalDistance:     5.0,
 				ApertureRadius:    0.001,
+				MaxRays:           1,
 				AdaptiveThreshold: 0.1,
 			},
 		},

@@ -5,7 +5,6 @@ import (
 	"math/rand"
 
 	"github.com/Bredgren/gotracer/trace/ray"
-	"github.com/go-gl/mathgl/mgl64"
 )
 
 // Scene represents the scene and all data needed to render it.
@@ -21,7 +20,9 @@ func (s *Scene) ColorAt(x, y int) color.NRGBA {
 	centerX := float64(x) * pixelW
 	centerY := float64(y) * pixelH
 	// TODO: handle debug rendering
-	return s.colorAtSub(centerX, centerY, pixelW, pixelH, 0).Color.NRGBA()
+	var rayCounts ray.Counts
+	c := s.colorAtSub(centerX, centerY, pixelW, pixelH, 0, &rayCounts)
+	return c.NRGBA()
 }
 
 // Result contains the results of tracing a ray into a scene. It includes the color and the number
@@ -31,54 +32,67 @@ type Result struct {
 	RayCount [ray.NumTypes]int
 }
 
-func (s *Scene) colorAtSub(centerX, centerY, width, height float64, depth int) *Result {
+func (s *Scene) colorAtSub(centerX, centerY, width, height float64, depth int, rayCounts *ray.Counts) Color64 {
 	if depth >= s.AntiAlias.MaxDivisions || s.Global.FastRender {
-		r := s.TraceDof(centerX, centerY)
-		r.RayCount[ray.Camera]++
-		return r
+		return s.TraceDof(centerX, centerY, rayCounts)
 	}
 	x1 := centerX - 0.25*width
 	x2 := centerX + 0.25*width
 	y1 := centerY - 0.25*height
 	y2 := centerY + 0.25*height
-	r1 := s.TraceDof(x1, y1)
-	r2 := s.TraceDof(x1, y2)
-	r3 := s.TraceDof(x2, y1)
-	r4 := s.TraceDof(x2, y2)
+	c1 := s.TraceDof(x1, y1, rayCounts)
+	c2 := s.TraceDof(x1, y2, rayCounts)
+	c3 := s.TraceDof(x2, y1, rayCounts)
+	c4 := s.TraceDof(x2, y2, rayCounts)
 	thresh := s.AntiAlias.Threshold
-	if ColorsDifferent(r1.Color, r2.Color, thresh) || ColorsDifferent(r1.Color, r3.Color, thresh) ||
-		ColorsDifferent(r1.Color, r4.Color, thresh) || ColorsDifferent(r2.Color, r3.Color, thresh) ||
-		ColorsDifferent(r2.Color, r4.Color, thresh) || ColorsDifferent(r3.Color, r4.Color, thresh) {
+	if ColorsDifferent(c1, c2, thresh) || ColorsDifferent(c1, c3, thresh) ||
+		ColorsDifferent(c1, c4, thresh) || ColorsDifferent(c2, c3, thresh) ||
+		ColorsDifferent(c2, c4, thresh) || ColorsDifferent(c3, c4, thresh) {
 		d := depth + 1
-		r1 = s.colorAtSub(x1, y1, width/2, height/2, d)
-		r2 = s.colorAtSub(x1, y2, width/2, height/2, d)
-		r3 = s.colorAtSub(x2, y1, width/2, height/2, d)
-		r4 = s.colorAtSub(x2, y2, width/2, height/2, d)
+		c1 = s.colorAtSub(x1, y1, width/2, height/2, d, rayCounts)
+		c2 = s.colorAtSub(x1, y2, width/2, height/2, d, rayCounts)
+		c3 = s.colorAtSub(x2, y1, width/2, height/2, d, rayCounts)
+		c4 = s.colorAtSub(x2, y2, width/2, height/2, d, rayCounts)
 	}
-	// Average the 4 subpixels, reuse r1
-	r1.Color = Color64(mgl64.Vec3(r1.Color).Add(mgl64.Vec3(r2.Color)).Add(mgl64.Vec3(r3.Color)).Add(mgl64.Vec3(r4.Color)).Mul(0.25))
-	r1.RayCount[ray.Camera] += r2.RayCount[ray.Camera] + r3.RayCount[ray.Camera] + r4.RayCount[ray.Camera]
-	return r1
+	// Average the 4 subpixels
+	return c1.Add(c2).Add(c3).Add(c4).Mul(0.25)
 }
 
 // TraceDof handles depth of field logic if the camera is configured to use it, otherwise
 // it traces a normal ray though the camera and the given normalized window coordinates.
-func (s *Scene) TraceDof(nx, ny float64) *Result {
-	var r ray.Ray
+func (s *Scene) TraceDof(nx, ny float64, rayCounts *ray.Counts) Color64 {
+	// Initial center ray is always cast
+	var centerRay ray.Ray
+	s.Camera.RayThrough(nx, ny, &centerRay)
+	rayCounts[ray.Camera]++
+	color := s.TraceRay(&centerRay, 0, 1.0, rayCounts)
 	if !s.Camera.UseDof || s.Global.FastRender {
-		s.Camera.RayThrough(nx, ny, &r)
-		return s.TraceRay(&r, 0, 1.0)
+		return color
 	}
-	// TODO handle DOF case
-	s.Camera.RayThrough(nx, ny, &r)
-	return s.TraceRay(&r, 0, 1.0)
+
+	// Always using at least one DOF ray
+	var dofRay ray.Ray
+	s.Camera.DofRayThrough(&centerRay, &dofRay)
+	rayCounts[ray.Camera]++
+	c := s.TraceRay(&dofRay, 0, 1.0, rayCounts)
+	numRays := 2
+	color = color.Add(c).Mul(1 / float64(numRays))
+
+	maxRays := s.Options.Camera.Dof.MaxRays
+	thresh := s.Options.Camera.Dof.AdaptiveThreshold
+	for numRays < maxRays && ColorsDifferent(color, c, thresh) {
+		rayCounts[ray.Camera]++
+		c = s.TraceRay(&dofRay, 0, 1.0, rayCounts)
+		numRays++
+		// Rolling average
+		color = color.Mul(float64(numRays) - 1).Add(c).Mul(1 / float64(numRays))
+	}
+	return color
 }
 
 // TraceRay sends a ray into the scene and returns the color it finds.
-func (s *Scene) TraceRay(ray *ray.Ray, depth int, contribution float64) *Result {
-	return &Result{
-		Color: Color64{rand.Float64(), rand.Float64(), rand.Float64()},
-	}
+func (s *Scene) TraceRay(ray *ray.Ray, depth int, contribution float64, rayCounts *ray.Counts) Color64 {
+	return Color64{rand.Float64(), rand.Float64(), rand.Float64()}
 }
 
 // NewScene creates and returns a new Scene from the given options.

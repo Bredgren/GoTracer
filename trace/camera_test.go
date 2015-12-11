@@ -164,14 +164,15 @@ func TestDofRayThrough(t *testing.T) {
 		},
 	}
 
+	var center ray.Ray
 	var got ray.Ray
 	for i, c := range cases {
 		camera := NewCamera(&c.opts, c.aspect)
-		camera.RayThrough(c.nx, c.ny, &got)
-		focalPoint := got.At(camera.FocalDistance)
+		camera.RayThrough(c.nx, c.ny, &center)
+		focalPoint := center.At(camera.FocalDistance)
 		for attempt := 0; attempt < c.attempts; attempt++ {
-			camera.DofRayThrough(c.nx, c.ny, &got)
-			// Must check X and Y not actual radius since for simplicity the implementation chooses within a square
+			camera.DofRayThrough(&center, &got)
+			// Must check X and Y not actual radius since, for simplicity, the implementation chooses within a square
 			originDist := got.Origin.Sub(c.want.Origin)
 			if originDist.X() > camera.ApertureRadius {
 				t.Errorf("DofRayThrough: case %d: Origin X distance: got=%#v want=%#v dist=%#v", i, got.Origin, c.want.Origin, originDist.X())
@@ -200,14 +201,12 @@ func BenchmarkDofRayThrough(b *testing.B) {
 		},
 	}, 1.0)
 
-	cases := make([][2]float64, b.N)
-	for i := 0; i < b.N; i++ {
-		cases[i] = [2]float64{rand.Float64(), rand.Float64()}
-	}
+	var center ray.Ray
+	var r ray.Ray
+	camera.RayThrough(rand.Float64(), rand.Float64(), &center)
 
 	b.ResetTimer()
-	var r ray.Ray
 	for i := 0; i < b.N; i++ {
-		camera.DofRayThrough(cases[i][0], cases[i][1], &r)
+		camera.DofRayThrough(&center, &r)
 	}
 }

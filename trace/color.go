@@ -35,6 +35,16 @@ func (c Color64) NRGBA() color.NRGBA {
 	}
 }
 
+// Add does a component-wise addition.
+func (c Color64) Add(other Color64) Color64 {
+	return Color64{c[0] + other[0], c[1] + other[1], c[2] + other[2]}
+}
+
+// Mul multiplies each component by val.
+func (c Color64) Mul(val float64) Color64 {
+	return Color64{c[0] * val, c[1] * val, c[2] * val}
+}
+
 // ColorsDifferent returns true if the distance between the given colors is greater than thresh.
 func ColorsDifferent(c1, c2 Color64, thresh float64) bool {
 	return mgl64.Vec3(c1).Sub(mgl64.Vec3(c2)).Len() > thresh
