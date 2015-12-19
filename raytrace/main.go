@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 
 	"github.com/Bredgren/gotracer/trace"
+	"github.com/Bredgren/gotracer/trace/options"
 )
 
 const (
@@ -90,7 +91,7 @@ func main() {
 	}
 
 	// Read and decode options
-	var options trace.Options
+	var options options.Options
 	jsonOpts, e := ioutil.ReadAll(inReader)
 	if e != nil {
 		log.Fatalf("reading options: %v\n", e)

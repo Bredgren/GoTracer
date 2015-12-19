@@ -4,13 +4,18 @@ import (
 	"image/color"
 	"math/rand"
 
+	"github.com/Bredgren/gotracer/trace/bvh"
+	"github.com/Bredgren/gotracer/trace/options"
 	"github.com/Bredgren/gotracer/trace/ray"
 )
 
 // Scene represents the scene and all data needed to render it.
 type Scene struct {
-	*Options
-	Camera *Camera
+	*options.Options
+	Camera  *Camera
+	BgColor Color64
+
+	bvh *bvh.Node
 }
 
 // ColorAt returns the color of the pixel at (x, y).
@@ -23,6 +28,17 @@ func (s *Scene) ColorAt(x, y int) color.NRGBA {
 	var rayCounts ray.Counts
 	c := s.colorAtSub(centerX, centerY, pixelW, pixelH, 0, &rayCounts)
 	return c.NRGBA()
+}
+
+// NewScene creates and returns a new Scene from the given options.
+func NewScene(options *options.Options) *Scene {
+	var objects []bvh.Intersector
+	return &Scene{
+		Options: options,
+		Camera:  NewCamera(&options.Camera, float64(options.Resolution.W)/float64(options.Resolution.H)),
+		BgColor: Color64{options.Background.Color.R, options.Background.Color.G, options.Background.Color.B},
+		bvh:     bvh.NewTree(objects),
+	}
 }
 
 // Result contains the results of tracing a ray into a scene. It includes the color and the number
@@ -91,14 +107,16 @@ func (s *Scene) TraceDof(nx, ny float64, rayCounts *ray.Counts) Color64 {
 }
 
 // TraceRay sends a ray into the scene and returns the color it finds.
-func (s *Scene) TraceRay(ray *ray.Ray, depth int, contribution float64, rayCounts *ray.Counts) Color64 {
+func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts *ray.Counts) Color64 {
+	isect := bvh.IntersectResult{}
+	s.bvh.Intersect(r, &isect)
+	if isect.Object == nil {
+		return s.BackgroundColor(r)
+	}
 	return Color64{rand.Float64(), rand.Float64(), rand.Float64()}
 }
 
-// NewScene creates and returns a new Scene from the given options.
-func NewScene(options *Options) *Scene {
-	return &Scene{
-		Options: options,
-		Camera:  NewCamera(&options.Camera, float64(options.Resolution.W)/float64(options.Resolution.H)),
-	}
+// BackgroundColor returns the color a ray returns when it hits no objects.
+func (s *Scene) BackgroundColor(r *ray.Ray) Color64 {
+	return s.BgColor
 }

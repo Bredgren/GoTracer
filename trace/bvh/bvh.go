@@ -25,10 +25,18 @@ type Intersector interface {
 	AABB() *AABB
 }
 
+// IntersectFn implements intersection with a ray.
+type IntersectFn func(*ray.Ray, *IntersectResult)
+
+// AABBFn returns an AABB.
+type AABBFn func() *AABB
+
 // IntersectResult holds the results of an intersection.
 type IntersectResult struct {
 	Object Intersector
-	T      int
+	T      float64
+	Normal mgl64.Vec3
+	UV     mgl64.Vec2
 }
 
 // AABB is an axis-aligned bounding box.

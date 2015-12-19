@@ -3,7 +3,8 @@ package ray
 import "github.com/go-gl/mathgl/mgl64"
 
 const (
-	ε = 0.00001
+	// Epsilon is the smallest number not considered 0.
+	Epsilon = 0.00001
 )
 
 // Type identifies the type of ray.

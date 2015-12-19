@@ -3,11 +3,13 @@ package trace
 import (
 	"image"
 	"sync"
+
+	"github.com/Bredgren/gotracer/trace/options"
 )
 
 // Trace renders an image according to the given options. It renders the image in chuncks
 // of the given size in parallel.
-func Trace(options *Options, gridSize int) *image.NRGBA {
+func Trace(options *options.Options, gridSize int) *image.NRGBA {
 	scene := NewScene(options)
 
 	imgW := options.Resolution.W

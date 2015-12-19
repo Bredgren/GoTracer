@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/Bredgren/gotracer/trace/options"
 	"github.com/Bredgren/gotracer/trace/ray"
 	"github.com/Bredgren/gotracer/trace/vec"
 	"github.com/go-gl/mathgl/mgl64"
@@ -26,7 +27,7 @@ type Camera struct {
 }
 
 // NewCamera initializes a Camera based on the options and returns it.
-func NewCamera(opts *cameraOpts, aspectRatio float64) *Camera {
+func NewCamera(opts *options.Camera, aspectRatio float64) *Camera {
 	fovMin, fovMax := fovMinMax(opts)
 	fov := mgl64.Clamp(opts.Fov, fovMin, fovMax) * math.Pi / 180
 
@@ -57,7 +58,7 @@ func NewCamera(opts *cameraOpts, aspectRatio float64) *Camera {
 }
 
 // Gets min and max for FOV from struct field.
-func fovMinMax(opts *cameraOpts) (min, max float64) {
+func fovMinMax(opts *options.Camera) (min, max float64) {
 	t := reflect.TypeOf(*opts)
 	fovF, ok := t.FieldByName("Fov")
 	if !ok {
