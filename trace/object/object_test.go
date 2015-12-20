@@ -10,19 +10,21 @@ import (
 )
 
 func TestPlane(t *testing.T) {
-	o := Object{}
-	f, _ := plane(&o, mgl64.Ident4())
+	o := Object{Transform: mgl64.Ident4(), InvTransform: mgl64.Ident4().Inv()}
+	f, _ := plane(&o)
 	res := bvh.IntersectResult{}
 
 	cases := []struct {
 		r  ray.Ray
 		o  *Object
 		uv mgl64.Vec2
+		t  float64
 	}{
 		{
 			r:  ray.Ray{Origin: mgl64.Vec3{0, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}},
 			o:  &o,
 			uv: mgl64.Vec2{0.5, 0.5},
+			t:  5.0,
 		},
 		{
 			r: ray.Ray{Origin: mgl64.Vec3{1, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}},
@@ -31,6 +33,7 @@ func TestPlane(t *testing.T) {
 			r:  ray.Ray{Origin: mgl64.Vec3{0, 0, -5}, Dir: mgl64.Vec3{0, 0, 1}},
 			o:  &o,
 			uv: mgl64.Vec2{0.5, 0.5},
+			t:  5.0,
 		},
 		{
 			r: ray.Ray{Origin: mgl64.Vec3{1, 0, 0}, Dir: mgl64.Vec3{-1, 0, 0}},
@@ -45,12 +48,15 @@ func TestPlane(t *testing.T) {
 		if c.o != nil && res.UV != c.uv {
 			t.Errorf("Ray: %#v: expected uv=%#v got %#v", c.r, c.uv, res.UV)
 		}
+		if c.o != nil && res.T != c.t {
+			t.Errorf("Ray: %#v: expected t=%#v got %#v", c.r, c.t, res.T)
+		}
 	}
 }
 
 func BenchmarkPlane(b *testing.B) {
-	o := Object{}
-	f, _ := plane(&o, mgl64.Ident4())
+	o := Object{Transform: mgl64.Ident4(), InvTransform: mgl64.Ident4().Inv()}
+	f, _ := plane(&o)
 	res := bvh.IntersectResult{}
 	r := ray.Ray{Origin: mgl64.Vec3{0, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}}
 	for i := 0; i <= b.N; i++ {
@@ -59,19 +65,21 @@ func BenchmarkPlane(b *testing.B) {
 }
 
 func TestCube(t *testing.T) {
-	o := Object{}
-	f, _ := cube(&o, mgl64.Ident4())
+	o := Object{Transform: mgl64.Ident4(), InvTransform: mgl64.Ident4().Inv()}
+	f, _ := cube(&o)
 	res := bvh.IntersectResult{}
 
 	cases := []struct {
 		r  ray.Ray
 		o  *Object
 		uv mgl64.Vec2
+		t  float64
 	}{
 		{
 			r:  ray.Ray{Origin: mgl64.Vec3{0, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}},
 			o:  &o,
 			uv: mgl64.Vec2{0.5, 0.5},
+			t:  4.5,
 		},
 		{
 			r: ray.Ray{Origin: mgl64.Vec3{1, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}},
@@ -80,6 +88,7 @@ func TestCube(t *testing.T) {
 			r:  ray.Ray{Origin: mgl64.Vec3{5, 0, 0}, Dir: mgl64.Vec3{-1, 0, 0}},
 			o:  &o,
 			uv: mgl64.Vec2{0.5, 0.5},
+			t:  4.5,
 		},
 	}
 
@@ -91,12 +100,15 @@ func TestCube(t *testing.T) {
 		if c.o != nil && res.UV != c.uv {
 			t.Errorf("Ray: %#v: expected uv=%#v got %#v", c.r, c.uv, res.UV)
 		}
+		if c.o != nil && res.T != c.t {
+			t.Errorf("Ray: %#v: expected t=%#v got %#v", c.r, c.t, res.T)
+		}
 	}
 }
 
 func BenchmarkCube(b *testing.B) {
-	o := Object{}
-	f, _ := cube(&o, mgl64.Ident4())
+	o := Object{Transform: mgl64.Ident4(), InvTransform: mgl64.Ident4().Inv()}
+	f, _ := cube(&o)
 	res := bvh.IntersectResult{}
 	r := ray.Ray{Origin: mgl64.Vec3{0, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}}
 	for i := 0; i <= b.N; i++ {

@@ -2,9 +2,11 @@ package trace
 
 import (
 	"image/color"
-	"math/rand"
+	"log"
+	"math"
 
 	"github.com/Bredgren/gotracer/trace/bvh"
+	"github.com/Bredgren/gotracer/trace/object"
 	"github.com/Bredgren/gotracer/trace/options"
 	"github.com/Bredgren/gotracer/trace/ray"
 )
@@ -33,6 +35,15 @@ func (s *Scene) ColorAt(x, y int) color.NRGBA {
 // NewScene creates and returns a new Scene from the given options.
 func NewScene(options *options.Options) *Scene {
 	var objects []bvh.Intersector
+	for _, obj := range options.Objects {
+		objs, e := object.NewObjects(obj)
+		if e != nil {
+			log.Fatalf("raytracer: creating object '%s': %v", obj.Name, e)
+		}
+		for _, o := range objs {
+			objects = append(objects, o)
+		}
+	}
 	return &Scene{
 		Options: options,
 		Camera:  NewCamera(&options.Camera, float64(options.Resolution.W)/float64(options.Resolution.H)),
@@ -113,7 +124,8 @@ func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts 
 	if isect.Object == nil {
 		return s.BackgroundColor(r)
 	}
-	return Color64{rand.Float64(), rand.Float64(), rand.Float64()}
+	c := 1 - (math.Min(isect.T, 20.0)/20.0)*0.9
+	return Color64{c, c, c}
 }
 
 // BackgroundColor returns the color a ray returns when it hits no objects.

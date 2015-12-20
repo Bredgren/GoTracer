@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Bredgren/gohtmlctrl/htmlctrl"
-	"github.com/Bredgren/gotracer/trace"
+	"github.com/Bredgren/gotracer/trace/options"
 	"github.com/Bredgren/gotracer/webtracer/lib"
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/gopherjs/jquery"
@@ -18,7 +18,7 @@ import (
 
 var jq = jquery.NewJQuery
 var console = js.Global.Get("console")
-var options *trace.Options
+var allOptions *options.Options
 
 func main() {
 	js.Global.Set("onBodyLoad", onBodyLoad)
@@ -32,7 +32,7 @@ func main() {
 
 func onBodyLoad() {
 	initGlobalCallbacks()
-	options = trace.NewOptions()
+	allOptions = options.NewOptions()
 	if !handleInitialItem() {
 		// setOptions may have already called this in handleInitialItem
 		initOptions()
@@ -111,7 +111,7 @@ type optionItem struct {
 func initOptions() {
 	opts := jq("#options")
 	opts.Empty()
-	o, e := htmlctrl.Struct(options, "Options", "all-options", "")
+	o, e := htmlctrl.Struct(allOptions, "Options", "all-options", "")
 	if e != nil {
 		console.Call("error", e.Error())
 		return
@@ -174,7 +174,7 @@ func onToggleHistory() {
 }
 
 func onSave() {
-	j, e := json.Marshal(options)
+	j, e := json.Marshal(allOptions)
 	if e != nil {
 		console.Call("error", e.Error())
 		return
@@ -196,7 +196,7 @@ func onFileChange(event *js.Object) {
 	reader := js.Global.Get("FileReader").New()
 	reader.Set("onload", func(evt *js.Object) {
 		content := evt.Get("target").Get("result").String()
-		e := json.Unmarshal([]byte(content), options)
+		e := json.Unmarshal([]byte(content), allOptions)
 		if e != nil {
 			console.Call("error", e)
 			return
@@ -247,7 +247,7 @@ func onRender(format string) {
 }
 
 func triggerRender(format string) {
-	j, e := json.Marshal(options)
+	j, e := json.Marshal(allOptions)
 	if e != nil {
 		console.Call("error", e.Error())
 		return
@@ -330,7 +330,7 @@ func setOptions(scene string) {
 			return
 		}
 
-		e := json.Unmarshal([]byte(data.String()), &options)
+		e := json.Unmarshal([]byte(data.String()), &allOptions)
 		if e != nil {
 			jq("#options").SetText("Error parsing scene file. It may have been created with an older version and can no longer be used.")
 			console.Call("error", "Unmarshaling options:", data.String(), e.Error())

@@ -4,3 +4,7 @@ cpu.out
 gotracer.test.exe
 mem.out
 webtracer/img/*
+*.test
+*.map
+raytrace/main
+webtracer/main

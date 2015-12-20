@@ -237,8 +237,8 @@ func NewOptions() *Options {
 				Type: "Cube",
 				Transform: Transform{
 					Translate:   Vector{0, 1, 0},
-					RotateAxis:  Vector{0, 0, 0},
-					RotateAngle: 0,
+					RotateAxis:  Vector{0, 1, 0},
+					RotateAngle: 45,
 					Scale:       Vector{2, 2, 2},
 				},
 				Material: "white",

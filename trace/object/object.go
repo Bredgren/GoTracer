@@ -7,14 +7,21 @@ import (
 	"github.com/Bredgren/gotracer/trace/bvh"
 	"github.com/Bredgren/gotracer/trace/options"
 	"github.com/Bredgren/gotracer/trace/ray"
+	"github.com/Bredgren/gotracer/trace/vec"
 	"github.com/go-gl/mathgl/mgl64"
 )
 
-type objFn func(*Object, mgl64.Mat4) (bvh.IntersectFn, *bvh.AABB)
+type objFn func(*Object) (bvh.IntersectFn, *bvh.AABB)
 
 var objFnMap = map[string]objFn{
 	"Plane": plane,
 	"Cube":  cube,
+	// "Sphere": sphere,
+	// "Cylinder": cylinder,
+	// "Cone": cone,
+	// "Triangle": triangle,
+	// "Trimesh": trimesh,
+	// "CSG": csg,
 }
 
 // Object reprsents an object in the scene and can be intersected with rays.
@@ -28,15 +35,17 @@ type Object struct {
 
 // Intersect implements the bvh.Intersector interface.
 func (o *Object) Intersect(r *ray.Ray, res *bvh.IntersectResult) {
-	newDir := mgl64.TransformNormal(r.Origin, o.InvTransform)
+	newDir := mgl64.TransformNormal(r.Dir, o.InvTransform)
 	localRay := ray.Ray{
 		Origin: mgl64.TransformCoordinate(r.Origin, o.InvTransform),
 		Dir:    newDir.Normalize(),
 	}
 	o.IsectFn(&localRay, res)
 	if res.Object != nil {
-		res.T /= newDir.Len()
-		// TODO: transform Normal
+		if !mgl64.FloatEqual(newDir.Len(), 0) {
+			res.T /= newDir.Len()
+		}
+		res.Normal = mgl64.TransformNormal(res.Normal, o.Transform).Normalize()
 	}
 }
 
@@ -52,9 +61,21 @@ func NewObjects(opts *options.Object) ([]*Object, error) {
 
 func newObjects(opts *options.Object, transform mgl64.Mat4) ([]*Object, error) {
 	optsT := opts.Transform
-	transform = mgl64.Scale3D(optsT.Scale.X, optsT.Scale.Y, optsT.Scale.Z).Mul4(transform)
-	transform = mgl64.HomogRotate3D(optsT.RotateAngle, mgl64.Vec3{optsT.RotateAxis.X, optsT.RotateAxis.Y, optsT.RotateAxis.Z}).Mul4(transform)
-	transform = mgl64.Translate3D(optsT.Translate.X, optsT.Translate.Y, optsT.Translate.Z).Mul4(transform)
+	if mgl64.FloatEqual(optsT.Scale.X, 0) {
+		optsT.Scale.X = 1
+	}
+	if mgl64.FloatEqual(optsT.Scale.Y, 0) {
+		optsT.Scale.Y = 1
+	}
+	if mgl64.FloatEqual(optsT.Scale.Z, 0) {
+		optsT.Scale.Z = 1
+	}
+	// transform = mgl64.Translate3D(optsT.Translate.X, optsT.Translate.Y, optsT.Translate.Z).Mul4(transform)
+	// transform = mgl64.HomogRotate3D(optsT.RotateAngle*math.Pi/180, vec.Normalize(mgl64.Vec3{optsT.RotateAxis.X, optsT.RotateAxis.Y, optsT.RotateAxis.Z}, vec.Y)).Mul4(transform)
+	// transform = mgl64.Scale3D(optsT.Scale.X, optsT.Scale.Y, optsT.Scale.Z).Mul4(transform)
+	transform = transform.Mul4(mgl64.Translate3D(optsT.Translate.X, optsT.Translate.Y, optsT.Translate.Z))
+	transform = transform.Mul4(mgl64.HomogRotate3D(optsT.RotateAngle*math.Pi/180, vec.Normalize(mgl64.Vec3{optsT.RotateAxis.X, optsT.RotateAxis.Y, optsT.RotateAxis.Z}, vec.Y)))
+	transform = transform.Mul4(mgl64.Scale3D(optsT.Scale.X, optsT.Scale.Y, optsT.Scale.Z))
 
 	var objs []*Object
 	o := Object{}
@@ -62,7 +83,9 @@ func newObjects(opts *options.Object, transform mgl64.Mat4) ([]*Object, error) {
 	if !ok {
 		return nil, fmt.Errorf("unknown object type '%s'", opts.Type)
 	}
-	o.IsectFn, o.aabb = fn(&o, transform)
+	o.Transform = transform
+	o.InvTransform = transform.Inv()
+	o.IsectFn, o.aabb = fn(&o)
 
 	objs = append(objs, &o)
 	for _, child := range opts.Children {
@@ -76,11 +99,11 @@ func newObjects(opts *options.Object, transform mgl64.Mat4) ([]*Object, error) {
 }
 
 // Plane is a 2D plane object with a width and height of 1 in the XY-plane centered at the origin.
-func plane(o *Object, transform mgl64.Mat4) (bvh.IntersectFn, *bvh.AABB) {
+func plane(o *Object) (bvh.IntersectFn, *bvh.AABB) {
 	return func(r *ray.Ray, res *bvh.IntersectResult) {
 		res.Object = nil
 
-		if r.Dir.Z() == 0 {
+		if mgl64.FloatEqual(r.Dir.Z(), 0) {
 			return // Miss when parallel
 		}
 
@@ -106,11 +129,11 @@ func plane(o *Object, transform mgl64.Mat4) (bvh.IntersectFn, *bvh.AABB) {
 		}
 
 		res.UV = mgl64.Vec2{point.X() + 0.5, 1 - (point.Y() + 0.5)}
-	}, makeAABB(1, 0.1, 1, transform)
+	}, makeAABB(1, 1, 0.1, o.Transform)
 }
 
 // Cube has dimensinos 1x1x1 and is centered at the origin.
-func cube(o *Object, transform mgl64.Mat4) (bvh.IntersectFn, *bvh.AABB) {
+func cube(o *Object) (bvh.IntersectFn, *bvh.AABB) {
 	return func(r *ray.Ray, res *bvh.IntersectResult) {
 		res.Object = nil
 
@@ -160,7 +183,7 @@ func cube(o *Object, transform mgl64.Mat4) (bvh.IntersectFn, *bvh.AABB) {
 			}
 			res.Normal[bestSide%3] = 1
 		}
-	}, makeAABB(1, 1, 1, transform)
+	}, makeAABB(1, 1, 1, o.Transform)
 }
 
 // Sphere has radius 1 centered at the origin.
