@@ -54,13 +54,52 @@ func (o *Object) AABB() *bvh.AABB {
 	return o.aabb
 }
 
-// NewObjects creates new objects from the given options including all the children.
-func NewObjects(opts *options.Object) ([]*Object, error) {
-	return newObjects(opts, mgl64.Ident4())
+// MakeObjects creates new objects from the given options.
+func MakeObjects(opts *options.Options) ([]*Object, error) {
+	var objs []*Object
+
+	objOpts := make(map[string]*options.Object)
+	for _, o := range opts.Objects {
+		objOpts[o.Name] = o
+	}
+
+	for _, layout := range opts.Layout {
+		l, ok := objOpts[layout.Name]
+		if !ok {
+			return nil, fmt.Errorf("Layout specified unknown object: %s", layout.Name)
+		}
+		os, e := newObjects(l, getTransform(layout.Transform))
+		if e != nil {
+			return nil, fmt.Errorf("Creating layout for object %s: %v", layout.Name, e)
+		}
+		objs = append(objs, os...)
+	}
+	return objs, nil
 }
 
 func newObjects(opts *options.Object, transform mgl64.Mat4) ([]*Object, error) {
-	optsT := opts.Transform
+	var objs []*Object
+	o := Object{}
+	fn, ok := objFnMap[opts.Type]
+	if !ok {
+		return nil, fmt.Errorf("unknown object type '%s'", opts.Type)
+	}
+	o.Transform = transform.Mul4(getTransform(opts.Transform))
+	o.InvTransform = o.Transform.Inv()
+	o.IsectFn, o.aabb = fn(&o)
+
+	objs = append(objs, &o)
+	for _, child := range opts.Children {
+		os, e := newObjects(child, o.Transform)
+		if e != nil {
+			return nil, e
+		}
+		objs = append(objs, os...)
+	}
+	return objs, nil
+}
+
+func getTransform(optsT options.Transform) mgl64.Mat4 {
 	if mgl64.FloatEqual(optsT.Scale.X, 0) {
 		optsT.Scale.X = 1
 	}
@@ -70,32 +109,11 @@ func newObjects(opts *options.Object, transform mgl64.Mat4) ([]*Object, error) {
 	if mgl64.FloatEqual(optsT.Scale.Z, 0) {
 		optsT.Scale.Z = 1
 	}
-	// transform = mgl64.Translate3D(optsT.Translate.X, optsT.Translate.Y, optsT.Translate.Z).Mul4(transform)
-	// transform = mgl64.HomogRotate3D(optsT.RotateAngle*math.Pi/180, vec.Normalize(mgl64.Vec3{optsT.RotateAxis.X, optsT.RotateAxis.Y, optsT.RotateAxis.Z}, vec.Y)).Mul4(transform)
-	// transform = mgl64.Scale3D(optsT.Scale.X, optsT.Scale.Y, optsT.Scale.Z).Mul4(transform)
+	transform := mgl64.Ident4()
 	transform = transform.Mul4(mgl64.Translate3D(optsT.Translate.X, optsT.Translate.Y, optsT.Translate.Z))
 	transform = transform.Mul4(mgl64.HomogRotate3D(optsT.RotateAngle*math.Pi/180, vec.Normalize(mgl64.Vec3{optsT.RotateAxis.X, optsT.RotateAxis.Y, optsT.RotateAxis.Z}, vec.Y)))
 	transform = transform.Mul4(mgl64.Scale3D(optsT.Scale.X, optsT.Scale.Y, optsT.Scale.Z))
-
-	var objs []*Object
-	o := Object{}
-	fn, ok := objFnMap[opts.Type]
-	if !ok {
-		return nil, fmt.Errorf("unknown object type '%s'", opts.Type)
-	}
-	o.Transform = transform
-	o.InvTransform = transform.Inv()
-	o.IsectFn, o.aabb = fn(&o)
-
-	objs = append(objs, &o)
-	for _, child := range opts.Children {
-		os, e := newObjects(child, transform)
-		if e != nil {
-			return nil, e
-		}
-		objs = append(objs, os...)
-	}
-	return objs, nil
+	return transform
 }
 
 // Plane is a 2D plane object with a width and height of 1 in the XY-plane centered at the origin.
