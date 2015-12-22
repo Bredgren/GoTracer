@@ -42,6 +42,8 @@ func NewScene(options *options.Options) *Scene {
 		objects[i] = obj
 	}
 
+	// TODO: calculate illumination maps
+
 	return &Scene{
 		Options: options,
 		Camera:  NewCamera(&options.Camera, float64(options.Resolution.W)/float64(options.Resolution.H)),

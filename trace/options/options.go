@@ -126,7 +126,7 @@ type Texture struct {
 // Object definse options for a single object.
 type Object struct {
 	Name         string    `title:"Name of new or existing object" json:"name"`
-	Type         string    `title:"Type of shape. The 'Transform' type is an invisible object" choice:"Transform,Sphere,Cube,Plane,Triangle,Trimesh,Cylinder,Cone" json:"type"`
+	Type         string    `title:"Type of shape. The 'Empty' type is an invisible object" choice:"Empty,Sphere,Cube,Plane,Triangle,Trimesh,Cylinder,Cone" json:"type"`
 	Transform    Transform `title:"Tranform of the object" json:"transform"`
 	Material     string    `title:"Name of the material to use" json:"material"`
 	TopRadius    float64   `title:"Top radius for cone objects" step:"0.1" json:"top_radius"`
@@ -137,16 +137,21 @@ type Object struct {
 
 // Layout defines transform options for an object.
 type Layout struct {
-	Transform Transform `title:"Tranform of the object" json:"transform"`
 	Name      string    `title:"Name of existing object from the list of objects" json:"name"`
+	Transform Transform `title:"Tranform of the object" json:"transform"`
 }
 
 // Transform defines the transform for an object.
 type Transform struct {
-	Translate   Vector  `title:"Translation" json:"translate"`
-	RotateAxis  Vector  `title:"Axis to rotate around" json:"rotate_axis"`
-	RotateAngle float64 `title:"Angle to rotate around the axis in degrees" min:"-360.0" max:"360.0" json:"rotate_angle"`
-	Scale       Vector  `title:"Scale" json:"scale"`
+	Translate Vector   `title:"Translation" json:"translate"`
+	Rotate    []Rotate `title:"Each rotation is applied in order" json:"rotate"`
+	Scale     Vector   `title:"Scale" json:"scale"`
+}
+
+// Rotate specfies a rotation axis and angle
+type Rotate struct {
+	Axis  Vector  `title:"Axis to rotate around" json:"rotate_axis"`
+	Angle float64 `title:"Angle to rotate around the axis in degrees" min:"-360.0" max:"360.0" json:"rotate_angle"`
 }
 
 // Color is and RGB color.
@@ -225,10 +230,12 @@ func NewOptions() *Options {
 				Name: "floor",
 				Type: "Plane",
 				Transform: Transform{
-					Translate:   Vector{0, 0, 0},
-					RotateAxis:  Vector{1, 0, 0},
-					RotateAngle: -90,
-					Scale:       Vector{10, 10, 0},
+					Translate: Vector{0, 0, 0},
+					Rotate: []Rotate{{
+						Axis:  Vector{1, 0, 0},
+						Angle: -90,
+					}},
+					Scale: Vector{10, 10, 0},
 				},
 				Material: "white",
 			},
@@ -236,10 +243,12 @@ func NewOptions() *Options {
 				Name: "box",
 				Type: "Cube",
 				Transform: Transform{
-					Translate:   Vector{0, 1, 0},
-					RotateAxis:  Vector{0, 1, 0},
-					RotateAngle: 45,
-					Scale:       Vector{2, 2, 2},
+					Translate: Vector{0, 1, 0},
+					Rotate: []Rotate{{
+						Axis:  Vector{0, 1, 0},
+						Angle: 45,
+					}},
+					Scale: Vector{2, 2, 2},
 				},
 				Material: "white",
 			},

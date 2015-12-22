@@ -101,7 +101,7 @@ func newObjects(opts *options.Object, transform mgl64.Mat4, objOpts map[string]*
 		return objs, nil
 	}
 
-	if opts.Type == "Transform" {
+	if opts.Type == "Empty" {
 		var objs []*Object
 		for _, child := range opts.Children {
 			os, e := newObjects(child, transform, objOpts, top, false)
@@ -146,9 +146,17 @@ func getTransform(optsT options.Transform) mgl64.Mat4 {
 	}
 	transform := mgl64.Ident4()
 	transform = transform.Mul4(mgl64.Translate3D(optsT.Translate.X, optsT.Translate.Y, optsT.Translate.Z))
-	transform = transform.Mul4(mgl64.HomogRotate3D(optsT.RotateAngle*math.Pi/180, vec.Normalize(mgl64.Vec3{optsT.RotateAxis.X, optsT.RotateAxis.Y, optsT.RotateAxis.Z}, vec.Y)))
+	transform = transform.Mul4(getRotation(optsT.Rotate))
 	transform = transform.Mul4(mgl64.Scale3D(optsT.Scale.X, optsT.Scale.Y, optsT.Scale.Z))
 	return transform
+}
+
+func getRotation(rots []options.Rotate) mgl64.Mat4 {
+	t := mgl64.Ident4()
+	for _, r := range rots {
+		t = mgl64.HomogRotate3D(r.Angle*math.Pi/180, vec.Normalize(mgl64.Vec3{r.Axis.X, r.Axis.Y, r.Axis.Z}, vec.Y)).Mul4(t)
+	}
+	return t
 }
 
 // Plane is a 2D plane object with a width and height of 1 in the XY-plane centered at the origin.
