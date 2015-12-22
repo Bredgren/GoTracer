@@ -217,4 +217,9 @@ select {
     top: 12.5%;
     font-size: 30px;
     color: red;
+    overflow: scroll;
+    border: 2px solid grey;
+    padding: 5px;
+    border-radius: 10px;
+    background: #222;
 }

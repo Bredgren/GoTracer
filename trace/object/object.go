@@ -66,31 +66,54 @@ func MakeObjects(opts *options.Options) ([]*Object, error) {
 	for _, layout := range opts.Layout {
 		l, ok := objOpts[layout.Name]
 		if !ok {
-			return nil, fmt.Errorf("Layout specified unknown object: %s", layout.Name)
+			return nil, fmt.Errorf("layout specified unknown object: %s", layout.Name)
 		}
-		os, e := newObjects(l, getTransform(layout.Transform))
+		os, e := newObjects(l, getTransform(layout.Transform), objOpts, layout.Name, true)
 		if e != nil {
-			return nil, fmt.Errorf("Creating layout for object %s: %v", layout.Name, e)
+			return nil, fmt.Errorf("creating layout for object %s: %v", layout.Name, e)
 		}
 		objs = append(objs, os...)
 	}
 	return objs, nil
 }
 
-func newObjects(opts *options.Object, transform mgl64.Mat4) ([]*Object, error) {
+func newObjects(opts *options.Object, transform mgl64.Mat4, objOpts map[string]*options.Object, top string, atTop bool) ([]*Object, error) {
+	transform = transform.Mul4(getTransform(opts.Transform))
+	if !atTop && opts.Name != "" {
+		if opts.Name == top {
+			return nil, fmt.Errorf("recursive object not supported: %s", opts.Name)
+		}
+		o, ok := objOpts[opts.Name]
+		if !ok {
+			return nil, fmt.Errorf("unknown child object for %s: %s", top, opts.Name)
+		}
+		objs, e := newObjects(o, transform, objOpts, top, true)
+		if e != nil {
+			return nil, e
+		}
+		for _, child := range opts.Children {
+			os, e := newObjects(child, transform, objOpts, top, false)
+			if e != nil {
+				return nil, e
+			}
+			objs = append(objs, os...)
+		}
+		return objs, nil
+	}
+
 	var objs []*Object
 	o := Object{}
 	fn, ok := objFnMap[opts.Type]
 	if !ok {
 		return nil, fmt.Errorf("unknown object type '%s'", opts.Type)
 	}
-	o.Transform = transform.Mul4(getTransform(opts.Transform))
+	o.Transform = transform
 	o.InvTransform = o.Transform.Inv()
 	o.IsectFn, o.aabb = fn(&o)
 
 	objs = append(objs, &o)
 	for _, child := range opts.Children {
-		os, e := newObjects(child, o.Transform)
+		os, e := newObjects(child, o.Transform, objOpts, top, false)
 		if e != nil {
 			return nil, e
 		}
