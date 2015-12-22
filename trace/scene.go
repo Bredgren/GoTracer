@@ -35,7 +35,7 @@ func (s *Scene) ColorAt(x, y int) color.NRGBA {
 func NewScene(options *options.Options) *Scene {
 	objs, e := object.MakeObjects(options)
 	if e != nil {
-		log.Fatalf("raytracer: creating objects: %v", e)
+		log.Fatalf("creating objects: %v", e)
 	}
 	objects := make([]bvh.Intersector, len(objs))
 	for i, obj := range objs {

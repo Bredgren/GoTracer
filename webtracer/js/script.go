@@ -234,6 +234,7 @@ func onRenderPng() {
 }
 
 func onRender(format string) {
+	clearError()
 	// Not allowing options to be changed while rendering
 	jq("#options input").SetProp("disabled", true)
 
@@ -255,21 +256,22 @@ func triggerRender(format string) {
 
 	jq(".image-container").Empty()
 	anim := startPulseAnimation("#animation")
-	jquery.Post("/render?format="+format, string(j), func(data, status, xhr string) {
-		if status != "success" {
-			console.Call("error", "Render wasn't success:", status, data, xhr)
-		}
+	p := jquery.Post("/render?format="+format, string(j), func(data, status, xhr string) {
 		stopPulseAnimation(anim)
 		jq("#options input").SetProp("disabled", false)
 		setImage(data)
+	})
+	p.Fail(func(a, b, c interface{}) {
+		text := a.(map[string]interface{})["responseText"].(string)
+		console.Call("error", "Render failed:", text)
+		stopPulseAnimation(anim)
+		jq("#options input").SetProp("disabled", false)
+		setError(text)
 	})
 }
 
 func refreshHistory() {
 	jquery.Get("/history?_=recent", "", func(data, status, xhr string) {
-		if status != "success" {
-			console.Call("error", "Failed to retrieve history:", status, data, xhr)
-		}
 		var history []*lib.RenderItem
 		e := json.Unmarshal([]byte(data), &history)
 		if e != nil {
@@ -360,4 +362,16 @@ func startPulseAnimation(selector string) (stop chan bool) {
 
 func stopPulseAnimation(stop chan<- bool) {
 	go func() { stop <- true }()
+}
+
+func setError(text string) {
+	errDiv := jq("#error")
+	errDiv.SetText(text)
+	errDiv.Show()
+}
+
+func clearError() {
+	errDiv := jq("#error")
+	errDiv.Empty()
+	errDiv.Hide()
 }

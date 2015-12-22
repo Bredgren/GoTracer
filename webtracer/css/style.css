@@ -208,3 +208,13 @@ select {
     margin-left: -100px;
     font-size: 50px;
 }
+
+#error {
+    position: fixed;
+    width: 75%;
+    left: 12.5%;
+    height: 75%;
+    top: 12.5%;
+    font-size: 30px;
+    color: red;
+}
