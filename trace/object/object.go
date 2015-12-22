@@ -101,6 +101,18 @@ func newObjects(opts *options.Object, transform mgl64.Mat4, objOpts map[string]*
 		return objs, nil
 	}
 
+	if opts.Type == "Transform" {
+		var objs []*Object
+		for _, child := range opts.Children {
+			os, e := newObjects(child, transform, objOpts, top, false)
+			if e != nil {
+				return nil, e
+			}
+			objs = append(objs, os...)
+		}
+		return objs, nil
+	}
+
 	var objs []*Object
 	o := Object{}
 	fn, ok := objFnMap[opts.Type]
