@@ -60,8 +60,9 @@ type AntiAlias struct {
 
 // Debug defines special options for producing images for debugging.
 type Debug struct {
-	DebugRender bool   `title:"Produce a debug image" json:"debug_render"`
+	Enabled     bool   `title:"Produce a debug image" json:"enabled"`
 	Type        string `title:"Type of debug image to produce" choice:"Ray Count,Anti Alias Subdivisions,Singe Pixel" json:"type"`
+	Scale       int    `title:"Number of rays to reach white" min:"1" json:"scale"`
 	SinglePixel bool   `title:"Render one pixel" json:"single_pixel"`
 	Pixel       Pixel  `title:"Pixel to render" json:"pixel"`
 }
@@ -200,7 +201,8 @@ func NewOptions() *Options {
 			Threshold:    0,
 		},
 		Debug: Debug{
-			DebugRender: false,
+			Enabled: false,
+			Scale:   1,
 		},
 		Lights: []*Light{
 			{

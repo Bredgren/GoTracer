@@ -3,6 +3,7 @@ package trace
 import (
 	"image/color"
 	"log"
+	"math"
 
 	"github.com/Bredgren/gotracer/trace/bvh"
 	"github.com/Bredgren/gotracer/trace/object"
@@ -25,10 +26,23 @@ func (s *Scene) ColorAt(x, y int) color.NRGBA {
 	pixelH := 1 / float64(s.Resolution.H)
 	centerX := float64(x) * pixelW
 	centerY := float64(y) * pixelH
-	// TODO: handle debug rendering
+
 	var rayCounts ray.Counts
 	c := s.colorAtSub(centerX, centerY, pixelW, pixelH, 0, &rayCounts)
-	return c.NRGBA()
+
+	if !s.Options.Debug.Enabled {
+		return c.NRGBA()
+	}
+
+	switch s.Options.Debug.Type {
+	case "Ray Count":
+		scale := math.Max(float64(s.Options.Debug.Scale), 1)
+		val := math.Min(float64(rayCounts[ray.Camera])/scale, 1)
+		return Color64{val, val, val}.NRGBA()
+	default:
+		log.Fatalf("unknown debug type: %s", s.Options.Debug.Type)
+		return color.NRGBA{}
+	}
 }
 
 // NewScene creates and returns a new Scene from the given options.
@@ -43,6 +57,7 @@ func NewScene(options *options.Options) *Scene {
 	}
 
 	// TODO: calculate illumination maps
+	// TODO: load background image
 
 	return &Scene{
 		Options: options,
@@ -124,18 +139,29 @@ func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts 
 	if isect.Object == nil {
 		return s.BackgroundColor(r)
 	}
-	c := 0.0
-	if isect.T <= 2 {
-		c = 1.0
-	} else if isect.T >= 20 {
-		c = 0.9
-	} else {
-		c = 1 - (isect.T-2)/18.0
-	}
-	return Color64{c, c, c}
+	// c := 0.0
+	// if isect.T <= 2 {
+	// 	c = 1.0
+	// } else if isect.T >= 20 {
+	// 	c = 0.9
+	// } else {
+	// 	c = 1 - (isect.T-2)/18.0
+	// }
+	// return Color64{c, c, c}
+	at := r.At(isect.T)
+	rd := (math.Sin(0.2*at.X()) + 1) / 2
+	g := (math.Sin(4.0*at.Y()) + 1) / 2
+	b := (math.Sin(0.2*at.Z()) + 1) / 2
+	return Color64{rd, g, b}
 }
 
 // BackgroundColor returns the color a ray returns when it hits no objects.
 func (s *Scene) BackgroundColor(r *ray.Ray) Color64 {
-	return s.BgColor
+	switch s.Background.Type {
+	case "Skybox":
+		// TODO: read from background image
+		return s.BgColor
+	default:
+		return s.BgColor
+	}
 }
