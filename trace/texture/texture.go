@@ -1,10 +1,10 @@
 package texture
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	"io"
-	"log"
 	"math"
 	"net/http"
 	"os"
@@ -38,18 +38,21 @@ func New(srcPath string, offset, scale mgl64.Vec2) (*Texture, error) {
 	if govalidator.IsURL(srcPath) {
 		resp, e := http.Get(srcPath)
 		if e != nil {
-			log.Fatalf("fetching image from url: %s: %v", srcPath, e)
+			return nil, fmt.Errorf("fetching image from url: %s: %v", srcPath, e)
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("fetching image from url: %s: %s", srcPath, resp.Status)
+		}
 
 		file, e := os.Create("/tmp/bgimage")
 		if e != nil {
-			log.Fatalf("creating temporary image: /tmp/bgimage: %v", e)
+			return nil, fmt.Errorf("creating temporary image: /tmp/bgimage: %v", e)
 		}
 
 		_, e = io.Copy(file, resp.Body)
 		if e != nil {
-			log.Fatalf("copying downloaded image to /tmp/bgimage: %v", e)
+			return nil, fmt.Errorf("copying downloaded image to /tmp/bgimage: %v", e)
 		}
 		file.Close()
 		srcPath = "/tmp/bgimage"
@@ -57,12 +60,12 @@ func New(srcPath string, offset, scale mgl64.Vec2) (*Texture, error) {
 
 	file, e := os.Open(srcPath)
 	if e != nil {
-		return nil, e
+		return nil, fmt.Errorf("opening local texture image: %v", e)
 	}
 	defer file.Close()
 	img, _, e := image.Decode(file)
 	if e != nil {
-		return nil, e
+		return nil, fmt.Errorf("decoding local texture image: %v", e)
 	}
 
 	b := img.Bounds()
@@ -103,4 +106,11 @@ func (t *Texture) ColorAt(uv mgl64.Vec2) color64.Color64 {
 // SetColorAt takes normalized coordinates and sets the color there to c, spreading it
 // out reversed lineary interpolated.
 func (t *Texture) SetColorAt(uv mgl64.Vec2, c color64.Color64) {
+	bounds := t.img.Bounds()
+	w := float64(bounds.Max.X - 1)
+	h := float64(bounds.Max.Y - 1)
+	x, y := uv.X()*w, uv.Y()*h
+	fx, fy := math.Floor(x), math.Floor(y)
+	i, j := int(fx), int(fy)
+	t.img.Set(i, j, c.NRGBA())
 }
