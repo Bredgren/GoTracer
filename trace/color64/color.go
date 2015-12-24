@@ -1,4 +1,4 @@
-package trace
+package color64
 
 import (
 	"image/color"
@@ -45,7 +45,9 @@ func (c Color64) Mul(val float64) Color64 {
 	return Color64{c[0] * val, c[1] * val, c[2] * val}
 }
 
-// ColorsDifferent returns true if the distance between the given colors is greater than thresh.
-func ColorsDifferent(c1, c2 Color64, thresh float64) bool {
+// Different returns true if the distance between the given colors is greater than thresh.
+func Different(c1, c2 Color64, thresh float64) bool {
 	return mgl64.Vec3(c1).Sub(mgl64.Vec3(c2)).Len() > thresh
 }
+
+// TODO: benchmark Different to see if it's worth improving

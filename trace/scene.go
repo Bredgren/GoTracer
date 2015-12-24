@@ -6,16 +6,20 @@ import (
 	"math"
 
 	"github.com/Bredgren/gotracer/trace/bvh"
+	"github.com/Bredgren/gotracer/trace/color64"
 	"github.com/Bredgren/gotracer/trace/object"
 	"github.com/Bredgren/gotracer/trace/options"
 	"github.com/Bredgren/gotracer/trace/ray"
+	"github.com/Bredgren/gotracer/trace/texture"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 // Scene represents the scene and all data needed to render it.
 type Scene struct {
 	*options.Options
 	Camera  *Camera
-	BgColor Color64
+	BgColor color64.Color64
+	BgTex   *texture.Texture
 
 	bvh *bvh.Node
 }
@@ -38,7 +42,7 @@ func (s *Scene) ColorAt(x, y int) color.NRGBA {
 	case "Ray Count":
 		scale := math.Max(float64(s.Options.Debug.Scale), 1)
 		val := math.Min(float64(rayCounts[ray.Camera])/scale, 1)
-		return Color64{val, val, val}.NRGBA()
+		return color64.Color64{val, val, val}.NRGBA()
 	default:
 		log.Fatalf("unknown debug type: %s", s.Options.Debug.Type)
 		return color.NRGBA{}
@@ -57,12 +61,17 @@ func NewScene(options *options.Options) *Scene {
 	}
 
 	// TODO: calculate illumination maps
-	// TODO: load background image
+
+	tex, e := texture.New(options.Background.Image, mgl64.Vec2{}, mgl64.Vec2{1, 1})
+	if e != nil {
+		log.Fatalf("creating background texture: %v", e)
+	}
 
 	return &Scene{
 		Options: options,
 		Camera:  NewCamera(&options.Camera, float64(options.Resolution.W)/float64(options.Resolution.H)),
-		BgColor: Color64{options.Background.Color.R, options.Background.Color.G, options.Background.Color.B},
+		BgColor: color64.Color64{options.Background.Color.R, options.Background.Color.G, options.Background.Color.B},
+		BgTex:   tex,
 		bvh:     bvh.NewTree(objects),
 	}
 }
@@ -70,11 +79,11 @@ func NewScene(options *options.Options) *Scene {
 // Result contains the results of tracing a ray into a scene. It includes the color and the number
 // of each type of ray that was produced.
 type Result struct {
-	Color    Color64
+	Color    color64.Color64
 	RayCount [ray.NumTypes]int
 }
 
-func (s *Scene) colorAtSub(centerX, centerY, width, height float64, depth int, rayCounts *ray.Counts) Color64 {
+func (s *Scene) colorAtSub(centerX, centerY, width, height float64, depth int, rayCounts *ray.Counts) color64.Color64 {
 	if depth >= s.AntiAlias.MaxDivisions || s.Global.FastRender {
 		return s.TraceDof(centerX, centerY, rayCounts)
 	}
@@ -87,9 +96,9 @@ func (s *Scene) colorAtSub(centerX, centerY, width, height float64, depth int, r
 	c3 := s.TraceDof(x2, y1, rayCounts)
 	c4 := s.TraceDof(x2, y2, rayCounts)
 	thresh := s.AntiAlias.Threshold
-	if ColorsDifferent(c1, c2, thresh) || ColorsDifferent(c1, c3, thresh) ||
-		ColorsDifferent(c1, c4, thresh) || ColorsDifferent(c2, c3, thresh) ||
-		ColorsDifferent(c2, c4, thresh) || ColorsDifferent(c3, c4, thresh) {
+	if color64.Different(c1, c2, thresh) || color64.Different(c1, c3, thresh) ||
+		color64.Different(c1, c4, thresh) || color64.Different(c2, c3, thresh) ||
+		color64.Different(c2, c4, thresh) || color64.Different(c3, c4, thresh) {
 		d := depth + 1
 		c1 = s.colorAtSub(x1, y1, width/2, height/2, d, rayCounts)
 		c2 = s.colorAtSub(x1, y2, width/2, height/2, d, rayCounts)
@@ -102,7 +111,7 @@ func (s *Scene) colorAtSub(centerX, centerY, width, height float64, depth int, r
 
 // TraceDof handles depth of field logic if the camera is configured to use it, otherwise
 // it traces a normal ray though the camera and the given normalized window coordinates.
-func (s *Scene) TraceDof(nx, ny float64, rayCounts *ray.Counts) Color64 {
+func (s *Scene) TraceDof(nx, ny float64, rayCounts *ray.Counts) color64.Color64 {
 	// Initial center ray is always cast
 	var centerRay ray.Ray
 	s.Camera.RayThrough(nx, ny, &centerRay)
@@ -122,7 +131,7 @@ func (s *Scene) TraceDof(nx, ny float64, rayCounts *ray.Counts) Color64 {
 
 	maxRays := s.Options.Camera.Dof.MaxRays
 	thresh := s.Options.Camera.Dof.AdaptiveThreshold
-	for numRays < maxRays && ColorsDifferent(color, c, thresh) {
+	for numRays < maxRays && color64.Different(color, c, thresh) {
 		rayCounts[ray.Camera]++
 		c = s.TraceRay(&dofRay, 0, 1.0, rayCounts)
 		numRays++
@@ -133,7 +142,7 @@ func (s *Scene) TraceDof(nx, ny float64, rayCounts *ray.Counts) Color64 {
 }
 
 // TraceRay sends a ray into the scene and returns the color it finds.
-func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts *ray.Counts) Color64 {
+func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts *ray.Counts) color64.Color64 {
 	isect := bvh.IntersectResult{}
 	s.bvh.Intersect(r, &isect)
 	if isect.Object == nil {
@@ -152,15 +161,19 @@ func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts 
 	rd := (math.Sin(0.2*at.X()) + 1) / 2
 	g := (math.Sin(4.0*at.Y()) + 1) / 2
 	b := (math.Sin(0.2*at.Z()) + 1) / 2
-	return Color64{rd, g, b}
+	return color64.Color64{rd, g, b}
 }
 
 // BackgroundColor returns the color a ray returns when it hits no objects.
-func (s *Scene) BackgroundColor(r *ray.Ray) Color64 {
+func (s *Scene) BackgroundColor(r *ray.Ray) color64.Color64 {
 	switch s.Background.Type {
 	case "Skybox":
-		// TODO: read from background image
 		return s.BgColor
+	case "Photosphere":
+		u := 0.5 + math.Atan2(r.Dir.Z(), r.Dir.X())/(2*math.Pi)
+		v := 0.5 - math.Asin(r.Dir.Y())/math.Pi
+		uv := mgl64.Vec2{u, v}
+		return s.BgTex.ColorAt(uv)
 	default:
 		return s.BgColor
 	}

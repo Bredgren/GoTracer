@@ -47,7 +47,7 @@ type Dof struct {
 
 // Background defines the options for rays that don't hit objects.
 type Background struct {
-	Type  string `title:"Type of background" choice:"Uniform,Skybox" json:"type"`
+	Type  string `title:"Type of background" choice:"Uniform,Skybox,Photosphere" json:"type"`
 	Color Color  `title:"Color to use for a solid background (Uniform)" json:"color"`
 	Image string `title:"Path/URL of image to use (Skybox)" json:"image"`
 }
