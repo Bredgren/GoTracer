@@ -3,10 +3,14 @@ package texture
 import (
 	"image"
 	"image/draw"
+	"io"
+	"log"
 	"math"
+	"net/http"
 	"os"
 
 	"github.com/Bredgren/gotracer/trace/color64"
+	"github.com/asaskevich/govalidator"
 	"github.com/go-gl/mathgl/mgl64"
 )
 
@@ -25,13 +29,32 @@ type Texture struct {
 // If the path is invalid an error is returned.
 func New(srcPath string, offset, scale mgl64.Vec2) (*Texture, error) {
 	if srcPath == "" {
-		return &Texture{}, nil
+		return &Texture{img: image.NewNRGBA(image.Rectangle{})}, nil
 	}
 	if t, ok := textures[srcPath]; ok {
 		return t, nil
 	}
-	// if srcPath is url, attempt to download image
-	// else just attempt to open image
+	// if srcPath is url, attempt to download image else just attempt to open image
+	if govalidator.IsURL(srcPath) {
+		resp, e := http.Get(srcPath)
+		if e != nil {
+			log.Fatalf("fetching image from url: %s: %v", srcPath, e)
+		}
+		defer resp.Body.Close()
+
+		file, e := os.Create("/tmp/bgimage")
+		if e != nil {
+			log.Fatalf("creating temporary image: /tmp/bgimage: %v", e)
+		}
+
+		_, e = io.Copy(file, resp.Body)
+		if e != nil {
+			log.Fatalf("copying downloaded image to /tmp/bgimage: %v", e)
+		}
+		file.Close()
+		srcPath = "/tmp/bgimage"
+	}
+
 	file, e := os.Open(srcPath)
 	if e != nil {
 		return nil, e

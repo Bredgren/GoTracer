@@ -49,7 +49,7 @@ type Dof struct {
 type Background struct {
 	Type  string `title:"Type of background" choice:"Uniform,Skybox,Photosphere" json:"type"`
 	Color Color  `title:"Color to use for a solid background (Uniform)" json:"color"`
-	Image string `title:"Path/URL of image to use (Skybox)" json:"image"`
+	Image string `title:"Path/URL of image to use (Skybox, Photosphere)" class:"fast-render" json:"image"`
 }
 
 // AntiAlias defines the anti-alias options.

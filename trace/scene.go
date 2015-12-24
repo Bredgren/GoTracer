@@ -62,7 +62,11 @@ func NewScene(options *options.Options) *Scene {
 
 	// TODO: calculate illumination maps
 
-	tex, e := texture.New(options.Background.Image, mgl64.Vec2{}, mgl64.Vec2{1, 1})
+	var tex *texture.Texture
+	if options.Background.Type == "Uniform" || options.Global.FastRender {
+		options.Background.Image = ""
+	}
+	tex, e = texture.New(options.Background.Image, mgl64.Vec2{}, mgl64.Vec2{1, 1})
 	if e != nil {
 		log.Fatalf("creating background texture: %v", e)
 	}
