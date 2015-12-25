@@ -14,9 +14,9 @@ import (
 type objFn func(*Object) (bvh.IntersectFn, *bvh.AABB)
 
 var objFnMap = map[string]objFn{
-	"Plane": plane,
-	"Cube":  cube,
-	// "Sphere": sphere,
+	"Plane":  plane,
+	"Cube":   cube,
+	"Sphere": sphere,
 	// "Cylinder": cylinder,
 	// "Cone": cone,
 	// "Triangle": triangle,
@@ -248,7 +248,52 @@ func cube(o *Object) (bvh.IntersectFn, *bvh.AABB) {
 }
 
 // Sphere has radius 1 centered at the origin.
-type Sphere struct {
+func sphere(o *Object) (bvh.IntersectFn, *bvh.AABB) {
+	return func(r *ray.Ray, res *bvh.IntersectResult) {
+		res.Object = nil
+
+		// -(d . o) +- sqrt((d . o)^2 - (d . d)((o . o) - 1)) / (d . d)
+		do := r.Dir.Dot(r.Origin)
+		dd := r.Dir.Dot(r.Dir)
+		oo := r.Origin.Dot(r.Origin)
+
+		discriminant := do*do - dd*(oo-1)
+		if discriminant < 0 {
+			return
+		}
+
+		discriminant = math.Sqrt(discriminant)
+
+		t2 := (-do + discriminant) / dd
+		if t2 <= ray.Epsilon {
+			return
+		}
+
+		t1 := (-do - discriminant) / dd
+		if t1 > ray.Epsilon {
+			res.Object = o
+			res.T = t1
+			// No need to normalize because it's a unit sphere at the origin
+			res.Normal = r.At(t1)
+			res.UV = mgl64.Vec2{
+				0.5 + (math.Atan2(res.Normal.Y(), res.Normal.X()) / (2 * math.Pi)),
+				0.5 - (math.Asin(res.Normal.Z()) / math.Pi),
+			}
+			return
+		}
+
+		if t2 > ray.Epsilon {
+			res.Object = o
+			res.T = t2
+			res.Normal = r.At(t2)
+			res.UV = mgl64.Vec2{
+				0.5 + (math.Atan2(res.Normal.Y(), res.Normal.X()) / (2 * math.Pi)),
+				0.5 - (math.Asin(res.Normal.Z()) / math.Pi),
+			}
+			return
+		}
+
+	}, makeAABB(2, 2, 2, o.Transform)
 }
 
 // Cylinder has height and radius 1 centered at the origin.

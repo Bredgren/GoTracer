@@ -116,6 +116,58 @@ func BenchmarkCube(b *testing.B) {
 	}
 }
 
+func TestSphere(t *testing.T) {
+	o := Object{Transform: mgl64.Ident4(), InvTransform: mgl64.Ident4().Inv()}
+	f, _ := sphere(&o)
+	res := bvh.IntersectResult{}
+
+	cases := []struct {
+		r  ray.Ray
+		o  *Object
+		uv mgl64.Vec2
+		t  float64
+	}{
+		{
+			r:  ray.Ray{Origin: mgl64.Vec3{0, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}},
+			o:  &o,
+			uv: mgl64.Vec2{0.5, 0.0},
+			t:  4,
+		},
+		{
+			r: ray.Ray{Origin: mgl64.Vec3{2, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}},
+		},
+		{
+			r:  ray.Ray{Origin: mgl64.Vec3{5, 0, 0}, Dir: mgl64.Vec3{-1, 0, 0}},
+			o:  &o,
+			uv: mgl64.Vec2{0.5, 0.5},
+			t:  4,
+		},
+	}
+
+	for _, c := range cases {
+		f(&c.r, &res)
+		if c.o == nil && res.Object != nil || c.o != nil && res.Object == nil {
+			t.Errorf("Ray: %#v: expected object=%#v got %#v", c.r, c.o, res.Object)
+		}
+		if c.o != nil && res.UV != c.uv {
+			t.Errorf("Ray: %#v: expected uv=%#v got %#v", c.r, c.uv, res.UV)
+		}
+		if c.o != nil && res.T != c.t {
+			t.Errorf("Ray: %#v: expected t=%#v got %#v", c.r, c.t, res.T)
+		}
+	}
+}
+
+func BenchmarkSphere(b *testing.B) {
+	o := Object{Transform: mgl64.Ident4(), InvTransform: mgl64.Ident4().Inv()}
+	f, _ := sphere(&o)
+	res := bvh.IntersectResult{}
+	r := ray.Ray{Origin: mgl64.Vec3{0, 0, 5}, Dir: mgl64.Vec3{0, 0, -1}}
+	for i := 0; i <= b.N; i++ {
+		f(&r, &res)
+	}
+}
+
 func TestMakeAABB(t *testing.T) {
 	halfHypot := math.Hypot(2, 2) / 2
 	cases := []struct {
