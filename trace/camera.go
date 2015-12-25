@@ -81,7 +81,7 @@ func fovMinMax(opts *options.Camera) (min, max float64) {
 // through that point starting from the camera.
 func (c *Camera) RayThrough(nx, ny float64, r *ray.Ray) {
 	r.Origin = c.Position
-	r.Dir = c.ViewDir.Add(c.u.Mul(nx - 0.5)).Add(c.v.Mul(ny - 0.5))
+	r.Dir = c.ViewDir.Add(c.u.Mul(nx - 0.5)).Add(c.v.Mul(ny - 0.5)).Normalize()
 }
 
 // DofRayThrough takes a center ray (which is not midified) and modifies r to be a randomized

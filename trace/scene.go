@@ -1,6 +1,7 @@
 package trace
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -172,12 +173,47 @@ func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts 
 func (s *Scene) BackgroundColor(r *ray.Ray) color64.Color64 {
 	switch s.Background.Type {
 	case "Skybox":
-		return s.BgColor
+		// Assumes a cube unfolded like so:
+		//          top(+Y)
+		// left(-X) front(-Z) right(+X) back(+Z)
+		//          bottom(-Y)
+		x, y, z := r.Dir.X(), r.Dir.Y(), r.Dir.Z()
+		w, h := 0.25, 1.0/3.0
+		var uv mgl64.Vec2
+		switch {
+		case z <= -math.Abs(x) && z <= -math.Abs(y): // front
+			t := -1 / z
+			du, dv := ((x*t)+1)/2, 1-((y*t)+1)/2
+			uv = mgl64.Vec2{w + w*du, h + h*dv}
+		case x <= -math.Abs(y) && x <= -math.Abs(z): // left
+			t := -1 / x
+			du, dv := 1-((z*t)+1)/2, 1-((y*t)+1)/2
+			uv = mgl64.Vec2{w * du, h + h*dv}
+		case x >= math.Abs(y) && x >= math.Abs(z): // right
+			t := 1 / x
+			du, dv := ((z*t)+1)/2, 1-((y*t)+1)/2
+			uv = mgl64.Vec2{2*w + w*du, h + h*dv}
+		case y <= -math.Abs(x) && y <= -math.Abs(z): // bottom
+			t := -1 / y
+			du, dv := ((x*t)+1)/2, ((z*t)+1)/2
+			uv = mgl64.Vec2{w + w*du, 2*h + h*dv}
+		case y > math.Abs(x) && y > math.Abs(z): // top
+			t := 1 / y
+			du, dv := ((x*t)+1)/2, 1-((z*t)+1)/2
+			uv = mgl64.Vec2{w + w*du, h * dv}
+		case z > math.Abs(x) && z > math.Abs(y): // back
+			t := 1 / z
+			du, dv := 1-((x*t)+1)/2, 1-((y*t)+1)/2
+			uv = mgl64.Vec2{3*w + w*du, h + h*dv}
+		}
+		if uv.X() == 0.0 && uv.Y() == 0.0 {
+			fmt.Println(r)
+		}
+		return s.BgTex.ColorAt(uv)
 	case "Photosphere":
 		u := 0.5 + math.Atan2(r.Dir.Z(), r.Dir.X())/(2*math.Pi)
 		v := 0.5 - math.Asin(r.Dir.Y())/math.Pi
-		uv := mgl64.Vec2{u, v}
-		return s.BgTex.ColorAt(uv)
+		return s.BgTex.ColorAt(mgl64.Vec2{u, v})
 	default:
 		return s.BgColor
 	}
