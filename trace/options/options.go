@@ -54,7 +54,7 @@ type Background struct {
 
 // AntiAlias defines the anti-alias options.
 type AntiAlias struct {
-	MaxDivisions int     `title:"Maximum subdivisions of a pixel. Larger values increase quality and rendering time." min:"0" max:"16" class:"fast-render" json:"max_divisions"`
+	MaxDivisions int     `title:"Maximum subdivisions of a pixel. Larger values increase quality and rendering time. Values larger than 3 (8x8) won't make much difference in quality." min:"0" max:"16" class:"fast-render" json:"max_divisions"`
 	Threshold    float64 `title:"Stop subdividing pixels when the difference is less than this. Smaller values increase quality and rendering time." min:"0.0" max:"99" step:"0.1" class:"fast-render" json:"threshold"`
 }
 
