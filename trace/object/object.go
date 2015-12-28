@@ -122,6 +122,7 @@ func newObjects(opts *options.Object, transform mgl64.Mat4, objOpts map[string]*
 	o.Transform = transform
 	o.InvTransform = o.Transform.Inv()
 	o.IsectFn, o.aabb = fn(&o)
+	o.MaterialName = opts.Material
 
 	objs = append(objs, &o)
 	for _, child := range opts.Children {
@@ -154,7 +155,7 @@ func getTransform(optsT options.Transform) mgl64.Mat4 {
 func getRotation(rots []options.Rotate) mgl64.Mat4 {
 	t := mgl64.Ident4()
 	for _, r := range rots {
-		t = mgl64.HomogRotate3D(r.Angle*math.Pi/180, vec.Normalize(mgl64.Vec3{r.Axis.X, r.Axis.Y, r.Axis.Z}, vec.Y)).Mul4(t)
+		t = mgl64.HomogRotate3D(r.Angle*math.Pi/180, vec.Normalize(mgl64.Vec3{r.Axis.X, r.Axis.Y, r.Axis.Z}, vec.Y, 1)).Mul4(t)
 	}
 	return t
 }

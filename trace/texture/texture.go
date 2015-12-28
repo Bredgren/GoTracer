@@ -76,6 +76,14 @@ func New(srcPath string, offset, scale mgl64.Vec2) (*Texture, error) {
 	return tex, nil
 }
 
+// NewEmpty creates a new empty texture.
+func NewEmpty(w, h int) (*Texture, error) {
+	b := image.Rect(0, 0, w, h)
+	nrgba := image.NewNRGBA(b)
+	tex := &Texture{img: nrgba}
+	return tex, nil
+}
+
 // ColorAt takes normalized coordinates and returns the color linearly interpolated.
 func (t *Texture) ColorAt(uv mgl64.Vec2) color64.Color64 {
 	bounds := t.img.Bounds()

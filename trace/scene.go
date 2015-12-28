@@ -8,6 +8,7 @@ import (
 
 	"github.com/Bredgren/gotracer/trace/bvh"
 	"github.com/Bredgren/gotracer/trace/color64"
+	"github.com/Bredgren/gotracer/trace/material"
 	"github.com/Bredgren/gotracer/trace/object"
 	"github.com/Bredgren/gotracer/trace/options"
 	"github.com/Bredgren/gotracer/trace/ray"
@@ -18,9 +19,11 @@ import (
 // Scene represents the scene and all data needed to render it.
 type Scene struct {
 	*options.Options
-	Camera  *Camera
-	BgColor color64.Color64
-	BgTex   *texture.Texture
+	Camera    *Camera
+	BgColor   color64.Color64
+	BgTex     *texture.Texture
+	Lights    []Light
+	Materials map[string]*material.Material
 
 	bvh *bvh.Node
 }
@@ -61,8 +64,6 @@ func NewScene(options *options.Options) *Scene {
 		objects[i] = obj
 	}
 
-	// TODO: calculate illumination maps
-
 	var tex *texture.Texture
 	if options.Background.Type == "Uniform" || options.Global.FastRender {
 		options.Background.Image = ""
@@ -72,12 +73,52 @@ func NewScene(options *options.Options) *Scene {
 		log.Fatalf("creating background texture: %v", e)
 	}
 
-	return &Scene{
-		Options: options,
-		Camera:  NewCamera(&options.Camera, float64(options.Resolution.W)/float64(options.Resolution.H)),
-		BgColor: color64.Color64{options.Background.Color.R, options.Background.Color.G, options.Background.Color.B},
-		BgTex:   tex,
-		bvh:     bvh.NewTree(objects),
+	scene := &Scene{
+		Options:   options,
+		Camera:    NewCamera(&options.Camera, float64(options.Resolution.W)/float64(options.Resolution.H)),
+		BgColor:   color64.Color64{options.Background.Color.R, options.Background.Color.G, options.Background.Color.B},
+		BgTex:     tex,
+		Lights:    makeLights(options.Lights),
+		Materials: makeMaterials(options.Materials, options.Global.FastRender),
+		bvh:       bvh.NewTree(objects),
+	}
+
+	scene.genIllumMaps()
+
+	return scene
+}
+
+func makeLights(opts []*options.Light) []Light {
+	lights := make([]Light, len(opts))
+	for i, lopt := range opts {
+		light, e := NewLight(lopt)
+		if e != nil {
+			log.Fatalf("creating light: %s: %v", lopt.Type, e)
+		}
+		lights[i] = light
+	}
+	return lights
+}
+
+func makeMaterials(opts []*options.Material, fast bool) map[string]*material.Material {
+	m := make(map[string]*material.Material)
+	for _, mat := range opts {
+		var e error
+		m[mat.Name], e = material.New(mat, fast)
+		if e != nil {
+			log.Fatalf("creating material: %s: %v", mat.Name, e)
+		}
+	}
+	return m
+}
+
+func (s *Scene) genIllumMaps() {
+	if s.Options.Global.FastRender {
+		return
+	}
+
+	for _, light := range s.Lights {
+		light.GenIllumMap(s)
 	}
 }
 
@@ -148,11 +189,35 @@ func (s *Scene) TraceDof(nx, ny float64, rayCounts *ray.Counts) color64.Color64 
 
 // TraceRay sends a ray into the scene and returns the color it finds.
 func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts *ray.Counts) color64.Color64 {
+	if depth > s.Options.Global.MaxRecursion || contribution < s.Options.Global.AdaptiveThreshold {
+		return color64.Color64{}
+	}
+
 	isect := bvh.IntersectResult{}
 	s.bvh.Intersect(r, &isect)
 	if isect.Object == nil {
 		return s.BackgroundColor(r)
 	}
+
+	material, ok := s.Materials[isect.Object.(*object.Object).MaterialName]
+	if !ok {
+		log.Fatalf("no material: %s", isect.Object.(*object.Object).MaterialName)
+	}
+
+	// TODO: handle liquid and index of refraction
+	// exiting := false
+	// if res.Normal.Dot(r.Dir) > 0 {
+	//   exiting = true
+	//   res.Normal = res.Normal.Mul(-1)
+	// }
+
+	// Bump mapping
+	// bump := material.Normal(res).Mul(2).Sub(mgl64.Vec3{1, 1, 1})
+	// cos := res.Normal(mgl64.Vec3{0, 0, 1})
+	// rotateVec := mgl64.Vec3{0, 0, 1}.Cross(res.Normal)
+
+	return material.IllumMap.ColorAt(isect.UV)
+
 	// c := 0.0
 	// if isect.T <= 2 {
 	// 	c = 1.0
@@ -161,12 +226,13 @@ func (s *Scene) TraceRay(r *ray.Ray, depth int, contribution float64, rayCounts 
 	// } else {
 	// 	c = 1 - (isect.T-2)/18.0
 	// }
-	// return Color64{c, c, c}
-	at := r.At(isect.T)
-	rd := (math.Sin(0.2*at.X()) + 1) / 2
-	g := (math.Sin(4.0*at.Y()) + 1) / 2
-	b := (math.Sin(0.2*at.Z()) + 1) / 2
-	return color64.Color64{rd, g, b}
+	// return color64.Color64{1 - c, 1 - c, 1 - c}
+
+	// at := r.At(isect.T)
+	// rd := (math.Sin(0.2*at.X()) + 1) / 2
+	// g := (math.Sin(4.0*at.Y()) + 1) / 2
+	// b := (math.Sin(0.2*at.Z()) + 1) / 2
+	// return color64.Color64{rd, g, b}
 }
 
 // BackgroundColor returns the color a ray returns when it hits no objects.
@@ -217,4 +283,23 @@ func (s *Scene) BackgroundColor(r *ray.Ray) color64.Color64 {
 	default:
 		return s.BgColor
 	}
+}
+
+// TraceIllumRay traces a ray for the purpose of generating illumination maps.
+func (s *Scene) TraceIllumRay(r *ray.Ray, color color64.Color64, depth int) {
+	if depth > s.Options.Global.MaxRecursion || !color64.Different(color, color64.Color64{}, 0.0001) {
+		return
+	}
+
+	isect := bvh.IntersectResult{}
+	s.bvh.Intersect(r, &isect)
+	if isect.Object == nil {
+		return
+	}
+
+	material, ok := s.Materials[isect.Object.(*object.Object).MaterialName]
+	if !ok {
+		log.Fatalf("no material: %s", isect.Object.(*object.Object).MaterialName)
+	}
+	material.IllumMap.SetColorAt(isect.UV, color)
 }

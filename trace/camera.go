@@ -34,7 +34,7 @@ func NewCamera(opts *options.Camera, aspectRatio float64) *Camera {
 	// Convert option vectors
 	lookAt := mgl64.Vec3{opts.LookAt.X, opts.LookAt.Y, opts.LookAt.Z}
 	position := mgl64.Vec3{opts.Position.X, opts.Position.Y, opts.Position.Z}
-	upDir := vec.Normalize(mgl64.Vec3{opts.UpDir.X, opts.UpDir.Y, opts.UpDir.Z}, vec.Y)
+	upDir := vec.Normalize(mgl64.Vec3{opts.UpDir.X, opts.UpDir.Y, opts.UpDir.Z}, vec.Y, 1)
 
 	// Camera space transform
 	m := mgl64.LookAtV(position, lookAt, upDir).Inv()

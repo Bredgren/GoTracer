@@ -16,9 +16,10 @@ type Options struct {
 
 // Global contains global options.
 type Global struct {
-	FastRender       bool `title:"Disable/limit some settings in order to decrease rendering time" id:"fast-render" json:"fast_render"`
-	MaxRecursion     int  `title:"Maximum reflective/refractive rays per pixel. Larger values increase quality and rendering time." min:"0" max:"99" class:"fast-render" json:"max_recursion"`
-	SoftShadowDetail int  `title:"Soft shadow detail. 0 disables soft shadows. Larger values increase quality and rendering time. " min:"0" max:"99" class:"fast-render" json:"soft_shadow_detail"`
+	FastRender        bool    `title:"Disable/limit some settings in order to decrease rendering time" id:"fast-render" json:"fast_render"`
+	MaxRecursion      int     `title:"Maximum reflective/refractive rays per pixel. Larger values increase quality and rendering time." min:"0" max:"99" class:"fast-render" json:"max_recursion"`
+	AdaptiveThreshold float64 `title:"Recursion will continue until the contribution to the overall color is less than this, or until MaxRecursion is reached, whichever is first. Smaller values increase quality and rendering time." min:"0.00001" step:"0.01" json:"adaptive_threshold"`
+	SoftShadowDetail  int     `title:"Soft shadow detail. 0 disables soft shadows. Larger values increase quality and rendering time. " min:"0" max:"99" class:"fast-render" json:"soft_shadow_detail"`
 }
 
 // Resolution defines the dimensions of the image.
@@ -79,21 +80,20 @@ type Light struct {
 	Color           Color  `title:"Color of the light" json:"color"`
 	Position        Vector `title:"Position of the light (Point and Spot)" json:"position"`
 	Direction       Vector `title:"Direction of the light (Direcitonal and Spot)" json:"direction"`
-	IlluminationMap bool   `title:"Generate an illumination map (Point and Spot). Increases rendering time." class:"fast-render" json:"illumination_map"`
+	IlluminationMap bool   `title:"Generate an illumination map (Spot). Increases rendering time." class:"fast-render" json:"illumination_map"`
 	Coeff           struct {
 		Constant  float64 `json:"constant"`
 		Linear    float64 `json:"linear"`
 		Quadratic float64 `json:"quadratic"`
-	} `title:"Constant, lnear, and quadratic coefficients for point light fall off (Point)" json:"coeff"`
-	Angle     float64 `title:"Spotlight angle" Type:"Spot" min:"0.0" max:"360.0" json:"angle"`
-	DropOff   float64 `title:"Spotlight drop off angle" Type:"Spot" min:"0.0" max:"360.0" json:"drop_off"`
-	FadeAngle float64 `title:"Stoplight fade angle" Type:"Spot" min:"0.0" max:"360.0" json:"fade_angle"`
+	} `title:"Constant, lnear, and quadratic coefficients for point light fall off (Point and Spot)" json:"coeff"`
+	Angle     float64 `title:"Spotlight angle (Spot)" min:"0.0" max:"360.0" json:"angle"`
+	DropOff   float64 `title:"Spotlight drop off angle (Spot)" min:"0.0" max:"360.0" json:"drop_off"`
+	FadeAngle float64 `title:"Stoplight fade angle (Spot)" min:"0.0" max:"360.0" json:"fade_angle"`
 }
 
 // Material defines options for materials.
 type Material struct {
 	Name         string      `title:"Unique name for this material" json:"name"`
-	Parent       string      `title:"Name of existing material to inherit attributes from" json:"parent"`
 	Emissive     MatProperty `title:"Emissive color of the material" json:"emissive"`
 	Ambient      MatProperty `title:"Abmient color of the material" json:"ambient"`
 	Diffuse      MatProperty `title:"Diffuse color of the material" json:"diffuse"`
@@ -111,7 +111,7 @@ type Material struct {
 type MatProperty struct {
 	Type    string  `title:"Type of material" choice:"Uniform,Texture" json:"type"`
 	Color   Color   `title:"Uniform color" json:"color"`
-	Texture Texture `title:"Texture options if using the 'Texture' type" json:"texture"`
+	Texture Texture `title:"Texture options if using the 'Texture' type" class:"fast-render" json:"texture"`
 }
 
 // Texture defines options for a texture.
